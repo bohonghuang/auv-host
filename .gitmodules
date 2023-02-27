@@ -1,0 +1,6 @@
+[submodule "vendor/json-rpc-cxx"]
+	path = vendor/json-rpc-cxx
+	url = https://github.com/jsonrpcx/json-rpc-cxx.git
+[submodule "vendor/sockpp"]
+	path = vendor/sockpp
+	url = https://github.com/fpagliughi/sockpp.git
