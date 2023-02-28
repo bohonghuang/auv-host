@@ -15,11 +15,14 @@ namespace auv
 class Application
 {
 public:
+	static Application& GetInstance();
 
 	void reload();
-
 private:
-	
+	Application() = default;
+	void run();
+private:
+
 };
 
 }
