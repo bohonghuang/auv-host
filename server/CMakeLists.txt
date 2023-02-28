@@ -17,7 +17,7 @@ add_subdirectory(algorithm)
 set(auv_server_src
         main.cpp
         connect_rov.cpp
-        connect_client.cpp)
+        connect_client.cpp application.cpp)
 
 add_executable(auv_server ${auv_server_src})
 target_link_libraries(auv_server ${OpenCV_LIBS} Sockpp::sockpp-static Ws2_32)
