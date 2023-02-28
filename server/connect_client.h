@@ -11,13 +11,13 @@ namespace auv
 
 class ConnectClient {
 public:
-	ConnectClient(uint16_t port, std::function<void(std::string_view)> callback) noexcept;
+	ConnectClient(uint16_t port, std::function<std::string(std::string_view)> callback) noexcept;
 
 	void join();
 private:
 	[[noreturn]] void run();
 private:
-	std::function<void(std::string_view)> m_cb;
+	std::function<std::string(std::string_view)> m_cb;
 	std::unique_ptr<sockpp::tcp_acceptor> m_accept;
 	std::thread m_thread;
 };

@@ -15,8 +15,9 @@ class ConnectServer
 {
 public:
 	ConnectServer(std::string_view, uint16_t port);
+	~ConnectServer();
 
-	std::string send(std::string_view buf);
+	std::string send_and_recv(std::string_view buf);
 private:
 	std::unique_ptr<sockpp::tcp_connector> m_connect;
 };

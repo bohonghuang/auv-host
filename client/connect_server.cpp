@@ -36,7 +36,12 @@ ConnectServer::ConnectServer(std::string_view host, uint16_t port)
 	}
 }
 
-std::string ConnectServer::send(std::string_view buf)
+ConnectServer::~ConnectServer()
+{
+	m_connect->shutdown();
+}
+
+std::string ConnectServer::send_and_recv(std::string_view buf)
 {
 	if (!m_connect->is_connected()) {
 		std::cout << "connect is error" << std::endl;
@@ -45,7 +50,7 @@ std::string ConnectServer::send(std::string_view buf)
 
 	static char recv_buf[50];
 	m_connect->write(buf.data(), buf.size());
-	m_connect->read(recv_buf, sizeof(recv_buf));
+	m_connect->read(recv_buf, sizeof recv_buf);
 	return recv_buf;
 }
 

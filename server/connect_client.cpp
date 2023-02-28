@@ -22,7 +22,7 @@ struct InitSocket
 [[maybe_unused]] static InitSocket s_init_socket;
 }
 
-ConnectClient::ConnectClient(uint16_t port, std::function<void(std::string_view)> callback) noexcept
+ConnectClient::ConnectClient(uint16_t port, std::function<std::string(std::string_view)> callback) noexcept
 	: m_cb(std::move(callback))
 {
 	m_accept = std::make_unique<sockpp::tcp_acceptor>(port);
@@ -49,8 +49,8 @@ void ConnectClient::run()
 		}
 
 		size_t n = sock.read(buf, sizeof(buf));
-		m_cb(buf);
-		sock.write("OK!");
+		auto msg = m_cb(buf);
+		sock.write(msg);
 		memset(buf, 0, sizeof(buf));
 	}
 }
