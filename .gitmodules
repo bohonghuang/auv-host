@@ -4,6 +4,6 @@
 [submodule "vendor/sockpp"]
 	path = vendor/sockpp
 	url = https://github.com/fpagliughi/sockpp.git
-[submodule "vendor/lua-jit"]
-	path = vendor/lua-jit
+[submodule "vendor/luajit"]
+	path = vendor/luajit
 	url = https://github.com/LuaJIT/LuaJIT.git

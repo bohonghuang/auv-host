@@ -9,20 +9,26 @@
 #include <map>
 #include <functional>
 
+
+
 namespace auv
 {
 
 class Application
 {
 public:
-	static Application& GetInstance();
+	static Application& GetInstance() noexcept;
 
-	void reload();
+	void start() noexcept;
+	void reload() noexcept;
+	void stop() noexcept;
+
+
 private:
 	Application() = default;
-	void run();
+	void run() noexcept;
 private:
-
+	std::map<std::string, std::function<void()>> m_algorithm_funcs;
 };
 
 }
