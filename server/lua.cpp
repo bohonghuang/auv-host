@@ -96,30 +96,64 @@ std::string Lua::do_string(std::string_view str)
 		return "Lua occur a unknown error.  " + err;
 }
 
-bool Lua::add_module(const LuaModule &mod) noexcept
+void Lua::add_function(std::string_view module_name, std::string_view func_name, lua_CFunction func)
 {
-	auto func_table = mod.get_lua_function_table();
-	const luaL_Reg *tmp = &func_table[0];
-	lua_createtable(m_lua_state, 0, static_cast<int>(func_table.size()));
-	luaL_setfuncs(m_lua_state, tmp, 0);
-	return false;
+	lua_getglobal(m_lua_state, module_name.data());
+	if (lua_isnil(m_lua_state, -1)) {
+		lua_pop(m_lua_state, 1);
+		lua_newtable(m_lua_state);
+	}
+
+	lua_pushcfunction(m_lua_state, func);
+	lua_setfield(m_lua_state, -2, func_name.data());
+	lua_setglobal(m_lua_state, module_name.data());
+}
+void Lua::add_function(std::string_view func_name, lua_CFunction func)
+{
+	lua_getglobal(m_lua_state, "_G");
+	lua_pushcfunction(m_lua_state, func);
+	lua_setfield(m_lua_state, -2, func_name.data());
+	lua_pop(m_lua_state, 1);
 }
 
-LuaModule::LuaModule(std::initializer_list<luaL_Reg> funcs) noexcept
+//bool Lua::add_module(const LuaModule &mod) noexcept
+//{
+//	lua_getglobal(m_lua_state, mod.get_name().c_str());
+//	if (lua_isnil(m_lua_state, -1)) {
+//		lua_pop(m_lua_state, 1);
+//		lua_newtable(m_lua_state);
+//	}
+//
+//	const auto& func_table = mod.get_lua_function_table();
+//	for(const auto& i : func_table) {
+//		auto p = i.func.target<int(*)(lua_State*)>();
+//		lua_pushcfunction(m_lua_state, (int(*)(lua_State*))p);
+//		lua_setfield(m_lua_state, -2, i.name.c_str());
+//	}
+//
+//	lua_setglobal(m_lua_state, mod.get_name().c_str());
+//	return false;
+//}
+
+LuaModule::LuaModule(std::string_view name, std::initializer_list<LuaFunction> funcs) noexcept
+	: m_name(name)
 {
 	m_functions.insert(m_functions.begin(), funcs.begin(), funcs.end());
 }
 
-void LuaModule::add_function(luaL_Reg func) noexcept
+void LuaModule::add_function(const LuaFunction& func) noexcept
 {
 	m_functions.push_back(func);
 }
 
-std::vector<luaL_Reg> LuaModule::get_lua_function_table() const noexcept
+const std::vector<LuaFunction>& LuaModule::get_lua_function_table() const noexcept
 {
-	std::vector<luaL_Reg> table = m_functions;
-	table.push_back({nullptr, nullptr});
-	return table;
+	return m_functions;
+}
+
+const std::string &LuaModule::get_name() const noexcept
+{
+	return m_name;
 }
 
 }

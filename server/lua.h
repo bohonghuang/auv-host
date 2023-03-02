@@ -20,16 +20,23 @@
 namespace auv::lua
 {
 
+struct LuaFunction {
+	std::string name;
+	std::function<int(lua_State*)> func;
+};
+
 class LuaModule
 {
 public:
 	LuaModule() noexcept = default;
-	LuaModule(std::initializer_list<luaL_Reg> funcs) noexcept;
-	void add_function(luaL_Reg func) noexcept;
+	LuaModule(std::string_view name, std::initializer_list<LuaFunction> funcs) noexcept;
+	void add_function(const LuaFunction& func) noexcept;
 
-	std::vector<luaL_Reg> get_lua_function_table() const noexcept;
+	const std::vector<LuaFunction>&  get_lua_function_table() const noexcept;
+	const std::string& get_name() const noexcept;
 private:
-	std::vector<luaL_Reg> m_functions;
+	std::string m_name;
+	std::vector<LuaFunction> m_functions;
 };
 
 class Lua
@@ -39,7 +46,9 @@ public:
 	~Lua();
 
 	bool load_file(std::string_view file_name) noexcept; // error return false
-	bool add_module(const LuaModule &module) noexcept; // error return false
+	void add_function(std::string_view func_name, lua_CFunction func);
+	void add_function(std::string_view module_name, std::string_view func_name, lua_CFunction func);
+	void add_module(const LuaModule &module) noexcept; // error return false
 	std::string do_string(std::string_view string);
 
 	template<typename T>
