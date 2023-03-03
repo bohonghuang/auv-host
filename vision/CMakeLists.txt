@@ -4,9 +4,7 @@ find_package(OpenCV REQUIRED)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-set(algorithm_srcs
-        block.cpp
-        video_capture.cpp)
+set(algorithm_srcs block.cpp)
 
 add_library(auv_algorithm STATIC ${algorithm_srcs})
 target_link_libraries(auv_algorithm ${OpenCV_LIBS})

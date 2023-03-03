@@ -161,20 +161,9 @@ private:
 			}, results);
 		return lua_c_fun;
 	}
+  
+	template<class T> struct dependent_false: std::false_type {};
 
-//	template<size_t ...I, typename ...From, typename ...To, typename Func>
-//	std::tuple<To...> tuple_reverse(std::tuple<From...> args)
-//	{
-//		std::tuple<To...> results{};
-//		std::apply([&args](const auto&... val){
-//			((val = std::get<I>(args)), ...);
-//		}, results)
-//		return results;
-//	}
-
-	template<class T> struct dependent_false: std::false_type
-	{
-	};
 	template<typename T>
 	T get_top_var()
 	{
