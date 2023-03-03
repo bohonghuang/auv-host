@@ -20,9 +20,10 @@
 namespace auv::lua
 {
 
-struct LuaFunction {
+struct LuaFunction
+{
 	std::string name;
-	std::function<int(lua_State*)> func;
+	std::function<int(lua_State *)> func;
 };
 
 class LuaModule
@@ -30,10 +31,10 @@ class LuaModule
 public:
 	LuaModule() noexcept = default;
 	LuaModule(std::string_view name, std::initializer_list<LuaFunction> funcs) noexcept;
-	void add_function(const LuaFunction& func) noexcept;
+	void add_function(const LuaFunction &func) noexcept;
 
-	const std::vector<LuaFunction>&  get_lua_function_table() const noexcept;
-	const std::string& get_name() const noexcept;
+	const std::vector<LuaFunction> &get_lua_function_table() const noexcept;
+	const std::string &get_name() const noexcept;
 private:
 	std::string m_name;
 	std::vector<LuaFunction> m_functions;
@@ -145,6 +146,31 @@ private:
 		else if constexpr (std::is_pointer_v<T>)
 			lua_pushlightuserdata(m_lua_state, const_cast<void *>(reinterpret_cast<const void *>(val)));
 	}
+
+	template<typename ...Results, typename ...Args>
+	lua_CFunction to_lua_func(std::function<std::tuple<Results...>(Args...)> fun)
+	{
+		lua_CFunction lua_c_fun;
+		std::tuple<Args...> args;
+
+		std::tuple<Results...> results;
+		std::apply(
+			[this](const auto &... val)
+			{
+				(push_var(val), ...);
+			}, results);
+		return lua_c_fun;
+	}
+
+//	template<size_t ...I, typename ...From, typename ...To, typename Func>
+//	std::tuple<To...> tuple_reverse(std::tuple<From...> args)
+//	{
+//		std::tuple<To...> results{};
+//		std::apply([&args](const auto&... val){
+//			((val = std::get<I>(args)), ...);
+//		}, results)
+//		return results;
+//	}
 
 	template<class T> struct dependent_false: std::false_type
 	{

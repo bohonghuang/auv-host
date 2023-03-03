@@ -48,6 +48,7 @@ int main()
 		double b = lua_tonumber(L, -2);
 		lua_pop(L, 2);
 		lua_pushnumber(L, a + b);
+		std::cout << a << ", " << b << std::endl;
 		return 1;
 	});
 
@@ -71,11 +72,19 @@ function add(num1, num2)
 end
 test.test()
 print(test.add(1,2))
+print(test)
 testa()
 print(add1(1, 3))
 )";
 
 	std::cout << lua.do_string(l) << std::endl;
+
+
+	std::tuple<int, int, int> t;
+
+
+
+	int i = 2;
 
 	// auto a = lua.call<int>("add", 1, 2);
 	// std::cout << "result = " << std::get<0>(a) << std::endl;
