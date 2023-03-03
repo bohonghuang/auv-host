@@ -104,35 +104,33 @@ void Lua::add_function(std::string_view func_name, lua_CFunction func) {
   lua_pop(m_lua_state, 1);
 }
 
-//bool Lua::add_module(const LuaModule &mod) noexcept
-//{
-//	lua_getglobal(m_lua_state, mod.get_name().c_str());
-//	if (lua_isnil(m_lua_state, -1)) {
-//		lua_pop(m_lua_state, 1);
-//		lua_newtable(m_lua_state);
-//	}
-//
-//	const auto& func_table = mod.get_lua_function_table();
-//	for(const auto& i : func_table) {
-//		auto p = i.func.target<int(*)(lua_State*)>();
-//		lua_pushcfunction(m_lua_state, (int(*)(lua_State*))p);
-//		lua_setfield(m_lua_state, -2, i.name.c_str());
-//	}
-//
-//	lua_setglobal(m_lua_state, mod.get_name().c_str());
-//	return false;
-//}
+void Lua::add_module(const LuaModule &mod) noexcept
+{
+	lua_getglobal(m_lua_state, mod.get_name().c_str());
+	if (lua_isnil(m_lua_state, -1)) {
+		lua_pop(m_lua_state, 1);
+		lua_newtable(m_lua_state);
+	}
 
-LuaModule::LuaModule(std::string_view name, std::initializer_list<LuaFunction> funcs) noexcept
+	const auto& func_table = mod.get_lua_function_table();
+	for(const auto& i : func_table) {
+		lua_pushcfunction(m_lua_state, i.func);
+		lua_setfield(m_lua_state, -2, i.name);
+	}
+
+	lua_setglobal(m_lua_state, mod.get_name().c_str());
+}
+
+LuaModule::LuaModule(std::string_view name, std::initializer_list<luaL_Reg> funcs) noexcept
     : m_name(name) {
   m_functions.insert(m_functions.begin(), funcs.begin(), funcs.end());
 }
 
-void LuaModule::add_function(const LuaFunction &func) noexcept {
+void LuaModule::add_function(const luaL_Reg &func) noexcept {
   m_functions.push_back(func);
 }
 
-const std::vector<LuaFunction> &LuaModule::get_lua_function_table() const noexcept {
+const std::vector<luaL_Reg> &LuaModule::get_lua_function_table() const noexcept {
   return m_functions;
 }
 
