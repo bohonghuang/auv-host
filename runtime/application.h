@@ -5,33 +5,31 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include <thread>
-#include <map>
 #include <functional>
+#include <map>
+#include <thread>
 
 
+namespace auv {
 
-namespace auv
-{
-
-class Application
-{
+class Application {
 public:
-	static Application& GetInstance() noexcept;
+  static Application &GetInstance() noexcept;
 
-	void start() noexcept;
-	void reload() noexcept;
-	void stop() noexcept;
+  void start() noexcept;
+  void reload() noexcept;
+  void stop() noexcept;
 
 
 private:
-	Application() = default;
-	void run() noexcept;
+  Application() = default;
+  void run() noexcept;
+
 private:
-	std::map<std::string, std::function<void()>> m_algorithm_funcs;
+  std::map<std::string, std::function<void()>> m_algorithm_funcs;
 };
 
-}
+}// namespace auv
 
 
-#endif //APPLICATION_H
+#endif//APPLICATION_H

@@ -7,13 +7,11 @@
 
 #include "lua.h"
 
-namespace auv::lua
-{
+namespace auv::lua {
 
 class LuaConfig {
-
 };
 
-}
+}// namespace auv::lua
 
-#endif //LUA_CONFIG_H
+#endif//LUA_CONFIG_H

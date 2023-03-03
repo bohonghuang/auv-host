@@ -4,7 +4,6 @@
 
 #include "application.h"
 
-namespace auv
-{
+namespace auv {
 
 }
