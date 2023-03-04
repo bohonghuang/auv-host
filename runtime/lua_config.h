@@ -5,13 +5,21 @@
 #ifndef LUA_CONFIG_H
 #define LUA_CONFIG_H
 
-#include "lua.h"
+#include <map>
+#include <sol/sol.hpp>
 
-namespace auv::lua {
+namespace auv {
 
-class LuaConfig {
+class Config {
+public:
+  static Config &GetInstance();
+
+  void load(std::string_view str);
+private:
+  Config() = default;
+  sol::state m_lua;
 };
 
-}// namespace auv::lua
+}// namespace auv
 
 #endif//LUA_CONFIG_H
