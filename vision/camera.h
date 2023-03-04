@@ -24,6 +24,7 @@ struct CameraParams {
 class Camera {
 public:
   Camera(int index, const CameraParams& camera_params);
+  Camera(std::string_view path, const CameraParams& camera_params);
 
   cv::Mat get_frame();
 private:

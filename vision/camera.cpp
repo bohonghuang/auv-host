@@ -9,7 +9,8 @@
 namespace auv::vision {
 
 
-Camera::Camera(int index, const CameraParams &camera_params) : m_camera_params(camera_params) {
+Camera::Camera(int index, const CameraParams &camera_params)
+    : m_camera_params(camera_params) {
   m_capture.open(index);
   ASSERT(m_capture.isOpened(), std::to_string(index) + ": camera open error.")
 
@@ -19,6 +20,11 @@ Camera::Camera(int index, const CameraParams &camera_params) : m_camera_params(c
   m_frame_size = {width, height};
   std::cout << "Open \"1\" camera success, it will use " << back_end
             << " as backend. width = " << width << "  height = " << height << std::endl;
+}
+
+Camera::Camera(std::string_view path, const CameraParams &camera_params)
+    : m_camera_params(camera_params) {
+  m_capture.open(path.data());
 }
 
 cv::Mat Camera::get_frame() {
@@ -38,7 +44,7 @@ cv::Mat Camera::get_frame() {
   }();
 
   cv::Mat frame;
-  if(!m_capture.read(frame)) {
+  if (!m_capture.read(frame)) {
     frame = cv::Mat::eye(m_frame_size, CV_32FC3);
     return frame;
   }
@@ -46,5 +52,6 @@ cv::Mat Camera::get_frame() {
   cv::remap(frame, frame, distort_map[0], distort_map[1], cv::INTER_LINEAR);
   return frame;
 }
+
 
 }// namespace auv::vision
