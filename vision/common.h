@@ -17,10 +17,6 @@
 
 namespace auv::vision {
 
-template<size_t N>
-using aPoints = std::array<cv::Point, N>;
-template<size_t N>
-using aPointfs = std::array<cv::Point2f, N>;
 using vPointfs = std::vector<cv::Point2f>;
 using vPoints = std::vector<cv::Point>;
 

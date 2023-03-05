@@ -33,6 +33,7 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
   std::vector<vPoints> contours;
   cv::findContours(process_frame, contours, cv::noArray(),
                    cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
   std::sort(contours.begin(), contours.end(),
             [](const vPoints &points1, const vPoints &points2) {
               cv::Point p1 = get_point_center(points1);
@@ -40,50 +41,66 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
               return p1.y < p2.y;
             });
 
-  for (const auto &i: contours) {
-    aPointfs<4> rect_4point;
-    auto rect = cv::minAreaRect(i);
-    rect.points(rect_4point.data());
-    auto dist01 = get_point_dist<float>(rect_4point[0], rect_4point[1]);
-    auto dist12 = get_point_dist<float>(rect_4point[1], rect_4point[2]);
-    auto [length, width] = std::minmax({dist01, dist12});
-    if (width < (float) high / 12 || length < (float) high / 8 || length / width > 6)
-      continue;
+  for (const auto &contour: contours) {
+    cv::Point2f rect_points[4];
+    auto rect = cv::minAreaRect(contour);
+    rect.points(rect_points);
+    auto dist01 = get_point_dist<double>(rect_points[0], rect_points[1]);
+    auto dist12 = get_point_dist<double>(rect_points[1], rect_points[2]);
+    auto [width, length] = std::minmax({dist01, dist12});
 
-    std::vector<cv::Point_<int>> rect_point;
-    rect_point.resize(4);
-    for (size_t j = 0; j < 4; ++j) {
-      rect_point[j] = rect_4point[j];
+    // std::cout << "length:" << length << "   width:" << width << std::endl;
+    if (width < (double) high / 12) {
+      // std::cout << "width" << std::endl;
+      continue;
     }
+    if (length < (float) high / 8) {
+      // std::cout << "length < (float) high" << std::endl;
+      continue;
+    }
+    if (length / width > 6) {
+      // std::cout << "length / width > 6" << std::endl;
+      continue;
+    }
+
     cv::Mat mask = cv::Mat::zeros(m_frame_size, CV_8UC1);
-    cv::fillPoly(mask, rect_point, cv::Scalar(255, 255, 255));
+    cv::fillPoly(mask, transform_points(rect_points), cv::Scalar(255, 255, 255));
     cv::Mat mask_result;
     cv::bitwise_and(process_frame, mask, mask_result);
-    float fill_percent = (float) cv::countNonZero(mask_result) / (float) cv::countNonZero(mask);
+    auto fill_percent = (double) cv::countNonZero(mask_result) / cv::countNonZero(mask);
     if (fill_percent < 0.6f)
       continue;
 
     float deg;
     if (dist01 > dist12)
-      deg = get_point_deg_in_bottom_axis(rect_4point[0], rect_4point[1]);
+      deg = get_point_deg_in_bottom_axis(rect_points[0], rect_points[1]);
     else
-      deg = get_point_deg_in_bottom_axis(rect_4point[1], rect_4point[2]);
+      deg = get_point_deg_in_bottom_axis(rect_points[1], rect_points[2]);
     deg = 90.0f - deg;
-    if (std::abs(deg) > 50)
+    if (std::abs(deg) > 60)
       continue;
 
-    std::vector<vPoints> points;
-    points.push_back(rect_point);
-    cv::drawContours(frame, points, 0,
-                     cv::Scalar(0, 255, 255), 2);
-    cv::Point cent_point = get_point_center(rect_4point);
+    for (size_t i = 0; i < 4; i++)
+      line(frame, rect_points[i], rect_points[(i + 1) % 4],
+           cv::Scalar(0, 255, 255), 2, cv::LINE_AA);
+    cv::Point cent_point = get_point_center(contour);
     auto dev = static_cast<float>((double) cent_point.x / m_frame_size.width - 0.5);
 
     result.axis.emplace_back(
         dev,
         0.0f,
         0.0f,
-        deg);
+        deg / 90.0f);
+  }
+
+  std::string str;
+  if (!result.axis.empty()) {
+    str = "dev: ";
+    str += std::to_string(result.axis[0].x);
+    str += "   deg: ";
+    str += std::to_string(result.axis[0].rot);
+    str += "\n";
+    cv::putText(frame, str, cv::Point(0, 20), 0, 0.7f, cv::Scalar(255, 0, 0), 2);
   }
   cv::cvtColor(process_frame, process_frame, cv::COLOR_GRAY2BGR);
   cv::hconcat(frame, process_frame, result.frame);
