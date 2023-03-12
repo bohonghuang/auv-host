@@ -9,9 +9,9 @@ namespace auv::vision {
 
 RedBarBlock::RedBarBlock() {
   m_threshold_params = {
-      {33, 177},
-      {146, 255},
-      {65, 130}};
+      {33, 177},  // Y
+      {146, 255}, // Cr
+      {65, 130}}; // Cb
 }
 
 AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::TimeStep ts) noexcept {
@@ -29,6 +29,7 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
                                 cv::Size(high / 48, high / 48));
   cv::morphologyEx(process_frame, process_frame, cv::MORPH_OPEN, kernel1);
   cv::morphologyEx(process_frame, process_frame, cv::MORPH_CLOSE, kernel2);
+
 
   std::vector<vPoints> contours;
   cv::findContours(process_frame, contours, cv::noArray(),

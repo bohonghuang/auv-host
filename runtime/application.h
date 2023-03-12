@@ -9,24 +9,27 @@
 #include <map>
 #include <thread>
 
+#include <sol/sol.hpp>
 
 namespace auv {
 
 class Application {
 public:
-  static Application &GetInstance() noexcept;
+  enum class Status {
+    READY,
+    RUN
+  };
 
-  void start() noexcept;
-  void reload() noexcept;
-  void stop() noexcept;
+  Application(const std::function<void(sol::state&)>& reg) noexcept;
 
+  void add_command(const std::string& command, const std::function<void(const std::vector<std::string>&)>& fun) noexcept;
+  [[noreturn]] void run() noexcept;
 
+  Status get_status() const noexcept;
 private:
-  Application() = default;
-  void run() noexcept;
-
-private:
-  std::map<std::string, std::function<void()>> m_algorithm_funcs;
+  Status m_status;
+  sol::state m_lua;
+  std::map<std::string, std::function<void(const std::vector<std::string>&)>> m_command_map;
 };
 
 }// namespace auv

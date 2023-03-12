@@ -83,8 +83,8 @@ struct ThresholdParams {
 template<typename T>
 class ThresholdBlock : public Block {
 public:
-  ThresholdParams<T>& test_get_threshold_params() {
-  	return m_threshold_params;
+  ThresholdParams<T> &test_get_threshold_params() {
+    return m_threshold_params;
   }
 
   const ThresholdParams<T> &get_threshold_params() const {

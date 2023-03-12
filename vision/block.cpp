@@ -27,8 +27,8 @@ AlgorithmResult Block::process(const cv::Mat &frame, TimeStep ts) noexcept {
 
 void Block::pre_process(const cv::Mat &frame) noexcept {
   cv::Size size = frame.size();
-  if (size.width != m_frame_size.width || size.height != m_frame_size.height)
-    cv::resize(frame, frame, m_frame_size);
+//  if (size.width != m_frame_size.width || size.height != m_frame_size.height)
+//    cv::resize(frame, frame, m_frame_size);
 }
 
 

@@ -12,6 +12,7 @@ namespace auv::vision {
 class RedBarBlock : public ThresholdBlock<int> {
 public:
   RedBarBlock();
+protected:
   AlgorithmResult process_imp(const cv::Mat &frame, auv::vision::TimeStep ts) noexcept override;
 };
 
