@@ -11,7 +11,7 @@ namespace auv::vision {
 
 class RedDoorBlock : public ThresholdBlock<int> {
 public:
-  RedDoorBlock();
+  RedDoorBlock(Camera &camera);
 
 protected:
   AlgorithmResult process_imp(const cv::Mat &frame, auv::vision::TimeStep ts) noexcept override;

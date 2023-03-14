@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-find_package(OpenCV REQUIRED)
-
-include_directories(${OpenCV_INCLUDE_DIRS})
-
 set(algorithm_srcs block.cpp camera.cpp red_bar.cpp utils.cpp red_door.cpp test/test.cpp)
 
 add_library(auv_vision STATIC ${algorithm_srcs})

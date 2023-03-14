@@ -9,9 +9,9 @@ namespace auv::vision {
 
 RedBarBlock::RedBarBlock() {
   m_threshold_params = {
-      {33, 177},  // Y
-      {146, 255}, // Cr
-      {65, 130}}; // Cb
+      {33, 177}, // Y
+      {146, 255},// Cr
+      {65, 130}};// Cb
 }
 
 AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::TimeStep ts) noexcept {
@@ -87,11 +87,11 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
     cv::Point cent_point = get_point_center(contour);
     auto dev = static_cast<float>((double) cent_point.x / m_frame_size.width - 0.5);
 
-    result.axis.emplace_back(
-        dev,
-        0.0f,
-        0.0f,
-        deg / 90.0f);
+    result.axis.push_back(
+        {dev,
+         0.0f,
+         0.0f,
+         deg / 90.0f});
   }
 
   std::string str;

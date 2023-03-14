@@ -10,7 +10,8 @@
 #else
 #define ASSERT(expression, information) \
   assert(expression);                   \
-  std::cout << "assert : " << information << std::endl;
+  if (!expression)                      \
+    std::cout << "assert : " << information << std::endl;
 #endif
 
 #include <opencv2/core/utility.hpp>

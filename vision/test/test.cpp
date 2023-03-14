@@ -63,7 +63,7 @@ int main() {
   auv::vision::RedBarBlock block;
   while (cap.read(frame)) {
     cv::Mat result;
-    //cv::warpPerspective(frame, result, trans_mat, frame.size()); //INTER_CUBIC
+    cv::warpPerspective(frame, result, trans_mat, frame.size()); //INTER_CUBIC
     auto re = block.process(frame);
     cv::imshow("test", re.frame);
     cv::waitKey(0);

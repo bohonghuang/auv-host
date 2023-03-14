@@ -23,7 +23,10 @@ public:
   Application(const std::function<void(sol::state&)>& reg) noexcept;
 
   void add_command(const std::string& command, const std::function<void(const std::vector<std::string>&)>& fun) noexcept;
-  [[noreturn]] void run() noexcept;
+  void script(const std::string& lua_code);
+
+  [[noreturn]]
+  void run() noexcept;
 
   Status get_status() const noexcept;
 private:

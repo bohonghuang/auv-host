@@ -67,7 +67,7 @@ static std::vector<std::string> split(std::string_view str, std::string_view del
     try {
       m_lua.script(msg);
     } catch (std::exception& e) {
-      std::cout << "error: " << e.what() << std::endl;
+      // std::cout << "error: " << e.what() << std::endl;
     }
 
     msg.clear();
@@ -76,6 +76,10 @@ static std::vector<std::string> split(std::string_view str, std::string_view del
 
 Application::Status Application::get_status() const noexcept {
   return m_status;
+}
+
+void Application::script(const std::string &lua_code) {
+  m_lua.script(lua_code);
 }
 
 

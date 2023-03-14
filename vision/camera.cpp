@@ -9,7 +9,7 @@
 namespace auv::vision {
 
 
-Camera::Camera(int index, const CameraParams &camera_params)
+Camera::Camera(int index, const CameraParams &camera_params) noexcept
     : m_camera_params(camera_params) {
   m_capture.open(index);
   ASSERT(m_capture.isOpened(), std::to_string(index) + ": camera open error.")
@@ -22,12 +22,25 @@ Camera::Camera(int index, const CameraParams &camera_params)
             << " as backend. width = " << width << "  height = " << height << std::endl;
 }
 
-Camera::Camera(std::string_view path, const CameraParams &camera_params)
+Camera::Camera(int index, double fx, double cx, double fy, double cy, double k1, double k2, double k3, double k4, double k5) noexcept {
+  m_camera_params = {fx, cx, fy, cy, k1, k2, k3, k4, k5};
+  m_capture.open(index);
+  ASSERT(m_capture.isOpened(), std::to_string(index) + ": camera open error.")
+
+  std::string back_end = m_capture.getBackendName();
+  int width = static_cast<int>(m_capture.get(cv::CAP_PROP_FRAME_WIDTH));
+  int height = static_cast<int>(m_capture.get(cv::CAP_PROP_FRAME_HEIGHT));
+  m_frame_size = {width, height};
+  std::cout << "Open \"" << index << "\" camera success, it will use " << back_end
+            << " as backend. width = " << width << "  height = " << height << std::endl;
+}
+
+Camera::Camera(std::string_view path, const CameraParams &camera_params) noexcept
     : m_camera_params(camera_params) {
   m_capture.open(path.data());
 }
 
-cv::Mat Camera::get_frame() {
+cv::Mat Camera::get_frame() noexcept {
   static const auto distort_map = [this]() -> std::array<cv::Mat, 2> {
     cv::Mat map[2];
     cv::Mat camera_matrix = (cv::Mat_<double>(3, 3) << m_camera_params.fx,
@@ -52,6 +65,7 @@ cv::Mat Camera::get_frame() {
   cv::remap(frame, frame, distort_map[0], distort_map[1], cv::INTER_LINEAR);
   return frame;
 }
+
 
 
 }// namespace auv::vision

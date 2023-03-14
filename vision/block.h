@@ -6,8 +6,8 @@
 #define BLOCK_H
 
 #include <atomic>
-#include <mutex>
 #include <thread>
+#include <vector>
 
 #include <opencv2/opencv.hpp>
 
@@ -36,7 +36,8 @@ public:
 public:
   virtual ~Block() noexcept = default;
 
-  AlgorithmResult process(const cv::Mat &frame, TimeStep ts = 0.0f) noexcept;
+  AlgorithmResult process(const cv::Mat &frame) noexcept;
+  // AlgorithmResult process(const cv::Mat &frame, TimeStep ts) noexcept;
 
 protected:
   virtual void pre_process(const cv::Mat &frame) noexcept;
@@ -50,21 +51,18 @@ protected:
 
 class SingleBlock : public Block {
 public:
-  SingleBlock(Camera &camera) noexcept;
-
-  virtual void start() noexcept;
+  virtual void start(Camera &camera) noexcept;
   virtual void stop() noexcept;
+  void join() noexcept;
 
-  const AlgorithmResult &test_once() noexcept;
-
-  AlgorithmResult getResult() noexcept;
+  AlgorithmResult get_result() noexcept;
 
 private:
-  Camera &m_camera;
   std::thread m_thread;
   std::mutex m_mutex;
   AlgorithmResult m_result;
   std::atomic<bool> m_is_running = false;
+  std::atomic<bool> m_has_get_result = false;
 };
 
 template<typename T>
@@ -81,7 +79,7 @@ struct ThresholdParams {
 };
 
 template<typename T>
-class ThresholdBlock : public Block {
+class ThresholdBlock : public SingleBlock {
 public:
   ThresholdParams<T> &test_get_threshold_params() {
     return m_threshold_params;
@@ -89,6 +87,13 @@ public:
 
   const ThresholdParams<T> &get_threshold_params() const {
     return m_threshold_params;
+  }
+
+  void set_params(T param1, T param2, T param3, T param4, T param5, T param6) {
+    m_threshold_params = {
+        {param1, param2},
+        {param3, param4},
+        {param5, param6}};
   }
 
   cv::Scalar get_low_param() {

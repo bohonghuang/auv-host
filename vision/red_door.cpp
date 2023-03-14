@@ -7,7 +7,7 @@
 
 namespace auv::vision {
 
-RedDoorBlock::RedDoorBlock() {
+RedDoorBlock::RedDoorBlock(Camera &camera) {
   m_threshold_params = {
       {33, 177},
       {146, 255},
@@ -43,29 +43,29 @@ AlgorithmResult RedDoorBlock::process_imp(const cv::Mat &frame, auv::vision::Tim
   cv::morphologyEx(process_frame, process_frame, cv::MORPH_OPEN, kernel1);
   cv::morphologyEx(process_frame, process_frame, cv::MORPH_CLOSE, kernel2);
 
-//  static ORBParam orb_param;
-//  static cv::Ptr<cv::ORB> orb_detector = cv::ORB::create(orb_param.nfeatures, orb_param.scaleFactor, orb_param.nlevels,
-//                                                        orb_param.edgeThreshold, orb_param.firstLevel, orb_param.WTA_K,
-//                                                        orb_param.scoreType, orb_param.patchSize, orb_param.fastThreshold);
-//  static cv::Ptr<cv::DescriptorMatcher> s_orb_descriptor_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::MatcherType::BRUTEFORCE_HAMMING);
-//  static cv::Mat door = cv::imread("door.png");
-//  static std::tuple<std::vector<cv::KeyPoint>, cv::Mat> door_keypoint_and_descriptor = []() {
-//    std::vector<cv::KeyPoint> key_points;
-//    cv::Mat descriptor;
-//    orb_detector->detectAndCompute(door, cv::Mat(), key_points, descriptor);
-//    return std::tuple{key_points, descriptor};
-//  }();
-//
-//  std::vector<cv::KeyPoint> frame_keypoint;
-//  cv::Mat frame_descriptors;
-//  orb_detector->detectAndCompute(frame, cv::Mat(), frame_keypoint, frame_descriptors);
-//
-//  std::vector<cv::DMatch> matches;
-//  cv::Mat output_frame;
-//  s_orb_descriptor_matcher->match(frame_descriptors, std::get<1>(door_keypoint_and_descriptor), matches, cv::Mat());
-//  cv::drawMatches(frame, frame_keypoint, door, std::get<0>(door_keypoint_and_descriptor),
-//                  matches, output_frame);
-//  cv::imshow("testtss", output_frame);
+  //  static ORBParam orb_param;
+  //  static cv::Ptr<cv::ORB> orb_detector = cv::ORB::create(orb_param.nfeatures, orb_param.scaleFactor, orb_param.nlevels,
+  //                                                        orb_param.edgeThreshold, orb_param.firstLevel, orb_param.WTA_K,
+  //                                                        orb_param.scoreType, orb_param.patchSize, orb_param.fastThreshold);
+  //  static cv::Ptr<cv::DescriptorMatcher> s_orb_descriptor_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::MatcherType::BRUTEFORCE_HAMMING);
+  //  static cv::Mat door = cv::imread("door.png");
+  //  static std::tuple<std::vector<cv::KeyPoint>, cv::Mat> door_keypoint_and_descriptor = []() {
+  //    std::vector<cv::KeyPoint> key_points;
+  //    cv::Mat descriptor;
+  //    orb_detector->detectAndCompute(door, cv::Mat(), key_points, descriptor);
+  //    return std::tuple{key_points, descriptor};
+  //  }();
+  //
+  //  std::vector<cv::KeyPoint> frame_keypoint;
+  //  cv::Mat frame_descriptors;
+  //  orb_detector->detectAndCompute(frame, cv::Mat(), frame_keypoint, frame_descriptors);
+  //
+  //  std::vector<cv::DMatch> matches;
+  //  cv::Mat output_frame;
+  //  s_orb_descriptor_matcher->match(frame_descriptors, std::get<1>(door_keypoint_and_descriptor), matches, cv::Mat());
+  //  cv::drawMatches(frame, frame_keypoint, door, std::get<0>(door_keypoint_and_descriptor),
+  //                  matches, output_frame);
+  //  cv::imshow("testtss", output_frame);
 
 
   //std::vector<cv::Vec2f> lines;
