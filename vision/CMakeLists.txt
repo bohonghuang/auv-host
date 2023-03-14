@@ -7,3 +7,6 @@ target_link_libraries(auv_vision ${OpenCV_LIBS})
 
 add_executable(test test/test.cpp)
 target_link_libraries(test auv_vision)
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/vision/test)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/libs)

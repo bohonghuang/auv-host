@@ -2,6 +2,8 @@
 // Created by Qff on 2023/2/27.
 //
 
+#include <fstream>
+
 #include "../vision/red_bar.h"
 #include "application.h"
 
@@ -53,12 +55,26 @@ int main() {
     });
   });
 
-  try {
-    app.script(R"(
-cam = Camera(0, 588.4306598875787, 322.7472860229715, 592.781786987308, 242.4471017083893, -0.1443039341764572, 0.91856728920134, 0.0, 0.0, -2.402839834767997)
-red_bar = VisionRedBar.new()
-)");
-  } catch (...) {}
+  app.add_command("/run", [&app](const std::vector<std::string> splits) {
+    if (splits.size() < 2) return;
+
+    std::string file_name = splits[1];
+    std::ifstream ifs(file_name);
+    if(!ifs.is_open()) {
+      std::cout << "Could not open the lua code file." << std::endl;
+      return;
+    }
+
+    std::string str;
+    std::string line;
+    while (std::getline(ifs, line)) {
+      str += line;
+    }
+    try {
+      app.script(str);
+    } catch(...) { }
+  });
+
   //auv::vision::RedBarBlock b;
   //auv::vision::Camera cam(0, 588.4306598875787, 322.7472860229715, 592.781786987308, 242.4471017083893, -0.1443039341764572, 0.91856728920134, 0.0, 0.0, -2.402839834767997);
   //b.start(cam);
