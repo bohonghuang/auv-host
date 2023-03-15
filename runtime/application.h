@@ -11,7 +11,21 @@
 
 #include <sol/sol.hpp>
 
+#include "connect_rov.h"
+
 namespace auv {
+
+template<typename T>
+void AddVisionBlock(sol::state &state, const std::string &class_name) {
+  state.new_usertype<T>(
+      class_name,
+      "process", &T::process,
+      "start", &T::start,
+      "stop", &T::stop,
+      "is_running", &T::is_running,
+      "get_result", &T::get_result);
+}
+
 
 class Application {
 public:
@@ -20,19 +34,20 @@ public:
     RUN
   };
 
-  Application(const std::function<void(sol::state&)>& reg) noexcept;
+  Application(const std::function<void(sol::state &)> &reg) noexcept;
 
-  void add_command(const std::string& command, const std::function<void(const std::vector<std::string>&)>& fun) noexcept;
-  void script(const std::string& lua_code);
+  void add_command(const std::string &command, const std::function<void(const std::vector<std::string> &)> &fun) noexcept;
+  void script(const std::string &lua_code);
 
-  [[noreturn]]
-  void run() noexcept;
+  [[noreturn]] void run() noexcept;
 
   Status get_status() const noexcept;
+
 private:
   Status m_status;
   sol::state m_lua;
-  std::map<std::string, std::function<void(const std::vector<std::string>&)>> m_command_map;
+  auv::ConnectROV m_rov;
+  std::map<std::string, std::function<void(const std::vector<std::string> &)>> m_command_map;
 };
 
 }// namespace auv

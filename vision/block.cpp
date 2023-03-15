@@ -77,8 +77,14 @@ AlgorithmResult SingleBlock::get_result() noexcept {
   return result;
 }
 
+
 void SingleBlock::join() noexcept {
   m_thread.join();
+}
+
+
+bool SingleBlock::is_running() const noexcept {
+  return m_is_running;
 }
 
 

@@ -53,6 +53,8 @@ class SingleBlock : public Block {
 public:
   virtual void start(Camera &camera) noexcept;
   virtual void stop() noexcept;
+
+  bool is_running() const noexcept;
   void join() noexcept;
 
   AlgorithmResult get_result() noexcept;
