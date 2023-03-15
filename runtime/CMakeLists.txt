@@ -9,7 +9,7 @@ include_directories(../vendor/json-rpc-cxx/include)
 include_directories(../vendor/json-rpc-cxx/vendor)
 
 set(auv_connect_rov_src connect_rov.cpp)
-set(auv_runtime_src main.cpp application.cpp)
+set(auv_runtime_src main.cpp application.cpp block.cpp block.h)
 
 add_library(auv_connect_rov STATIC ${auv_connect_rov_src})
 
