@@ -40,22 +40,14 @@ Application::Application(const std::function<void(sol::state &state)> &reg) noex
       "z", &auv::vision::AxisResult::z,
       "rot", &auv::vision::AxisResult::rot);
 
-  auto rov = m_lua["ROV"].get_or_create<sol::table>();
-  rov.set("catcher", [this](float val) {
-    m_rov.catcher(val);
-  });
-  rov.set_function("move", [this](float x, float y, float z, float rot) {
-    m_rov.move(x, y, z, rot);
-  });
-  rov.set_function("move_absolute", [this](float x, float y, float z, float rot) {
-    m_rov.move_absolute(x, y, z, rot);
-  });
-  rov.set("set_direction_locked", [this](bool val) {
-    m_rov.set_direction_locked(val);
-  });
-  rov.set("set_depth_locked", [this](bool val) {
-    m_rov.set_depth_locked(val);
-  });
+  m_lua.new_usertype<auv::ConnectROV>(
+      "ROV",
+      sol::constructors<auv::ConnectROV(const std::string &, int)>(),
+      "catcher", &auv::ConnectROV::catcher,
+      "move", &auv::ConnectROV::move,
+      "move_absolute", &auv::ConnectROV::move_absolute,
+      "set_direction_locked", &auv::ConnectROV::set_direction_locked,
+      "set_depth_locked", &auv::ConnectROV::set_depth_locked);
 
   m_lua.new_usertype<auv::vision::AlgorithmResult>(
       "AlgorithmResult",
@@ -94,7 +86,8 @@ static std::vector<std::string> split(std::string_view str, std::string_view del
   while (true) {
     std::string line;
     std::getline(std::cin, line);
-
+    if (line.empty())
+      continue;
     if (line[0] == '/') {
       auto params = split(line);
       if (params.empty()) {

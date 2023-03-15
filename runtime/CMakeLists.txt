@@ -12,7 +12,6 @@ set(auv_connect_rov_src connect_rov.cpp)
 set(auv_runtime_src main.cpp application.cpp)
 
 add_library(auv_connect_rov STATIC ${auv_connect_rov_src})
-target_link_libraries(auv_connect_rov Ws2_32)
 
 add_executable(auv_runtime ${auv_runtime_src})
 target_link_libraries(auv_runtime ${LUAJIT_LIBRARY} auv_vision auv_connect_rov)

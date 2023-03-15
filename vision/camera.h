@@ -33,6 +33,7 @@ public:
 private:
   cv::VideoCapture m_capture;
   cv::Size m_frame_size;
+  cv::Mat m_last_frame;
   CameraParams m_camera_params{};
 };
 

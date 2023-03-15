@@ -34,19 +34,18 @@ public:
     RUN
   };
 
-  Application(const std::function<void(sol::state &)> &reg) noexcept;
+  explicit Application(const std::function<void(sol::state &)> &reg) noexcept;
 
   void add_command(const std::string &command, const std::function<void(const std::vector<std::string> &)> &fun) noexcept;
   void script(const std::string &lua_code);
 
   [[noreturn]] void run() noexcept;
 
-  Status get_status() const noexcept;
+  [[nodiscard]] Status get_status() const noexcept;
 
 private:
   Status m_status;
   sol::state m_lua;
-  auv::ConnectROV m_rov;
   std::map<std::string, std::function<void(const std::vector<std::string> &)>> m_command_map;
 };
 

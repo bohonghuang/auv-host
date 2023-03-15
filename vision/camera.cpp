@@ -24,7 +24,7 @@ Camera::Camera(int index, const CameraParams &camera_params) noexcept
 
 Camera::Camera(int index, double fx, double cx, double fy, double cy, double k1, double k2, double k3, double k4, double k5) noexcept {
   m_camera_params = {fx, cx, fy, cy, k1, k2, k3, k4, k5};
-  m_capture.open(index);
+  m_capture.open("v4l2src device=/dev/video0 ! video/x-raw, format=(string)YUY2, width=(int)640, height=(int)480 ! videoconvert ! appsink ");
   ASSERT(m_capture.isOpened(), std::to_string(index) + ": camera open error.")
 
   std::string back_end = m_capture.getBackendName();
@@ -58,11 +58,11 @@ cv::Mat Camera::get_frame() noexcept {
 
   cv::Mat frame;
   if (!m_capture.read(frame)) {
-    frame = cv::Mat::eye(m_frame_size, CV_32FC3);
-    return frame;
+    return m_last_frame;
   }
 
   cv::remap(frame, frame, distort_map[0], distort_map[1], cv::INTER_LINEAR);
+  m_last_frame = frame;
   return frame;
 }
 
