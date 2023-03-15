@@ -8,7 +8,7 @@
 #include "block.h"
 #include <opencv2/opencv.hpp>
 
-namespace auv::vision {
+namespace auv::vision::utils {
 
 template<typename V, typename T>
 V get_point_dist(const cv::Point_<T> &p1, const cv::Point_<T> &p2) {
@@ -93,6 +93,8 @@ auto get_top_left_right_bottom_left_right_point(const cv::Point_<T> (&four_point
 
 
 void regulate_threshold_params(std::string_view file_name, ThresholdBlock<int> &block);
+
+std::vector<std::string> split(std::string_view str, std::string_view delim = " ");
 
 }// namespace auv::vision
 

@@ -37,8 +37,8 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
 
   std::sort(contours.begin(), contours.end(),
             [](const vPoints &points1, const vPoints &points2) {
-              cv::Point p1 = get_point_center(points1);
-              cv::Point p2 = get_point_center(points2);
+              cv::Point p1 = utils::get_point_center(points1);
+              cv::Point p2 = utils::get_point_center(points2);
               return p1.y < p2.y;
             });
 
@@ -46,8 +46,8 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
     cv::Point2f rect_points[4];
     auto rect = cv::minAreaRect(contour);
     rect.points(rect_points);
-    auto dist01 = get_point_dist<double>(rect_points[0], rect_points[1]);
-    auto dist12 = get_point_dist<double>(rect_points[1], rect_points[2]);
+    auto dist01 = utils::get_point_dist<double>(rect_points[0], rect_points[1]);
+    auto dist12 = utils::get_point_dist<double>(rect_points[1], rect_points[2]);
     auto [width, length] = std::minmax({dist01, dist12});
 
     // std::cout << "length:" << length << "   width:" << width << std::endl;
@@ -65,7 +65,7 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
     }
 
     cv::Mat mask = cv::Mat::zeros(m_frame_size, CV_8UC1);
-    cv::fillPoly(mask, transform_points(rect_points), cv::Scalar(255, 255, 255));
+    cv::fillPoly(mask, utils::transform_points(rect_points), cv::Scalar(255, 255, 255));
     cv::Mat mask_result;
     cv::bitwise_and(process_frame, mask, mask_result);
     auto fill_percent = (double) cv::countNonZero(mask_result) / cv::countNonZero(mask);
@@ -74,9 +74,9 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
 
     float deg;
     if (dist01 > dist12)
-      deg = get_point_deg_in_bottom_axis(rect_points[0], rect_points[1]);
+      deg = utils::get_point_deg_in_bottom_axis(rect_points[0], rect_points[1]);
     else
-      deg = get_point_deg_in_bottom_axis(rect_points[1], rect_points[2]);
+      deg = utils::get_point_deg_in_bottom_axis(rect_points[1], rect_points[2]);
     deg = 90.0f - deg;
     if (std::abs(deg) > 60)
       continue;
@@ -84,7 +84,7 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
     for (size_t i = 0; i < 4; i++)
       line(frame, rect_points[i], rect_points[(i + 1) % 4],
            cv::Scalar(0, 255, 255), 2, cv::LINE_AA);
-    cv::Point cent_point = get_point_center(contour);
+    cv::Point cent_point = utils::get_point_center(contour);
     auto dev = static_cast<float>((double) cent_point.x / m_frame_size.width - 0.5);
 
     result.axis.push_back(

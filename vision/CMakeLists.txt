@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(algorithm_srcs block.cpp camera.cpp red_bar.cpp utils.cpp red_door.cpp test/test.cpp)
+include_directories(.)
+
+set(algorithm_srcs 
+        block.cpp 
+        camera.cpp 
+        red_bar.cpp 
+        utils.cpp 
+        red_door.cpp 
+        neural_network/yolo_fast_v2.cpp)
 
 add_library(auv_vision STATIC ${algorithm_srcs})
 target_link_libraries(auv_vision ${OpenCV_LIBS})
