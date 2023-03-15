@@ -21,6 +21,11 @@ void InRangeBlock::set_range(int param1_low, int param2_low, int param3_low, int
 }
 
 cv::Mat InRangeBlock::process(const cv::Mat &frame) {
+  if (frame.channels() != 3) {
+    std::cout << "The frame need three channels!" << std::endl;
+    return {};
+  }
+
   cv::Mat result;
   cv::cvtColor(frame, result, static_cast<int>(m_type));
   cv::inRange(result, cv::Scalar(m_param1_low, m_param2_low, m_param3_low),

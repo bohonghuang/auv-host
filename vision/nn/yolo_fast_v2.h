@@ -1,5 +1,5 @@
-#ifndef __NEURAL_NETWORK_YOLO_FAST_V2__
-#define __NEURAL_NETWORK_YOLO_FAST_V2__
+#ifndef NEURAL_NETWORK_YOLO_FAST_V2_
+#define NEURAL_NETWORK_YOLO_FAST_V2_
 
 #include <string>
 #include <vector>
@@ -34,11 +34,11 @@ struct YoloFastV2ModelConfig {
 
 class YoloFastV2 {
 public:
-  YoloFastV2(const std::string& module_config_file_path, float obj_threshold=0.3, 
+  explicit YoloFastV2(const std::string& module_config_file_path, float obj_threshold=0.3,
                float conf_threshold=0.3, float nms_threshold=0.4);
 
-  cv::Mat detect(const cv::Mat src_img);
-  std::map<std::string, std::vector<YoloFastV2Result>> process(cv::Mat& img, const cv::Mat detect_result);
+  cv::Mat forward(const cv::Mat& src_img);
+  std::map<std::string, std::vector<YoloFastV2Result>> process(cv::Mat& img, const cv::Mat& detect_result);
 private:
   void load_data_file(const std::string& file_path);
   void draw_pred(cv::Mat& img, float confidence, int class_id, const cv::Rect& rect_range);

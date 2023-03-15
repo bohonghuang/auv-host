@@ -4,41 +4,41 @@
 
 #include "application.h"
 
+#include "../vision/block/camera.h"
+#include "../vision/block/inrange.h"
+#include "../vision/block/find_bar.h"
+
 #include <iostream>
-#include <opencv2/opencv.hpp>
 
 namespace auv {
 
 Application::Application(const std::function<void(sol::state &state)> &reg) noexcept
     : m_status(Application::Status::READY) {
+
   m_lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::package);
-//  m_lua.new_usertype<auv::vision::Block>(
-//      "Block",
-//      "process", &auv::vision::Block::process);
-//
-//  m_lua.new_usertype<auv::vision::SingleBlock>(
-//      "SingleBlock",
-//      "start", &auv::vision::SingleBlock::start,
-//      "stop", &auv::vision::SingleBlock::stop,
-//      "is_running", &auv::vision::SingleBlock::is_running,
-//      "get_result", &auv::vision::SingleBlock::get_result);
-//
-//  m_lua.new_usertype<auv::vision::ThresholdBlock<int>>(
-//      "ThresholdBlock",
-//      sol::base_classes, sol::bases<auv::vision::SingleBlock>(),
-//      "set_params", &auv::vision::ThresholdBlock<int>::set_params);
-//
-//  m_lua.new_usertype<auv::vision::CameraBlock>(
-//      "CameraBlock",
-//      sol::constructors<auv::vision::CameraBlock(int, double, double, double, double, double, double, double, double, double)>(),
-//      "get_frame", &auv::vision::CameraBlock::get_frame);
-//
-//  m_lua.new_usertype<auv::vision::AxisResult>(
-//      "AxisResult",
-//      "x", &auv::vision::AxisResult::x,
-//      "y", &auv::vision::AxisResult::y,
-//      "z", &auv::vision::AxisResult::z,
-//      "rot", &auv::vision::AxisResult::rot);
+
+  m_lua.new_usertype<auv::vision::CameraBlock>(
+      "CameraBlock",
+      sol::constructors<auv::vision::CameraBlock(int, double, double, double, double, double, double, double, double, double)>(),
+      "process", &auv::vision::CameraBlock::process);
+
+  m_lua.new_enum<auv::vision::InRangeBlock::ColorType>(
+      "ColorType",
+      {
+          {"YCrCb", auv::vision::InRangeBlock::ColorType::YCrCb},
+          {"HLS", auv::vision::InRangeBlock::ColorType::HLS},
+          {"HSV", auv::vision::InRangeBlock::ColorType::HSV},
+      });
+
+  m_lua.new_usertype<auv::vision::InRangeBlock>(
+      "InRangeBlock",
+      sol::constructors<auv::vision::InRangeBlock(auv::vision::InRangeBlock::ColorType, int, int, int, int, int, int)>(),
+      "process", &auv::vision::InRangeBlock::process);
+
+  m_lua.new_usertype<auv::vision::FindBarBlock>(
+      "FindBarBlock",
+      sol::constructors<auv::vision::FindBarBlock(bool)>(),
+      "process", &auv::vision::FindBarBlock::process);
 
   m_lua.new_usertype<auv::ConnectROV>(
       "ROV",
@@ -48,11 +48,6 @@ Application::Application(const std::function<void(sol::state &state)> &reg) noex
       "move_absolute", &auv::ConnectROV::move_absolute,
       "set_direction_locked", &auv::ConnectROV::set_direction_locked,
       "set_depth_locked", &auv::ConnectROV::set_depth_locked);
-
-//  m_lua.new_usertype<auv::vision::AlgorithmResult>(
-//      "AlgorithmResult",
-//      "axis", &auv::vision::AlgorithmResult::axis,
-//      "frame", &auv::vision::AlgorithmResult::frame);
 
   m_lua.set_function("imshow", [](const cv::Mat &frame) {
     cv::imshow("pre", frame);

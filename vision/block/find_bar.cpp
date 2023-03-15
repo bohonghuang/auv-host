@@ -8,8 +8,20 @@
 
 namespace auv::vision {
 
+FindBarBlock::FindBarBlock(bool draw_contours)
+    : m_draw_contours(draw_contours) {}
+
 FindBarBlock::Out FindBarBlock::process(const cv::Mat &frame) {
-  cv::Mat preview_frame = frame.clone();
+  if (frame.channels() != 1) {
+    std::cout << "The frame need gray color type!" << std::endl;
+    return {};
+  }
+
+  cv::Mat preview;
+  if (m_draw_contours) {
+    preview = frame.clone();
+    cv::cvtColor(preview, preview, cv::COLOR_GRAY2BGR);
+  }
   cv::Mat process_frame = frame.clone();
   int height = frame.size().height;
   static cv::Mat kernel1 =
@@ -72,14 +84,17 @@ FindBarBlock::Out FindBarBlock::process(const cv::Mat &frame) {
     if (std::abs(deg) > 60)
       continue;
 
-    for (size_t i = 0; i < 4; i++)
-      line(preview_frame, rect_points[i], rect_points[(i + 1) % 4],
-           cv::Scalar(0, 255, 255), 2, cv::LINE_AA);
+    if (m_draw_contours) {
+      for (size_t i = 0; i < 4; i++)
+        line(preview, rect_points[i], rect_points[(i + 1) % 4],
+             cv::Scalar(0, 255, 255), 2, cv::LINE_AA);
+    }
     cv::Point cent_point = utils::get_point_center(contour);
-    auto dev = static_cast<float>((double) cent_point.x / frame.size().width - 0.5);
+    //    auto dev = static_cast<float>((double) cent_point.x / frame.size().width - 0.5);
     results.push_back({cent_point, deg});
   }
-  return {preview_frame,
+
+  return {preview,
           results};
 }
 

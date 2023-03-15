@@ -4,10 +4,10 @@
 
 #include <fstream>
 
-#include "application.h"
-#include "../vision/camera.h"
-#include "../vision/block/inrange.h"
+#include "../vision/block/camera.h"
 #include "../vision/block/find_bar.h"
+#include "../vision/block/inrange.h"
+#include "application.h"
 
 int main() {
   auv::Application app([](sol::state &state) {
@@ -35,12 +35,16 @@ int main() {
   });
 
   auv::vision::CameraBlock camera(0, 588.4306598875787, 322.7472860229715, 592.781786987308, 242.4471017083893, -0.1443039341764572, 0.91856728920134, 0.0, 0.0, -2.402839834767997);
-  auv::vision::InRangeBlock block{auv::vision::InRangeBlock::ColorType::HLS, 0,0,0,0,0,0};
-  auv::vision::FindBarBlock find_bar;
-  auto out = camera | block | find_bar;
-  auto res = out.process({});
-  cv::Mat result;
-  cv::imshow("preview", std::get<0>(res));
-  cv::waitKey();
+  auv::vision::InRangeBlock in_range{auv::vision::InRangeBlock::ColorType::YCrCb, 33,146,65,177,255,130};
+  auv::vision::FindBarBlock find_bar(true);
+  auto out = camera | in_range | find_bar;
+
+  while(true) {
+    auto res = out.process({});
+    cv::imshow("preview", std::get<0>(res));
+    auto result = std::get<1>(res);
+    cv::waitKey();
+  }
+
   app.run();
 }

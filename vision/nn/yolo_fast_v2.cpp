@@ -137,7 +137,7 @@ void YoloFastV2::load_data_file(const std::string& file_path) {
     }
 }
 
-cv::Mat YoloFastV2::detect(const cv::Mat src_img) {
+cv::Mat YoloFastV2::forward(const cv::Mat& src_img) {
     auto blob = cv::dnn::blobFromImage(src_img, 1.0/255.0, cv::Size(m_model_config.width, m_model_config.height));
     m_net.setInput(blob);
 
@@ -172,7 +172,7 @@ cv::Mat YoloFastV2::detect(const cv::Mat src_img) {
     return result;
 }
 
-std::map<std::string, std::vector<YoloFastV2Result>> YoloFastV2::process(cv::Mat& img, const cv::Mat detect_result) {
+std::map<std::string, std::vector<YoloFastV2Result>> YoloFastV2::process(cv::Mat& img, const cv::Mat& detect_result) {
     int img_height = img.size().height;
     int img_width = img.size().width;
     static float ratioh = (float)img_height / m_model_config.height;
