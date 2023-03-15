@@ -51,7 +51,7 @@ private:
   float m_conf_threshold;
   float m_nms_threshold;
   std::array<int, 2> m_stride = {16, 32};
-  cv::dnn::dnn4_v20220524::Net m_net;
+  cv::dnn::dnn4_v20221220::Net m_net;
 };
 
 } // namespace auv::vision::network

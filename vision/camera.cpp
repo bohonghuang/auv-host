@@ -8,8 +8,15 @@
 
 namespace auv::vision {
 
+void CameraBlock::SetFrameRate(float val) {
+  s_frame_rate = val;
+}
 
-Camera::Camera(int index, const CameraParams &camera_params) noexcept
+float CameraBlock::GetFrameRate() {
+  return s_frame_rate;
+}
+
+CameraBlock::CameraBlock(int index, const CameraParams &camera_params) noexcept
     : m_camera_params(camera_params) {
   m_capture.open(index);
   ASSERT(m_capture.isOpened(), std::to_string(index) + ": camera open error.")
@@ -22,7 +29,7 @@ Camera::Camera(int index, const CameraParams &camera_params) noexcept
             << " as backend. width = " << width << "  height = " << height << std::endl;
 }
 
-Camera::Camera(int index, double fx, double cx, double fy, double cy, double k1, double k2, double k3, double k4, double k5) noexcept {
+CameraBlock::CameraBlock(int index, double fx, double cx, double fy, double cy, double k1, double k2, double k3, double k4, double k5) noexcept {
   m_camera_params = {fx, cx, fy, cy, k1, k2, k3, k4, k5};
   m_capture.open("v4l2src device=/dev/video0 ! video/x-raw, format=(string)YUY2, width=(int)640, height=(int)480 ! videoconvert ! appsink ");
   ASSERT(m_capture.isOpened(), std::to_string(index) + ": camera open error.")
@@ -35,12 +42,12 @@ Camera::Camera(int index, double fx, double cx, double fy, double cy, double k1,
             << " as backend. width = " << width << "  height = " << height << std::endl;
 }
 
-Camera::Camera(std::string_view path, const CameraParams &camera_params) noexcept
+CameraBlock::CameraBlock(std::string_view path, const CameraParams &camera_params) noexcept
     : m_camera_params(camera_params) {
   m_capture.open(path.data());
 }
 
-cv::Mat Camera::get_frame() noexcept {
+cv::Mat CameraBlock::process(CameraBlock::In) noexcept {
   static const auto distort_map = [this]() -> std::array<cv::Mat, 2> {
     cv::Mat map[2];
     cv::Mat camera_matrix = (cv::Mat_<double>(3, 3) << m_camera_params.fx,
@@ -65,7 +72,6 @@ cv::Mat Camera::get_frame() noexcept {
   m_last_frame = frame;
   return frame;
 }
-
 
 
 }// namespace auv::vision

@@ -92,7 +92,7 @@ auto get_top_left_right_bottom_left_right_point(const cv::Point_<T> (&four_point
 }
 
 
-void regulate_threshold_params(std::string_view file_name, ThresholdBlock<int> &block);
+//void regulate_threshold_params(std::string_view file_name, ThresholdBlock<int> &block);
 
 std::vector<std::string> split(std::string_view str, std::string_view delim = " ");
 

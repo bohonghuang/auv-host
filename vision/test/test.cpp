@@ -2,8 +2,6 @@
 // Created by Qff on 2023/3/5.
 //
 
-#include "../red_bar.h"
-#include "../red_door.h"
 #include "../utils.h"
 
 #include <iostream>
@@ -60,12 +58,12 @@ int main() {
 
   cv::Mat trans_mat = cv::getPerspectiveTransform(src, dst);
   cv::Mat frame;
-  auv::vision::RedBarBlock block;
+  //auv::vision::RedBarBlock block;
   while (cap.read(frame)) {
     cv::Mat result;
     cv::warpPerspective(frame, result, trans_mat, frame.size()); //INTER_CUBIC
-    auto re = block.process(frame);
-    cv::imshow("test", re.frame);
+    //auto re = block.process(frame);
+    // cv::imshow("test", re.frame);
     cv::waitKey(0);
   }
 

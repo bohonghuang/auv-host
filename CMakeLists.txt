@@ -10,6 +10,7 @@ set(SOL2_BUILD_LUA false)
 find_package(OpenCV REQUIRED)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(runtime)
 
 add_subdirectory(runtime)
 add_subdirectory(vision)

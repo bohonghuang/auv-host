@@ -1,47 +1,38 @@
 //
-// Created by Qff on 2023/3/4.
+// Created by qff233 on 23-3-15.
 //
 
-#include "red_bar.h"
+#include "find_bar.h"
+
 #include "utils.h"
 
 namespace auv::vision {
 
-RedBarBlock::RedBarBlock() {
-  m_threshold_params = {
-      {33, 177}, // Y
-      {146, 255},// Cr
-      {65, 130}};// Cb
-}
-
-AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::TimeStep ts) noexcept {
-  AlgorithmResult result;
-  auto process_frame = frame.clone();
-  cv::cvtColor(process_frame, process_frame, cv::COLOR_BGR2YCrCb);
-  cv::inRange(process_frame, get_low_param(), get_high_param(), process_frame);
-
-  int high = m_frame_size.height;
+FindBarBlock::Out FindBarBlock::process(const cv::Mat &frame) {
+  cv::Mat preview_frame = frame.clone();
+  cv::Mat process_frame = frame.clone();
+  int height = frame.size().height;
   static cv::Mat kernel1 =
       cv::getStructuringElement(cv::MORPH_ELLIPSE,
-                                cv::Size(high / 96, high / 96));
+                                cv::Size(height / 96, height / 96));
   static cv::Mat kernel2 =
       cv::getStructuringElement(cv::MORPH_ELLIPSE,
-                                cv::Size(high / 48, high / 48));
+                                cv::Size(height / 48, height / 48));
   cv::morphologyEx(process_frame, process_frame, cv::MORPH_OPEN, kernel1);
   cv::morphologyEx(process_frame, process_frame, cv::MORPH_CLOSE, kernel2);
 
-
-  std::vector<vPoints> contours;
+  std::vector<std::vector<cv::Point>> contours;
   cv::findContours(process_frame, contours, cv::noArray(),
                    cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
   std::sort(contours.begin(), contours.end(),
-            [](const vPoints &points1, const vPoints &points2) {
+            [](const std::vector<cv::Point> &points1, const std::vector<cv::Point> &points2) {
               cv::Point p1 = utils::get_point_center(points1);
               cv::Point p2 = utils::get_point_center(points2);
               return p1.y < p2.y;
             });
 
+  std::vector<FindBarResult> results;
+  results.resize(contours.size());
   for (const auto &contour: contours) {
     cv::Point2f rect_points[4];
     auto rect = cv::minAreaRect(contour);
@@ -51,11 +42,11 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
     auto [width, length] = std::minmax({dist01, dist12});
 
     // std::cout << "length:" << length << "   width:" << width << std::endl;
-    if (width < (double) high / 12) {
+    if (width < (double) height / 12) {
       // std::cout << "width" << std::endl;
       continue;
     }
-    if (length < (float) high / 8) {
+    if (length < (float) height / 8) {
       // std::cout << "length < (float) high" << std::endl;
       continue;
     }
@@ -64,7 +55,7 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
       continue;
     }
 
-    cv::Mat mask = cv::Mat::zeros(m_frame_size, CV_8UC1);
+    cv::Mat mask = cv::Mat::zeros(frame.size(), CV_8UC1);
     cv::fillPoly(mask, utils::transform_points(rect_points), cv::Scalar(255, 255, 255));
     cv::Mat mask_result;
     cv::bitwise_and(process_frame, mask, mask_result);
@@ -82,31 +73,14 @@ AlgorithmResult RedBarBlock::process_imp(const cv::Mat &frame, auv::vision::Time
       continue;
 
     for (size_t i = 0; i < 4; i++)
-      line(frame, rect_points[i], rect_points[(i + 1) % 4],
+      line(preview_frame, rect_points[i], rect_points[(i + 1) % 4],
            cv::Scalar(0, 255, 255), 2, cv::LINE_AA);
     cv::Point cent_point = utils::get_point_center(contour);
-    auto dev = static_cast<float>((double) cent_point.x / m_frame_size.width - 0.5);
-
-    result.axis.push_back(
-        {dev,
-         0.0f,
-         0.0f,
-         deg / 90.0f});
+    auto dev = static_cast<float>((double) cent_point.x / frame.size().width - 0.5);
+    results.push_back({cent_point, deg});
   }
-
-  std::string str;
-  if (!result.axis.empty()) {
-    str = "dev: ";
-    str += std::to_string(result.axis[0].x);
-    str += "   deg: ";
-    str += std::to_string(result.axis[0].rot);
-    str += "\n";
-    cv::putText(frame, str, cv::Point(0, 20), 0, 0.7f, cv::Scalar(255, 0, 0), 2);
-  }
-  cv::cvtColor(process_frame, process_frame, cv::COLOR_GRAY2BGR);
-  cv::hconcat(frame, process_frame, result.frame);
-  return result;
+  return {preview_frame,
+          results};
 }
-
 
 }// namespace auv::vision
