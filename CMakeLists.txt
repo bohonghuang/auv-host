@@ -4,7 +4,6 @@ project(auv-host)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_subdirectory(vendor/sol2)
 set(SOL2_LUA_VERSION "LuaJIT")
 set(SOL2_BUILD_LUA false)
 

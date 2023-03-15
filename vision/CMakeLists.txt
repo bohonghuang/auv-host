@@ -8,7 +8,7 @@ set(algorithm_srcs
         red_bar.cpp 
         utils.cpp 
         red_door.cpp 
-        neural_network/yolo_fast_v2.cpp)
+        nn/yolo_fast_v2.cpp)
 
 add_library(auv_vision STATIC ${algorithm_srcs})
 target_link_libraries(auv_vision ${OpenCV_LIBS})
@@ -16,5 +16,5 @@ target_link_libraries(auv_vision ${OpenCV_LIBS})
 add_executable(test test/test.cpp)
 target_link_libraries(test auv_vision)
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/vision/test)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/libs)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
