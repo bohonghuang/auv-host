@@ -60,17 +60,20 @@ int main() {
     } catch (...) {}
   });
 
-    auv::vision::CameraBlock camera(0, 588.4306598875787, 322.7472860229715, 592.781786987308, 242.4471017083893, -0.1443039341764572, 0.91856728920134, 0.0, 0.0, -2.402839834767997);
-    auv::vision::InRangeBlock in_range{auv::vision::InRangeBlock::ColorType::YCrCb, 33,146,65,177,255,130};
-    auv::vision::FindBarBlock find_bar(true);
-    auto out = camera | in_range | find_bar;
+  auv::vision::CameraBlock camera(0, {588.4306598875787, 322.7472860229715, 592.781786987308, 242.4471017083893, -0.1443039341764572, 0.91856728920134, 0.0, 0.0, -2.402839834767997});
+  auv::vision::InRangeBlock in_range{auv::vision::InRangeBlock::ColorType::YCrCb, 33, 146, 65, 177, 255, 130};
+  auv::IntoAnyBlock<cv::Mat> from_mat;
+  auv::FromAnyBlock<cv::Mat> into_mat;
+  auv::vision::FindBarBlock find_bar(true);
 
-    while(true) {
-      auto res = out.process({});
-      cv::imshow("preview", std::get<0>(res));
-      auto result = std::get<1>(res);
-      cv::waitKey();
-    }
+  auto out = (camera | from_mat | into_mat | in_range | find_bar).as_untyped().as_typed<auv::vision::CameraBlock::In, auv::vision::FindBarBlock::Out>();
 
-  app.run();
+  while (true) {
+    auto res = out.process({});
+    cv::imshow("preview", std::get<0>(res));
+    auto result = std::get<1>(res);
+    cv::waitKey();
+  }
+
+  // app.run();
 }
