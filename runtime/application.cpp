@@ -5,8 +5,8 @@
 #include "application.h"
 
 #include "../vision/block/camera.h"
-#include "../vision/block/inrange.h"
 #include "../vision/block/find_bar.h"
+#include "../vision/block/inrange.h"
 
 #include <iostream>
 
@@ -17,29 +17,6 @@ Application::Application(const std::function<void(sol::state &state)> &reg) noex
 
   m_lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::package);
 
-  m_lua.new_usertype<auv::vision::CameraBlock>(
-      "CameraBlock",
-      sol::constructors<auv::vision::CameraBlock(int, double, double, double, double, double, double, double, double, double)>(),
-      "process", &auv::vision::CameraBlock::process);
-
-  m_lua.new_enum<auv::vision::InRangeBlock::ColorType>(
-      "ColorType",
-      {
-          {"YCrCb", auv::vision::InRangeBlock::ColorType::YCrCb},
-          {"HLS", auv::vision::InRangeBlock::ColorType::HLS},
-          {"HSV", auv::vision::InRangeBlock::ColorType::HSV},
-      });
-
-  m_lua.new_usertype<auv::vision::InRangeBlock>(
-      "InRangeBlock",
-      sol::constructors<auv::vision::InRangeBlock(auv::vision::InRangeBlock::ColorType, int, int, int, int, int, int)>(),
-      "process", &auv::vision::InRangeBlock::process);
-
-  m_lua.new_usertype<auv::vision::FindBarBlock>(
-      "FindBarBlock",
-      sol::constructors<auv::vision::FindBarBlock(bool)>(),
-      "process", &auv::vision::FindBarBlock::process);
-
   m_lua.new_usertype<auv::ConnectROV>(
       "ROV",
       sol::constructors<auv::ConnectROV(const std::string &, int)>(),
@@ -48,6 +25,11 @@ Application::Application(const std::function<void(sol::state &state)> &reg) noex
       "move_absolute", &auv::ConnectROV::move_absolute,
       "set_direction_locked", &auv::ConnectROV::set_direction_locked,
       "set_depth_locked", &auv::ConnectROV::set_depth_locked);
+
+  m_lua.new_usertype<cv::Point>(
+      "Point",
+      "x", &cv::Point::x,
+      "y", &cv::Point::y);
 
   m_lua.set_function("imshow", [](const cv::Mat &frame) {
     cv::imshow("pre", frame);

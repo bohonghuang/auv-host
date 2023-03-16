@@ -38,7 +38,7 @@ public:
                float conf_threshold=0.3, float nms_threshold=0.4);
 
   cv::Mat forward(const cv::Mat& src_img);
-  std::map<std::string, std::vector<YoloFastV2Result>> process(cv::Mat& img, const cv::Mat& detect_result);
+  std::map<std::string, std::vector<YoloFastV2Result>> process(const cv::Mat& img, const cv::Mat& detect_result);
 private:
   void load_data_file(const std::string& file_path);
   void draw_pred(cv::Mat& img, float confidence, int class_id, const cv::Rect& rect_range);
@@ -51,7 +51,7 @@ private:
   float m_conf_threshold;
   float m_nms_threshold;
   std::array<int, 2> m_stride = {16, 32};
-  cv::dnn::dnn4_v20221220::Net m_net;
+  cv::dnn::Net m_net;
 };
 
 } // namespace auv::vision::network

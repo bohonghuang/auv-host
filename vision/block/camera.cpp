@@ -47,7 +47,7 @@ CameraBlock::CameraBlock(std::string_view path, const CameraParams &camera_param
   m_capture.open(path.data());
 }
 
-cv::Mat CameraBlock::process(CameraBlock::In) noexcept {
+cv::Mat CameraBlock::process(const CameraBlock::In&) noexcept {
   static const auto distort_map = [this]() -> std::array<cv::Mat, 2> {
     cv::Mat map[2];
     cv::Mat camera_matrix = (cv::Mat_<double>(3, 3) << m_camera_params.fx,

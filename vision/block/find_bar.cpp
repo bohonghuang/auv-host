@@ -13,7 +13,7 @@ FindBarBlock::FindBarBlock(bool draw_contours)
 
 FindBarBlock::Out FindBarBlock::process(const cv::Mat &frame) {
   if (frame.channels() != 1) {
-    std::cout << "The frame need gray color type!" << std::endl;
+    std::cout << "The frame need gray color type! But it is " << frame.channels() << std::endl;
     return {};
   }
 

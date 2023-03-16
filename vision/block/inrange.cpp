@@ -22,7 +22,7 @@ void InRangeBlock::set_range(int param1_low, int param2_low, int param3_low, int
 
 cv::Mat InRangeBlock::process(const cv::Mat &frame) {
   if (frame.channels() != 3) {
-    std::cout << "The frame need three channels!" << std::endl;
+    std::cout << "The frame need three channels! But it is " << frame.channels() << std::endl;
     return {};
   }
 

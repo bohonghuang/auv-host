@@ -172,7 +172,7 @@ cv::Mat YoloFastV2::forward(const cv::Mat& src_img) {
     return result;
 }
 
-std::map<std::string, std::vector<YoloFastV2Result>> YoloFastV2::process(cv::Mat& img, const cv::Mat& detect_result) {
+std::map<std::string, std::vector<YoloFastV2Result>> YoloFastV2::process(const cv::Mat& img, const cv::Mat& detect_result) {
     int img_height = img.size().height;
     int img_width = img.size().width;
     static float ratioh = (float)img_height / m_model_config.height;
@@ -228,7 +228,7 @@ std::map<std::string, std::vector<YoloFastV2Result>> YoloFastV2::process(cv::Mat
         result.name = m_classes[class_ids[i]];
 
         results[result.name].push_back(result);
-        this->draw_pred(img, result.confidences, class_ids[i], rect);
+        // this->draw_pred(img, result.confidences, class_ids[i], rect);
     }
 
 end_up:

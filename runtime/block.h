@@ -15,14 +15,13 @@ class Block {
 public:
   using In = I;
   using Out = O;
-  virtual O process(I in) = 0;
+  virtual O process(const I& in) = 0;
 };
 
 template<class Block1, class Block2>
 auto operator|(Block1 block1, Block2 block2) {
   return ChainBlock<Block1, Block2>{block1, block2};
 }
-
 
 template<class Block1_, class Block2_>
 class ChainBlock : public Block<typename std::remove_reference_t<Block1_>::In,
@@ -33,8 +32,8 @@ class ChainBlock : public Block<typename std::remove_reference_t<Block1_>::In,
   static_assert(std::is_same_v<std::remove_cv_t<std::remove_reference_t<typename Block1::Out>>, std::remove_cv_t<std::remove_reference_t<typename Block2::In>>>, "Unmatched input and output types for two blocks.");
 
 public:
-  ChainBlock(Block1 block1, Block2 block2) : m_block_1(block1), m_block_2(block2) {}
-  typename Block2::Out process(typename Block1::In in) override {
+  ChainBlock(Block1& block1, Block2& block2) : m_block_1(block1), m_block_2(block2) {}
+  typename Block2::Out process(const typename Block1::In& in) override {
     return m_block_2.process(m_block_1.process(in));
   }
 

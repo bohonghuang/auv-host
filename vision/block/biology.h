@@ -17,7 +17,7 @@ class FindBiologyBlock : public Block<cv::Mat, std::map<std::string, std::vector
 public:
   explicit FindBiologyBlock(const std::string& data_path);
 
-  Out process(In) override;
+  Out process(const In&) override;
 private:
   network::YoloFastV2 m_yolo;
 };

@@ -34,7 +34,7 @@ public:
   CameraBlock(int index, double fx, double cx, double fy, double cy, double k1, double k2, double k3, double k4, double k5) noexcept;
   CameraBlock(std::string_view path, const CameraParams &camera_params) noexcept;
 
-  cv::Mat process(In) noexcept override;
+  cv::Mat process(const In&) noexcept override;
 
 private:
   cv::VideoCapture m_capture;
