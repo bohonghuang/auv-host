@@ -11,25 +11,34 @@
 
 namespace auv::vision {
 
+class ConvertColorBlock : public auv::Block<cv::Mat, cv::Mat> {
+public:
+  ConvertColorBlock(int code);
+  Out process(In in) override;
+  AUV_BLOCK;
+private:
+  int m_code;
+};
+
+struct InRangeParams {
+  int low_1;
+  int high_1;
+  int low_2;
+  int high_2;
+  int low_3;
+  int high_3;
+};
+
 class InRangeBlock : public auv::Block<const cv::Mat&, cv::Mat> {
 public:
-  enum class ColorType {
-    YCrCb = cv::COLOR_BGR2YCrCb,
-    HLS = cv::COLOR_BGR2HLS,
-    HSV = cv::COLOR_BGR2HSV
-  };
-  InRangeBlock(ColorType type, int param1_low, int param2_low, int param3_low, int param1_high, int param2_high, int param3_high);
+  InRangeBlock() = default;
+  explicit InRangeBlock(InRangeParams params);
+  void set_params(InRangeParams params);
   void set_range(int param1_low, int param2_low, int param3_low, int param1_high, int param2_high, int param3_high);
   Out process(In) override;
   AUV_BLOCK;
 private:
-  int m_param1_low;
-  int m_param2_low;
-  int m_param3_low;
-  int m_param1_high;
-  int m_param2_high;
-  int m_param3_high;
-  ColorType m_type;
+  InRangeParams m_params;
 };
 
 }// namespace auv::vision
