@@ -50,7 +50,7 @@ int main() {
                                                        sol::constructors<auv::vision::ConvertColorBlock(int)>(),
                                                        AUV_BLOCK_SOL_METHODS(auv::vision::ConvertColorBlock));
 
-    sol::table cv_namespace;
+    sol::table cv_namespace = state.create_named_table("cv");
     cv_namespace["COLOR_BGR2HSV"] = cv::COLOR_BGR2HSV;
     cv_namespace["COLOR_BGR2YCrCb"] = cv::COLOR_BGR2YCrCb;
     cv_namespace["COLOR_GRAY2BGR"] = cv::COLOR_GRAY2BGR;
