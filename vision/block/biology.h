@@ -13,7 +13,7 @@
 
 namespace auv::vision {
 
-class FindBiologyBlock : public Block<const cv::Mat&, std::map<std::string, std::vector<network::YoloFastV2Result>>> {
+class FindBiologyBlock : public Block<cv::Mat, std::map<std::string, std::vector<network::YoloFastV2Result>>> {
 public:
   explicit FindBiologyBlock(const std::string& data_path);
   Out process(In) override;

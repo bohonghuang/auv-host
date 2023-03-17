@@ -27,7 +27,7 @@ void InRangeBlock::set_range(int param1_low, int param2_low, int param3_low, int
   m_params.high_3 = param3_high;
 }
 
-cv::Mat InRangeBlock::process(const cv::Mat &frame) {
+cv::Mat InRangeBlock::process(cv::Mat frame) {
   cv::Mat result;
   cv::inRange(result, cv::Scalar(m_params.low_1, m_params.low_2, m_params.low_3),
               cv::Scalar(m_params.high_1, m_params.high_2, m_params.high_3), result);

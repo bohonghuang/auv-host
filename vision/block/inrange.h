@@ -29,7 +29,7 @@ struct InRangeParams {
   int high_3;
 };
 
-class InRangeBlock : public auv::Block<const cv::Mat&, cv::Mat> {
+class InRangeBlock : public auv::Block<cv::Mat, cv::Mat> {
 public:
   InRangeBlock() = default;
   explicit InRangeBlock(InRangeParams params);

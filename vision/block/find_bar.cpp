@@ -11,7 +11,7 @@ namespace auv::vision {
 FindBarBlock::FindBarBlock(bool draw_contours)
     : m_draw_contours(draw_contours) {}
 
-FindBarBlock::Out FindBarBlock::process(const cv::Mat &frame) {
+FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
   if (frame.channels() != 1) {
     std::cout << "The frame need gray color type! But it is " << frame.channels() << std::endl;
     return {};
