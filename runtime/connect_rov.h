@@ -21,7 +21,7 @@ private:
 
 class ConnectROV {
 public:
-  ConnectROV(const std::string &address = "192.168.137.219", int port = 8888) noexcept;
+  explicit ConnectROV(const std::string &address = "192.168.137.219", int port = 8888) noexcept;
 
   void catcher(float val) noexcept;
   void move(float x, float y, float z, float rot) noexcept;
