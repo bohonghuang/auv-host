@@ -2,8 +2,8 @@
 // Created by qff233 on 23-3-15.
 //
 
-#ifndef AUV_HOST_INRANGE_H
-#define AUV_HOST_INRANGE_H
+#ifndef AUV_HOST_COLOR_H
+#define AUV_HOST_COLOR_H
 
 #include <opencv2/opencv.hpp>
 
@@ -13,7 +13,7 @@ namespace auv::vision {
 
 class ConvertColorBlock : public auv::Block<cv::Mat, cv::Mat> {
 public:
-  ConvertColorBlock(int code);
+  explicit ConvertColorBlock(int code);
   Out process(In in) override;
   AUV_BLOCK;
 private:
@@ -32,15 +32,15 @@ struct InRangeParams {
 class InRangeBlock : public auv::Block<cv::Mat, cv::Mat> {
 public:
   InRangeBlock() = default;
-  explicit InRangeBlock(InRangeParams params);
-  void set_params(InRangeParams params);
+  explicit InRangeBlock(const InRangeParams& params);
+  void set_params(const InRangeParams& params);
   void set_range(int param1_low, int param2_low, int param3_low, int param1_high, int param2_high, int param3_high);
   Out process(In) override;
   AUV_BLOCK;
 private:
-  InRangeParams m_params;
+  InRangeParams m_params{};
 };
 
 }// namespace auv::vision
 
-#endif//AUV_HOST_INRANGE_H
+#endif//AUV_HOST_COLOR_H

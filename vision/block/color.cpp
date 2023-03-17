@@ -3,7 +3,7 @@
 //
 
 
-#include "inrange.h"
+#include "color.h"
 
 namespace auv::vision {
 
@@ -15,7 +15,7 @@ cv::Mat ConvertColorBlock::process(cv::Mat input) {
   return output;
 }
 
-InRangeBlock::InRangeBlock(InRangeParams params)
+InRangeBlock::InRangeBlock(const InRangeParams& params)
     : m_params(params) {}
 
 void InRangeBlock::set_range(int param1_low, int param2_low, int param3_low, int param1_high, int param2_high, int param3_high) {
@@ -25,6 +25,10 @@ void InRangeBlock::set_range(int param1_low, int param2_low, int param3_low, int
   m_params.high_1 = param1_high;
   m_params.high_2 = param2_high;
   m_params.high_3 = param3_high;
+}
+
+void InRangeBlock::set_params(const InRangeParams& params) {
+  m_params = params;
 }
 
 cv::Mat InRangeBlock::process(cv::Mat frame) {

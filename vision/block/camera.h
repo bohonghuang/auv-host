@@ -11,18 +11,6 @@
 
 namespace auv::vision {
 
-struct CameraParams {
-  double fx;
-  double cx;
-  double fy;
-  double cy;
-  double k1;
-  double k2;
-  double k3;
-  double k4;
-  double k5;
-};
-
 class CameraBlock : public auv::Block<std::tuple<>, cv::Mat> {
 public:
   static void SetFrameRate(float val);
@@ -30,16 +18,14 @@ public:
 
 public:
   CameraBlock() noexcept = default;
-  CameraBlock(int index, const CameraParams &camera_params) noexcept;
-  CameraBlock(int index, double fx, double cx, double fy, double cy, double k1, double k2, double k3, double k4, double k5) noexcept;
-  CameraBlock(std::string_view path, const CameraParams &camera_params) noexcept;
+  explicit CameraBlock(int index) noexcept;
+  explicit CameraBlock(const std::string& path) noexcept;
+
   Out process(In) noexcept override;
   AUV_BLOCK;
 private:
   cv::VideoCapture m_capture;
-  cv::Size m_frame_size;
   cv::Mat m_last_frame;
-  CameraParams m_camera_params{};
   inline static float s_frame_rate = 30.0f;
 };
 

@@ -5,8 +5,8 @@
 #include "application.h"
 
 #include "../vision/block/camera.h"
+#include "../vision/block/color.h"
 #include "../vision/block/find_bar.h"
-#include "../vision/block/inrange.h"
 
 #include <iostream>
 

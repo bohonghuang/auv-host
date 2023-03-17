@@ -5,10 +5,11 @@ include_directories(.)
 set(algorithm_srcs
         block/camera.cpp
         utils.cpp
-        block/inrange.cpp
+        block/color.cpp
         nn/yolo_fast_v2.cpp
         block/find_bar.cpp
-        block/biology.cpp)
+        block/biology.cpp
+        block/camera_calibr.cpp block/imshow.h block/imshow.cpp)
 
 add_library(auv_vision STATIC ${algorithm_srcs})
 target_link_libraries(auv_vision ${OpenCV_LIBS})
