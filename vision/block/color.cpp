@@ -15,7 +15,7 @@ cv::Mat ConvertColorBlock::process(cv::Mat input) {
   return output;
 }
 
-InRangeBlock::InRangeBlock(const InRangeParams& params)
+InRangeBlock::InRangeBlock(const InRangeParams &params)
     : m_params(params) {}
 
 void InRangeBlock::set_range(int param1_low, int param2_low, int param3_low, int param1_high, int param2_high, int param3_high) {
@@ -27,13 +27,13 @@ void InRangeBlock::set_range(int param1_low, int param2_low, int param3_low, int
   m_params.high_3 = param3_high;
 }
 
-void InRangeBlock::set_params(const InRangeParams& params) {
+void InRangeBlock::set_params(const InRangeParams &params) {
   m_params = params;
 }
 
 cv::Mat InRangeBlock::process(cv::Mat frame) {
   cv::Mat result;
-  cv::inRange(result, cv::Scalar(m_params.low_1, m_params.low_2, m_params.low_3),
+  cv::inRange(frame, cv::Scalar(m_params.low_1, m_params.low_2, m_params.low_3),
               cv::Scalar(m_params.high_1, m_params.high_2, m_params.high_3), result);
   return result;
 }

@@ -6,6 +6,7 @@
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 
 namespace auv {
 
@@ -151,7 +152,7 @@ template<class I>
 class IntoAnyBlock : public Block<I, std::any> {
 public:
   std::any process(I in) override {
-    return {in};
+    return in;
   }
   AUV_BASIC_BLOCK;
 };
@@ -160,7 +161,11 @@ template<class O>
 class FromAnyBlock : public Block<std::any, O> {
 public:
   O process(std::any in) override {
-    return std::any_cast<O>(in);
+    if constexpr (std::is_same_v<O, std::any>) {
+      return in;
+    } else {
+      return std::any_cast<O>(in);
+    }
   }
   AUV_BASIC_BLOCK;
 };
@@ -172,9 +177,15 @@ public:
   std::any process(std::any in) override {
     return m_block->process(in);
   }
+  std::any process() {
+    return process(std::tuple<> {});
+  }
   AUV_BASIC_BLOCK;
   AnyBlock connect(AnyBlock block) {
-    return (*this | block).as_untyped();
+    return (*this | std::move(block)).as_untyped();
+  }
+  AnyBlock operator|(AnyBlock block) {
+    return connect(std::move(block));
   }
 
 private:

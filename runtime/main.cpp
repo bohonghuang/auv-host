@@ -16,8 +16,21 @@ int main() {
   auv::Application app([](sol::state &state) {
     state.new_usertype<auv::AnyBlock>(
         "AnyBlock", sol::no_constructor,
-        "process", &auv::AnyBlock::process,
+        "process", sol::overload(sol::resolve<std::any(std::any)>(&auv::AnyBlock::process), sol::resolve<std::any()>(&auv::AnyBlock::process)),
         "connect", &auv::AnyBlock::connect);
+
+    state.set_function("connect", [](sol::variadic_args va) -> auv::AnyBlock {
+      auto &&begin = *va.cbegin();
+      static constexpr auto to_any_block = [](const sol::userdata &&block) -> auv::AnyBlock {
+        return block.is<auv::AnyBlock>() ? block.as<auv::AnyBlock>() : block["as_untyped"].call<auv::AnyBlock>(block);
+      };
+      auto prev_block = to_any_block(begin);
+      for (auto iter = va.cbegin() + 1; iter != va.cend(); iter++) {
+        prev_block = prev_block.connect(to_any_block(*iter));
+      }
+      return prev_block;
+    });
+
     /*-----------------------------------------------------------------------------------------------*/
     state.new_usertype<auv::vision::CameraParams>(
         "CameraParams",
@@ -67,7 +80,6 @@ int main() {
     cv_namespace["COLOR_BGR2HSV"] = cv::COLOR_BGR2HSV;
     cv_namespace["COLOR_BGR2YCrCb"] = cv::COLOR_BGR2YCrCb;
     cv_namespace["COLOR_GRAY2BGR"] = cv::COLOR_GRAY2BGR;
-    // state["cv"] = cv_namespace;
 
     /*-----------------------------------------------------------------------------------------------*/
     state.new_usertype<auv::vision::FindBarResult>(
@@ -100,22 +112,5 @@ int main() {
       app.script(str);
     } catch (...) {}
   });
-
-  auv::vision::CameraBlock camera(0);
-  //{588.4306598875787, 322.7472860229715, 592.781786987308, 242.4471017083893, -0.1443039341764572, 0.91856728920134, 0.0, 0.0, -2.402839834767997}
-  auv::vision::InRangeBlock in_range{{33, 146, 65, 177, 255, 130}};
-  auv::IntoAnyBlock<cv::Mat> from_mat;
-  auv::FromAnyBlock<cv::Mat> into_mat;
-  auv::vision::FindBarBlock find_bar(true);
-
-  auto out = (camera | from_mat | into_mat | in_range | find_bar).as_untyped().as_typed<auv::vision::CameraBlock::In, auv::vision::FindBarBlock::Out>();
-
-  while (true) {
-    auto res = out.process({});
-    cv::imshow("preview", std::get<0>(res));
-    auto result = std::get<1>(res);
-    cv::waitKey();
-  }
-
-  // app.run();
+  app.run();
 }
