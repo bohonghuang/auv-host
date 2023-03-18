@@ -1,7 +1,3 @@
-//
-// Created by qff233 on 23-3-18.
-//
-
 #include "rov_controller.h"
 
 namespace auv {

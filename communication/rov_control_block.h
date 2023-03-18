@@ -1,7 +1,3 @@
-//
-// Created by qff233 on 23-3-17.
-//
-
 #ifndef AUV_HOST_ROV_CONTROL_BLOCK_H
 #define AUV_HOST_ROV_CONTROL_BLOCK_H
 

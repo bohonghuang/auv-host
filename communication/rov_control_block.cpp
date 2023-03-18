@@ -1,7 +1,3 @@
-//
-// Created by qff233 on 23-3-17.
-//
-
 #include "cpp-httplib/httplib.h"
 #include "jsonrpccxx/client.hpp"
 

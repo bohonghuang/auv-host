@@ -1,7 +1,3 @@
-//
-// Created by Qff on 2023/3/4.
-//
-
 #ifndef UTILS_H
 #define UTILS_H
 

@@ -1,7 +1,3 @@
-//
-// Created by qff233 on 23-3-15.
-//
-
 #include "find_bar.h"
 
 #include "utils.h"

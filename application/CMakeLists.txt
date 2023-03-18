@@ -7,7 +7,7 @@ include_directories(../vendor/json-rpc-cxx/include)
 include_directories(${LUAJIT_INCLUDE_DIRS})
 
 set(auv_application_src
-        main.cpp)
+        main.cpp lua_interop.cpp)
 
 add_executable(auv_application ${auv_application_src})
 target_link_libraries(auv_application auv_runtime auv_communication auv_vision ${LUAJIT_LIBRARY})

@@ -1,8 +1,3 @@
-//
-// Created by qff233 on 23-3-15.
-//
-
-
 #include "color.h"
 
 namespace auv::vision {

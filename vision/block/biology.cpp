@@ -1,7 +1,3 @@
-//
-// Created by qff233 on 23-3-16.
-//
-
 #include "biology.h"
 
 namespace auv::vision {

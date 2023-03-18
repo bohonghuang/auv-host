@@ -1,7 +1,3 @@
-//
-// Created by Qff on 2023/3/4.
-//
-
 #include "utils.h"
 #include "block.h"
 

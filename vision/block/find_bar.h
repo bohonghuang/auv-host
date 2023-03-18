@@ -1,7 +1,3 @@
-//
-// Created by qff233 on 23-3-15.
-//
-
 #ifndef AUV_HOST_FIND_BAR_H
 #define AUV_HOST_FIND_BAR_H
 

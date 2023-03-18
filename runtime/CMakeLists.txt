@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(auv_runtime_src
-        application.cpp)
+        application.cpp lua_interop.cpp)
 
 include_directories(${Readline_INCLUDE_DIR})
 

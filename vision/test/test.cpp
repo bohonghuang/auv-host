@@ -1,7 +1,3 @@
-//
-// Created by Qff on 2023/3/5.
-//
-
 #include "../utils.h"
 
 #include <iostream>

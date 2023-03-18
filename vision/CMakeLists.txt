@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 include_directories(.)
+include_directories(..)
 
 set(algorithm_srcs
         block/camera.cpp
@@ -10,7 +11,7 @@ set(algorithm_srcs
         block/find_bar.cpp
         block/biology.cpp
         block/camera_calibr.cpp
-        block/imshow.cpp)
+        block/imshow.cpp lua_interop.cpp)
 
 add_library(auv_vision STATIC ${algorithm_srcs})
 target_link_libraries(auv_vision ${OpenCV_LIBS})

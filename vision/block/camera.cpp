@@ -1,7 +1,3 @@
-//
-// Created by Qff on 2023/3/3.
-//
-
 #include "camera.h"
 
 #include "common.h"

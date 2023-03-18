@@ -1,7 +1,3 @@
-//
-// Created by qff233 on 23-3-16.
-//
-
 #ifndef AUV_HOST_BIOLOGY_H
 #define AUV_HOST_BIOLOGY_H
 
