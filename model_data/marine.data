@@ -1,0 +1,22 @@
+[name]
+model_name=marine
+
+[train-configure]
+epochs=501
+steps=150,200,300,400
+batch_size=32
+subdivisions=1
+learning_rate=0.001
+
+[model-configure]
+pre_weights=None
+classes=5
+width=352
+height=352
+anchor_num=3
+anchors=44.69,50.09, 57.94,89.00, 111.53,207.59, 117.07,136.20, 161.65,207.72, 198.60,269.83
+
+[data-configure]
+train=./dataset/train.txt
+val=./dataset/val.txt
+names=./model_data/marine.names

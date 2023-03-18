@@ -18,10 +18,10 @@ private:
 
 struct InRangeParams {
   int low_1;
-  int high_1;
   int low_2;
-  int high_2;
   int low_3;
+  int high_1;
+  int high_2;
   int high_3;
 };
 

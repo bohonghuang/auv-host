@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 
-include_directories(../)
-include_directories(../vendor/json-rpc-cxx/vendor)
-include_directories(../vendor/json-rpc-cxx/include)
+include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/vendor/json-rpc-cxx/vendor)
+include_directories(${PROJECT_SOURCE_DIR}/vendor/json-rpc-cxx/include)
+include_directories(${PROJECT_SOURCE_DIR}/vision)
 
 include_directories(${LUAJIT_INCLUDE_DIRS})
 

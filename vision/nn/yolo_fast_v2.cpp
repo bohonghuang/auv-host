@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "utils.h"
+#include "model_lib.h"
 
 namespace auv::vision::network {
     
@@ -23,7 +24,7 @@ static cv::Mat get_grid(int nx = 20, int ny = 20) {
     return result.clone();
 }
 
-YoloFastV2::YoloFastV2(const std::string& module_config_file_path, float obj_threshold, 
+YoloFastV2::YoloFastV2(const std::string& module_config_file_path, float obj_threshold,
                        float conf_threshold, float nms_threshold) 
     : m_obj_threshold(obj_threshold),
       m_conf_threshold(conf_threshold),
@@ -44,9 +45,7 @@ YoloFastV2::YoloFastV2(const std::string& module_config_file_path, float obj_thr
         m_anchors.at<float>(i) = m_model_config.anchors[i];
     }
 
-    m_net = cv::dnn::readNet("./marine_model.onnx");
-    m_net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
-    m_net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
+    m_net = ModelLibs::GetInstance().get_net("marine"); //"./marine_model.onnx"
 }
 
 void YoloFastV2::load_data_file(const std::string& file_path) {
@@ -56,9 +55,9 @@ void YoloFastV2::load_data_file(const std::string& file_path) {
     std::map<std::string, std::string> key_value;
     std::vector<std::string> temp_key_value;
     for(std::string line; std::getline(ifs, line); ) {
-        if(char tmp = line[0];tmp  == '\n' || tmp == '\r' || tmp == '[' || line.size() == 0)
+        if(char tmp = line[0];tmp  == '\n' || tmp == '\r' || tmp == '[' || line.empty())
             continue;
-        temp_key_value = utils::split(line.c_str(), "=");
+        temp_key_value = utils::split(line, "=");
         temp_key_value[1] = *(temp_key_value[1].cend()-1) == '\r' ? 
                                 temp_key_value[1].substr(0, temp_key_value[1].length()-1) :
                                 temp_key_value[1];

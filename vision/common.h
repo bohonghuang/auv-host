@@ -4,10 +4,12 @@
 #ifdef NDEBUG
 #define ASSERT(expression, information)
 #else
-#define ASSERT(expression, information) \
-  assert(expression);                   \
-  if (!expression)                      \
-    std::cout << "assert : " << information << std::endl;
+#define ASSERT(expression, information)                     \
+  {                                                         \
+    assert(expression);                                     \
+    if (!expression)                                        \
+      std::cout << "assert : " << information << std::endl; \
+  }
 #endif
 
 #include <opencv2/core/utility.hpp>
