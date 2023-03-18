@@ -11,7 +11,7 @@
 
 namespace auv::vision {
 
-class CameraBlock : public auv::Block<std::tuple<>, cv::Mat> {
+class CameraBlock : public auv::Block<auv::unit_t, cv::Mat> {
 public:
   static void SetFrameRate(float val);
   static float GetFrameRate();

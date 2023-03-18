@@ -11,8 +11,6 @@
 
 #include <sol/sol.hpp>
 
-#include "connect_rov.h"
-
 namespace auv {
 
 template<typename T>

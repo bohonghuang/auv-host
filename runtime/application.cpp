@@ -4,37 +4,13 @@
 
 #include "application.h"
 
-#include "../vision/block/camera.h"
-#include "../vision/block/color.h"
-#include "../vision/block/find_bar.h"
-
 #include <iostream>
 
 namespace auv {
 
 Application::Application(const std::function<void(sol::state &state)> &reg) noexcept
     : m_status(Application::Status::READY) {
-
   m_lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::package);
-
-  m_lua.new_usertype<auv::ConnectROV>(
-      "ROV",
-      sol::constructors<auv::ConnectROV(const std::string &, int)>(),
-      "catcher", &auv::ConnectROV::catcher,
-      "move", &auv::ConnectROV::move,
-      "move_absolute", &auv::ConnectROV::move_absolute,
-      "set_direction_locked", &auv::ConnectROV::set_direction_locked,
-      "set_depth_locked", &auv::ConnectROV::set_depth_locked);
-
-  m_lua.new_usertype<cv::Point>(
-      "Point",
-      "x", &cv::Point::x,
-      "y", &cv::Point::y);
-
-  m_lua.set_function("imshow", [](const cv::Mat &frame) {
-    cv::imshow("pre", frame);
-    cv::waitKey(1);
-  });
   reg(m_lua);
 }
 

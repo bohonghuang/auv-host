@@ -4,16 +4,36 @@
 
 #include <fstream>
 
-#include "../vision/block/camera.h"
-#include "../vision/block/camera_calibr.h"
-#include "../vision/block/color.h"
-#include "../vision/block/find_bar.h"
+#include "communication/rov_control_block.h"
+#include "vision/block/camera.h"
+#include "vision/block/camera_calibr.h"
+#include "vision/block/color.h"
+#include "vision/block/find_bar.h"
 #include "application.h"
 
 #define AUV_BLOCK_SOL_METHODS(TYPE) "process", &TYPE::process, "as_untyped", &TYPE::as_untyped
 
 int main() {
   auv::Application app([](sol::state &state) {
+    state.new_usertype<auv::RovController>(
+        "ROV",
+        sol::constructors<auv::RovController(const std::string &, int)>(),
+        "catcher", &auv::RovController::catcher,
+        "move", &auv::RovController::move,
+        "move_absolute", &auv::RovController::move_absolute,
+        "set_direction_locked", &auv::RovController::set_direction_locked,
+        "set_depth_locked", &auv::RovController::set_depth_locked);
+
+    state.new_usertype<cv::Point>(
+        "Point",
+        "x", &cv::Point::x,
+        "y", &cv::Point::y);
+
+    state.set_function("imshow", [](const cv::Mat &frame) {
+      cv::imshow("pre", frame);
+      cv::waitKey(1);
+    });
+
     state.new_usertype<auv::AnyBlock>(
         "AnyBlock", sol::no_constructor,
         "process", sol::overload(sol::resolve<std::any(std::any)>(&auv::AnyBlock::process), sol::resolve<std::any()>(&auv::AnyBlock::process)),
@@ -44,6 +64,11 @@ int main() {
         "k3", &auv::vision::CameraParams::k3,
         "k4", &auv::vision::CameraParams::k4,
         "k5", &auv::vision::CameraParams::k5);
+
+    state.new_usertype<auv::RovControlBlock>(
+        "RovControlBlock",
+        sol::constructors<auv::RovControlBlock(std::shared_ptr<auv::RovController>)>(),
+        AUV_BLOCK_SOL_METHODS(auv::RovControlBlock));
 
     state.new_usertype<auv::vision::CameraBlock>(
         "CameraBlock",

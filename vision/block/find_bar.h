@@ -19,6 +19,7 @@ struct FindBarResult {
 class FindBarBlock : public auv::Block<cv::Mat, std::tuple<cv::Mat, std::vector<FindBarResult>>> {
 public:
   explicit FindBarBlock(bool draw_contours = false);
+
   Out process(In frame) override;
   AUV_BLOCK;
 private:

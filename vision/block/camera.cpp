@@ -31,7 +31,7 @@ CameraBlock::CameraBlock(const std::string &path) noexcept {
   m_capture.open(path);
 }
 
-cv::Mat CameraBlock::process(std::tuple<>) noexcept {
+cv::Mat CameraBlock::process(auv::unit_t) noexcept {
   cv::Mat frame;
   if (!m_capture.read(frame)) {
     return m_last_frame;

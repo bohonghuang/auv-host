@@ -1,39 +1,34 @@
 //
-// Created by Qff on 2023/3/14.
+// Created by qff233 on 23-3-18.
 //
 
-#include "connect_rov.h"
+#include "rov_controller.h"
 
 namespace auv {
 
-ConnectROV::ConnectROV(const std::string &address, int port) noexcept
+RovController::RovController(const std::string &address, int port) noexcept
     : m_connector(address, port), m_rpc_client(m_connector, jsonrpccxx::version::v2) {}
 
 
-void ConnectROV::move(float x, float y, float z, float rot) noexcept {
+void RovController::move(float x, float y, float z, float rot) noexcept {
   return m_rpc_client.CallNotificationNamed("move", {{"x", x}, {"y", y}, {"z", z}, {"rot", rot}});
 }
 
-
-void ConnectROV::move_absolute(float x, float y, float z, float rot) noexcept {
+void RovController::move_absolute(float x, float y, float z, float rot) noexcept {
   return m_rpc_client.CallNotificationNamed("move_absolute", {{"x", x}, {"y", y}, {"z", z}, {"rot", rot}});
 }
 
-
-void ConnectROV::catcher(float val) noexcept {
+void RovController::catcher(float val) noexcept {
   return m_rpc_client.CallNotification("catcher", {val});
 }
 
-
-void ConnectROV::set_direction_locked(bool val) noexcept {
+void RovController::set_direction_locked(bool val) noexcept {
   return m_rpc_client.CallNotification("set_direction_locked", {val});
 }
 
-
-void ConnectROV::set_depth_locked(bool val) noexcept {
+void RovController::set_depth_locked(bool val) noexcept {
   return m_rpc_client.CallNotification("set_depth_locked", {val});
 }
-
 
 std::string CppHttpLibClientConnector::Send(const std::string &request) noexcept {
   auto res = m_http_client.Post("/jsonrpc", request, "application/json");
@@ -51,3 +46,4 @@ CppHttpLibClientConnector::CppHttpLibClientConnector(const std::string &host, in
 
 
 }// namespace auv
+

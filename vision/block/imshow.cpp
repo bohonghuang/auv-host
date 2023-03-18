@@ -7,7 +7,7 @@
 namespace auv::vision {
 
 
-std::tuple<> ImshowBlock::process(cv::Mat frame) noexcept {
+auv::unit_t ImshowBlock::process(cv::Mat frame) noexcept {
   cv::imshow("preview", frame);
   cv::waitKey(1);
   return {};

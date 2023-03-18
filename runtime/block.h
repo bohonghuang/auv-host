@@ -10,6 +10,8 @@
 
 namespace auv {
 
+struct unit_t {};
+
 namespace self_type {
 template<typename T>
 struct Reader {
@@ -49,23 +51,23 @@ using Read = std::remove_pointer_t<decltype(adl_GetSelfType(Reader<T>{}))>;
     return auv::as_typed_block<I_, O_>(*this); \
   }
 
-#define AUV_BLOCK                                             \
-  AUV_BASIC_BLOCK                                             \
-  template<class... Arg>                                      \
-  static Self make_typed(Arg... arg) { \
-    return Self(arg...);                                      \
-  }                                                           \
-  template<class... Arg>                                      \
-  static AnyBlock make_untyped(Arg... arg) {                  \
-    return Self(arg...).as_untyped();                         \
-  }                                                           \
-  template<class... Arg>                                      \
-  static std::shared_ptr<Self> make_shared(Arg... arg) {      \
-    return std::make_shared<Self>(arg...);                    \
-  }                                                           \
-  template<class... Arg>                                      \
-  static std::unique_ptr<Self> make_unique(Arg... arg) {      \
-    return std::make_unique<Self>(arg...);                    \
+#define AUV_BLOCK                                        \
+  AUV_BASIC_BLOCK                                        \
+  template<class... Arg>                                 \
+  static Self make_typed(Arg... arg) {                   \
+    return Self(arg...);                                 \
+  }                                                      \
+  template<class... Arg>                                 \
+  static AnyBlock make_untyped(Arg... arg) {             \
+    return Self(arg...).as_untyped();                    \
+  }                                                      \
+  template<class... Arg>                                 \
+  static std::shared_ptr<Self> make_shared(Arg... arg) { \
+    return std::make_shared<Self>(arg...);               \
+  }                                                      \
+  template<class... Arg>                                 \
+  static std::unique_ptr<Self> make_unique(Arg... arg) { \
+    return std::make_unique<Self>(arg...);               \
   }
 
 
@@ -178,7 +180,7 @@ public:
     return m_block->process(in);
   }
   std::any process() {
-    return process(std::tuple<> {});
+    return process(auv::unit_t{});
   }
   AUV_BASIC_BLOCK;
   AnyBlock connect(AnyBlock block) {

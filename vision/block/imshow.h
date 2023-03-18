@@ -11,7 +11,7 @@
 
 namespace auv::vision {
 
-class ImshowBlock : public Block<cv::Mat, std::tuple<>> {
+class ImshowBlock : public Block<cv::Mat, auv::unit_t> {
 public:
   Out process(In) noexcept override;
   AUV_BLOCK;
