@@ -58,7 +58,7 @@ using Read = std::remove_pointer_t<decltype(adl_GetSelfType(Reader<T>{}))>;
     return Self(arg...);                                 \
   }                                                      \
   template<class... Arg>                                 \
-  static AnyBlock make_untyped(Arg... arg) {             \
+  static auv::AnyBlock make_untyped(Arg... arg) {        \
     return Self(arg...).as_untyped();                    \
   }                                                      \
   template<class... Arg>                                 \
@@ -68,6 +68,16 @@ using Read = std::remove_pointer_t<decltype(adl_GetSelfType(Reader<T>{}))>;
   template<class... Arg>                                 \
   static std::unique_ptr<Self> make_unique(Arg... arg) { \
     return std::make_unique<Self>(arg...);               \
+  }
+
+
+#define AUV_MUX_BLOCK                                    \
+  AUV_BASIC_BLOCK                                        \
+  template<class... Arg>                                 \
+  static std::shared_ptr<Self> make_shared(Arg... arg) { \
+    auto ptr = std::make_shared<Self>(arg...);           \
+    ptr->m_ref_self = ptr;                               \
+    return ptr;                                          \
   }
 
 
@@ -88,6 +98,9 @@ class AnyBlock;
 template<class I, class O>
 class TypedAnyBlock;
 
+template<class B>
+class SharedBlock;
+
 template<class I, class O>
 class Block {
 public:
@@ -96,9 +109,22 @@ public:
   virtual O process(I in) = 0;
 };
 
+template<class T>
+struct wrap_ref_block_impl {
+  using type = T;
+};
+
+template<class T>
+struct wrap_ref_block_impl<std::shared_ptr<T>> {
+  using type = SharedBlock<T>;
+};
+
+template<class T>
+using wrap_ref_block = typename wrap_ref_block_impl<T>::type;
+
 template<class Block1, class Block2>
 auto operator|(Block1 block1, Block2 block2) {
-  return ChainBlock<Block1, Block2>{block1, block2};
+  return ChainBlock<wrap_ref_block<Block1>, wrap_ref_block<Block2>>{block1, block2};
 }
 
 template<class Block>
@@ -186,9 +212,6 @@ public:
   AnyBlock connect(AnyBlock block) {
     return (*this | std::move(block)).as_untyped();
   }
-  AnyBlock operator|(AnyBlock block) {
-    return connect(std::move(block));
-  }
 
 private:
   std::shared_ptr<Block<std::any, std::any>> m_block;
@@ -205,6 +228,63 @@ public:
 
 private:
   AnyBlock m_block;
+};
+
+template<class T>
+struct member_object_pointer_type_impl {};
+
+template<class T, class S>
+struct member_object_pointer_type_impl<T S::*> {
+  using target = T;
+  using parent = S;
+};
+
+template<class T>
+using member_object_pointer_target_t = typename member_object_pointer_type_impl<T>::target;
+
+template<class T>
+using member_object_pointer_parent_t = typename member_object_pointer_type_impl<T>::parent;
+
+template<class B>
+class SharedBlock : public Block<typename B::In, typename B::Out> {
+public:
+  SharedBlock(std::shared_ptr<B> ptr) : m_ptr(ptr) {}
+  typename B::Out process(typename B::In in) override {
+    return m_ptr->process(in);
+  }
+
+private:
+  std::shared_ptr<B> m_ptr;
+};
+
+template<class O>
+class MuxBlock : public Block<unit_t, O> {
+public:
+  template<class P>
+  class MuxInputBlock : public Block<member_object_pointer_target_t<P>, unit_t> {
+    using In = member_object_pointer_target_t<P>;
+    using Parent = member_object_pointer_parent_t<P>;
+
+  public:
+    MuxInputBlock(std::weak_ptr<MuxBlock<O>> parent, P pointer) : m_ref_parent(parent), m_member_pointer(pointer) {}
+    unit_t process(In in) override {
+      if (auto parent = std::dynamic_pointer_cast<Parent>(m_ref_parent.lock())) {
+        parent.get()->*m_member_pointer = in;
+      }
+      return {};
+    }
+
+  private:
+    std::weak_ptr<MuxBlock<O>> m_ref_parent;
+    P m_member_pointer;
+  };
+  template<class P>
+  MuxInputBlock<P> input_block(P member_ptr) {
+    return MuxInputBlock<P>{m_ref_self, member_ptr};
+  }
+
+protected:
+  std::weak_ptr<MuxBlock<O>> m_ref_self;
 };
 
 }// namespace auv
