@@ -15,6 +15,9 @@ enum class NetWorkAccType {
 struct ModelParams {
   NetWorkAccType acc_type = NetWorkAccType::GPU;
   cv::dnn::Net net;
+
+  std::string file_name;
+  bool is_loaded = false;
 };
 
 class ModelLibs {

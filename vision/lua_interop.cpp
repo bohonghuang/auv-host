@@ -6,6 +6,8 @@
 #include "block/color.h"
 #include "block/find_bar.h"
 
+#include "camera_mgr.h"
+
 void auv::vision::lua::setup_env(sol::state &state) {
   if (state["vision"].is<sol::table>()) return;
   auv::lua::setup_env(state);
@@ -15,9 +17,18 @@ void auv::vision::lua::setup_env(sol::state &state) {
       "x", &cv::Point::x,
       "y", &cv::Point::y);
 
+  state.new_usertype<cv::Size>(
+      "Size",
+      "width", &cv::Size::width,
+      "height", &cv::Size::height);
+
   state.set_function("imshow", [](const cv::Mat &frame) {
     cv::imshow("pre", frame);
     cv::waitKey(1);
+  });
+
+  state.set_function("GetCaptureManager", []() -> auv::vision::CameraManager & {
+    return auv::vision::CameraManager::GetInstance();
   });
 
   /*-----------------------------------------------------------------------------------------------*/
@@ -34,9 +45,13 @@ void auv::vision::lua::setup_env(sol::state &state) {
       "k4", &auv::vision::CameraParams::k4,
       "k5", &auv::vision::CameraParams::k5);
 
+  state.new_usertype<auv::vision::CameraManager>(
+      "CameraManager",
+      "get_capture", &auv::vision::CameraManager::get_capture);
+
   state.new_usertype<auv::vision::CameraBlock>(
       "CameraBlock",
-      sol::constructors<auv::vision::CameraBlock(int)>(),
+      sol::constructors<auv::vision::CameraBlock(cv::VideoCapture &)>(),
       AUV_BLOCK_SOL_METHODS(auv::vision::CameraBlock));
 
   state.new_usertype<auv::vision::CameraCalibrateBlock>(

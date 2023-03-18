@@ -14,27 +14,37 @@ void ModelLibs::add_model(const std::string &model_name, const std::string &file
   auto it = m_models.find(model_name);
   if (it != m_models.end())
     ASSERT(false, "This model has been in the libs")
-  cv::dnn::Net net;
-  net = cv::dnn::readNet(file);
-  switch (type) {
-    case NetWorkAccType::CPU:
-      net.setPreferableBackend(cv::dnn::DNN_BACKEND_DEFAULT);
-      net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
-      break;
-    case NetWorkAccType::GPU:
-      net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
-      net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
-      break;
-  }
-  m_models[model_name] = {type, net};
+  m_models[model_name] = {type, cv::dnn::Net(), file, false};
 }
+
 
 ModelParams &ModelLibs::get_model(const std::string &model_name) noexcept {
   auto it = m_models.find(model_name);
   if (it == m_models.end())
     ASSERT(false, "could not find the model!")
+
+  if (!it->second.is_loaded) {
+    auto &param = it->second;
+    param.is_loaded = true;
+
+    it->second.net = cv::dnn::readNet(param.file_name);
+    cv::dnn::Net net;
+    switch (param.acc_type) {
+      case NetWorkAccType::CPU:
+        net.setPreferableBackend(cv::dnn::DNN_BACKEND_DEFAULT);
+        net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
+        break;
+      case NetWorkAccType::GPU:
+        net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
+        net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
+        break;
+    }
+    param.net = net;
+  }
+
   return it->second;
 }
+
 
 cv::dnn::Net &ModelLibs::get_net(const std::string &model_name) noexcept {
   auto &model = this->get_model(model_name);
