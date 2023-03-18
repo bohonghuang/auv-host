@@ -108,6 +108,9 @@ public:
   using In = I;
   using Out = O;
   virtual O process(I in) = 0;
+  O operator() (I in) {
+    return process(std::move(in));
+  }
 };
 
 template<class T>
