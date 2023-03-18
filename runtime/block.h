@@ -6,6 +6,7 @@
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 
 namespace auv {
@@ -156,7 +157,7 @@ class ChainBlock : public Block<typename std::remove_reference_t<Block1_>::In,
   static_assert(std::is_same_v<std::remove_cv_t<std::remove_reference_t<typename Block1::Out>>, std::remove_cv_t<std::remove_reference_t<typename Block2::In>>>, "Unmatched input and output types for two blocks.");
 
 public:
-  ChainBlock(Block1 block1, Block2 block2) : m_block_1(block1), m_block_2(block2) {}
+  ChainBlock(Block1 block1, Block2 block2) : m_block_1(std::move(block1)), m_block_2(std::move(block2)) {}
   typename Block2::Out process(typename Block1::In in) override {
     return m_block_2.process(m_block_1.process(in));
   }
@@ -220,7 +221,7 @@ private:
 template<class I, class O>
 class TypedAnyBlock : public Block<I, O> {
 public:
-  TypedAnyBlock(AnyBlock block) : m_block(block) {}
+  TypedAnyBlock(AnyBlock block) : m_block(std::move(block)) {}
   O process(I in) override {
     return std::any_cast<O>(m_block.process(std::any{in}));
   }
@@ -261,12 +262,12 @@ template<class O>
 class MuxBlock : public Block<unit_t, O> {
 public:
   template<class P>
-  class MuxInputBlock : public Block<member_object_pointer_target_t<P>, unit_t> {
+  class InputBlock : public Block<member_object_pointer_target_t<P>, unit_t> {
     using In = member_object_pointer_target_t<P>;
     using Parent = member_object_pointer_parent_t<P>;
 
   public:
-    MuxInputBlock(std::weak_ptr<MuxBlock<O>> parent, P pointer) : m_ref_parent(parent), m_member_pointer(pointer) {}
+    InputBlock(std::weak_ptr<MuxBlock<O>> parent, P pointer) : m_ref_parent(parent), m_member_pointer(pointer) {}
     unit_t process(In in) override {
       if (auto parent = std::dynamic_pointer_cast<Parent>(m_ref_parent.lock())) {
         parent.get()->*m_member_pointer = in;
@@ -279,12 +280,40 @@ public:
     P m_member_pointer;
   };
   template<class P>
-  MuxInputBlock<P> input_block(P member_ptr) {
-    return MuxInputBlock<P>{m_ref_self, member_ptr};
+  InputBlock<P> input_block(P member_ptr) {
+    return {m_ref_self, member_ptr};
   }
 
 protected:
   std::weak_ptr<MuxBlock<O>> m_ref_self;
+};
+
+class UntypedMuxBlock : public Block<unit_t, std::any> {
+private:
+  using Key = std::string;
+  class InputBlock : public Block<std::any, unit_t> {
+  public:
+    InputBlock(std::weak_ptr<UntypedMuxBlock> parent, Key key) : m_ref_parent(std::move(parent)), m_key(std::move(key)) {}
+    unit_t process(std::any in) override {
+      if (auto parent = m_ref_parent.lock()) {
+        parent->m_buffer[m_key] = in;
+      }
+      return {};
+    }
+
+  private:
+    std::weak_ptr<UntypedMuxBlock> m_ref_parent;
+    Key m_key;
+  };
+  std::weak_ptr<UntypedMuxBlock> m_ref_self;
+
+protected:
+  std::unordered_map<Key, std::any> m_buffer;
+
+public:
+  InputBlock input_block(Key key) {
+    return {m_ref_self, std::move(key)};
+  }
 };
 
 }// namespace auv

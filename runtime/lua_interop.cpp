@@ -1,5 +1,6 @@
 #include "lua_interop.h"
 #include "block.h"
+#include "lua_block.h"
 
 void auv::lua::setup_env(sol::state &state) {
   if (state["runtime"].is<sol::table>()) return;
@@ -21,4 +22,10 @@ void auv::lua::setup_env(sol::state &state) {
     }
     return prev_block;
   });
+  state.new_usertype<UntypedLuaBlock>("LuaBlock",
+                                      sol::no_constructor,
+                                      AUV_BLOCK_SOL_METHODS(auv::UntypedLuaBlock));
+  state.new_usertype<UntypedLuaMuxBlock>("LuaMuxBlock",
+                                         sol::no_constructor,
+                                         AUV_BLOCK_SOL_METHODS(auv::UntypedLuaMuxBlock));
 }
