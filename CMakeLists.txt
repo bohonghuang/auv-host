@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(SOL2_LUA_VERSION "LuaJIT")
 set(SOL2_BUILD_LUA false)
 
+add_compile_options(-Wno-non-template-friend)
+
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 find_package(LuaJit REQUIRED)
