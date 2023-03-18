@@ -9,6 +9,7 @@
 #include <map>
 #include <thread>
 
+#define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
 
 namespace auv {
@@ -37,7 +38,7 @@ public:
   void add_command(const std::string &command, const std::function<void(const std::vector<std::string> &)> &fun) noexcept;
   void script(const std::string &lua_code);
 
-  [[noreturn]] void run() noexcept;
+  void run() noexcept;
 
   [[nodiscard]] Status get_status() const noexcept;
 

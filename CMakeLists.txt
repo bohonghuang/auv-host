@@ -9,6 +9,7 @@ set(SOL2_BUILD_LUA false)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 find_package(LuaJit REQUIRED)
+find_package(Readline REQUIRED)
 find_package(OpenCV REQUIRED)
 
 include_directories(${LUAJIT_INCLUDE_DIRS})

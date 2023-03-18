@@ -3,6 +3,8 @@
 //
 
 #include "application.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include <iostream>
 
@@ -10,7 +12,7 @@ namespace auv {
 
 Application::Application(const std::function<void(sol::state &state)> &reg) noexcept
     : m_status(Application::Status::READY) {
-  m_lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::package);
+  m_lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::package, sol::lib::jit);
   reg(m_lua);
 }
 
@@ -34,45 +36,22 @@ static std::vector<std::string> split(std::string_view str, std::string_view del
   return results;
 }
 
-[[noreturn]] void Application::run() noexcept {
-  std::string msg;
-  while (true) {
-    std::string line;
-    std::getline(std::cin, line);
-    if (line.empty())
-      continue;
-    if (line[0] == '/') {
-      auto params = split(line);
-      if (params.empty()) {
-        std::cout << "please input /help" << std::endl;
-        continue;
-      }
-
-      auto it = m_command_map.find(params[0]);
-      if (it == m_command_map.end()) {
-        std::cout << "could not find the command" << std::endl;
-        continue;
-      }
-
-      it->second(params);
-      msg.clear();
-      continue;
-    }
-
-    if (line[line.size() - 1] == '\\') {
-      msg += line;
-      continue;
-    }
-
-    msg += line;
-
+void Application::run() noexcept {
+  char *line;
+  std::string prompt;
+  if (m_lua["jit"].is<sol::table>()) {
+    prompt = m_lua["jit"]["version"];
+  } else {
+    prompt = m_lua["_VERSION"];
+  }
+  prompt += "> ";
+  while ((line = readline(prompt.c_str())) != nullptr) {
+    add_history(line);
     try {
-      m_lua.script(msg);
+      m_lua.script(line);
     } catch (std::exception &e) {
-      // std::cout << "error: " << e.what() << std::endl;
+       std::cout << "Evaluation error: " << e.what() << std::endl;
     }
-
-    msg.clear();
   }
 }
 
