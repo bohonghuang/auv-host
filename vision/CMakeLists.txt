@@ -15,8 +15,8 @@ set(auv_vision_srcs
         nn/yolo_fast_v2.cpp
         lua_interop.cpp camera_mgr.h camera_mgr.cpp)
 
-add_library(auv_vision STATIC ${auv_vision_srcs})
-target_link_libraries(auv_vision ${OpenCV_LIBS})
+add_library(auv-vision STATIC ${auv_vision_srcs})
+target_link_libraries(auv-vision ${OpenCV_LIBS})
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)

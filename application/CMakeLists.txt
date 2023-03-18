@@ -10,7 +10,7 @@ include_directories(${LUAJIT_INCLUDE_DIRS})
 set(auv_application_src
         main.cpp lua_interop.cpp)
 
-add_executable(auv_application ${auv_application_src})
-target_link_libraries(auv_application auv_runtime auv_communication auv_vision ${LUAJIT_LIBRARY})
+add_executable(auv-application ${auv_application_src})
+target_link_libraries(auv-application auv-runtime auv-communication auv-vision ${LUAJIT_LIBRARY})
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)

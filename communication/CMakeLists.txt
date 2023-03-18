@@ -8,8 +8,8 @@ set(auv_communication_src
         rov_control_block.cpp
         rov_controller.cpp lua_interop.cpp)
 
-add_library(auv_communication STATIC ${auv_communication_src})
-target_include_directories(auv_communication PUBLIC .)
+add_library(auv-communication STATIC ${auv_communication_src})
+target_include_directories(auv-communication PUBLIC .)
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
