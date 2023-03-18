@@ -13,15 +13,13 @@ public:
   static float GetFrameRate();
 
 public:
-  CameraBlock() noexcept = default;
-  explicit CameraBlock(int index) noexcept;
-  explicit CameraBlock(const std::string &path) noexcept;
+  explicit CameraBlock(cv::VideoCapture& cap) noexcept;
 
   Out process(In) noexcept override;
   AUV_BLOCK;
 
 private:
-  cv::VideoCapture m_capture;
+  cv::VideoCapture& m_capture;
   cv::Mat m_last_frame;
   inline static float s_frame_rate = 30.0f;
 };
