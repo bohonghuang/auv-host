@@ -1,4 +1,5 @@
 cam = CameraBlock.new(0)
+
 calibr_params = CameraParams.new()
 calibr_params.fx = 588.4306598875787
 calibr_params.cx = 322.7472860229715
@@ -12,8 +13,8 @@ calibr_params.k5 = -2.402839834767997
 
 calibr = CameraCalibrateBlock.new(calibr_params)
 cvtcolor = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
-inrange_params = InRangeParams.new()
 
+inrange_params = InRangeParams.new()
 inrange_params.low_1 = 33
 inrange_params.high_1 = 146
 inrange_params.low_2 = 65
@@ -25,4 +26,5 @@ inrange = InRangeBlock.new(inrange_params)
 find_bar = FindBarBlock.new(true)
 
 pipeline = connect(cam, cvtcolor, inrange, find_bar)
+--pipeline = connect(cam, cvtcolor)
 pipeline:process()

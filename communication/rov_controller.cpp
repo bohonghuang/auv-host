@@ -7,7 +7,13 @@
 namespace auv {
 
 RovController::RovController(const std::string &address, int port) noexcept
-    : m_connector(address, port), m_rpc_client(m_connector, jsonrpccxx::version::v2) {}
+    : m_connector(address, port), m_rpc_client(m_connector, jsonrpccxx::version::v2) {
+  if (m_connector.is_valid()) {
+    std::cout << "Connect Rov success. address : " << address << "   port : " << port << std::endl;
+  } else {
+    std::cout << "Connect Rov error!!" << std::endl;
+  }
+}
 
 
 void RovController::move(float x, float y, float z, float rot) noexcept {
@@ -44,6 +50,9 @@ CppHttpLibClientConnector::CppHttpLibClientConnector(const std::string &host, in
     : m_http_client(host, port) {
 }
 
+bool CppHttpLibClientConnector::is_valid() const noexcept {
+  return m_http_client.is_valid();
+}
+
 
 }// namespace auv
-

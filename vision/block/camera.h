@@ -19,10 +19,11 @@ public:
 public:
   CameraBlock() noexcept = default;
   explicit CameraBlock(int index) noexcept;
-  explicit CameraBlock(const std::string& path) noexcept;
+  explicit CameraBlock(const std::string &path) noexcept;
 
   Out process(In) noexcept override;
   AUV_BLOCK;
+
 private:
   cv::VideoCapture m_capture;
   cv::Mat m_last_frame;

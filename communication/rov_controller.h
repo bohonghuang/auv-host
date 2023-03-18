@@ -15,6 +15,7 @@ public:
   CppHttpLibClientConnector(const std::string &host, int port) noexcept;
   std::string Send(const std::string &request) noexcept override;
 
+  [[nodiscard]] bool is_valid() const noexcept;
 private:
   httplib::Client m_http_client;
 };

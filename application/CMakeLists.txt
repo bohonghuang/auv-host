@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.10)
 include_directories(../)
 include_directories(../vendor/json-rpc-cxx/vendor)
 include_directories(../vendor/json-rpc-cxx/include)
-include_directories(../vendor/sol2/include)
 
 include_directories(${LUAJIT_INCLUDE_DIRS})
 
