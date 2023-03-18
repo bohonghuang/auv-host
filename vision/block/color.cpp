@@ -16,7 +16,7 @@ cv::Mat ConvertColorBlock::process(cv::Mat input) {
 }
 
 InRangeBlock::InRangeBlock(const InRangeParams &params)
-    : m_params(params) {}
+    : m_params(params) { }
 
 void InRangeBlock::set_range(int param1_low, int param2_low, int param3_low, int param1_high, int param2_high, int param3_high) {
   m_params.low_1 = param1_low;

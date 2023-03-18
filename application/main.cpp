@@ -4,12 +4,14 @@
 
 #include <fstream>
 
+#include "application.h"
 #include "communication/rov_control_block.h"
+#include "vision/block/biology.h"
 #include "vision/block/camera.h"
 #include "vision/block/camera_calibr.h"
 #include "vision/block/color.h"
 #include "vision/block/find_bar.h"
-#include "application.h"
+#include "vision/nn/model_lib.h"
 
 #define AUV_BLOCK_SOL_METHODS(TYPE) "process", &TYPE::process, "as_untyped", &TYPE::as_untyped
 
@@ -137,5 +139,38 @@ int main() {
       app.script(str);
     } catch (...) {}
   });
+
+  auv::vision::network::ModelLibs::GetInstance().add_model(
+      "marine", "./model_data/marine_model.onnx",
+      auv::vision::network::NetWorkAccType::CPU);
+
+  auto cam = auv::vision::CameraBlock(0);
+  auto color = auv::vision::ConvertColorBlock(cv::COLOR_BGR2YCrCb);
+  auto range = auv::vision::InRangeBlock({33, 146, 65, 177, 255, 130});
+  auto find = auv::vision::FindBarBlock(true);
+
+  // auto res = cam | color | range | find;
+
+  auto bio = auv::vision::FindBiologyBlock();
+  auto res = cam | bio;
+  while (true) {
+    //    auto [frame, vecs] = res.process({});
+    //    cv::imshow("preview", frame);
+    //    for (const auto &i: vecs) {
+    //      std::cout << i.long_side_rot << "   " << i.short_side_cent_point << std::endl;
+    //    }
+
+    auto result = res.process({});
+    auto frame = cam.process({});
+    for (const auto &i: result) {
+      const auto &vec = i.second;
+      for (const auto &j: vec) {
+        cv::rectangle(frame, j.rect, cv::Scalar(0, 0, 255), 2);
+      }
+    }
+    cv::imshow("preview", frame);
+    cv::waitKey(1);
+  }
+
   app.run();
 }
