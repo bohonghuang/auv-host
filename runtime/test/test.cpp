@@ -97,9 +97,9 @@ state:script("function process(x) return int.to_any(int.from_any(x[\"i\"]) + 1) 
 mux_block = LuaMuxBlock.new(function (x) return int.to_any(int.from_any(x["i"]) * int.from_any(x["j"]) + 1) end)
 block_i = LuaBlock.new(function (x) return int.to_any(3) end)
 block_j = LuaBlock.new(function (x) return int.to_any(2) end)
-connect(block_i, mux_block:input_block("i")):process(void:as_untyped())
-connect(block_j, mux_block:input_block("j")):process(void:as_untyped())
-result = int.from_any(mux_block:process(void))
+connect(block_i, mux_block:input_block("i")):process()
+connect(block_j, mux_block:input_block("j")):process()
+result = int.from_any(mux_block:process())
     )?");
     REQUIRE(state.get<int>("result") == 7);
   }
