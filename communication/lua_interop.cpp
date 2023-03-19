@@ -19,4 +19,9 @@ void auv::communication::lua::setup_env(sol::state &state) {
       "RovControlBlock",
       sol::constructors<auv::RovControlBlock(std::shared_ptr<auv::RovController>)>(),
       AUV_BLOCK_SOL_METHODS(auv::RovControlBlock));
+  static bool initial_invocation = true;
+  if (initial_invocation) {
+    auv::lua::setup_env_all = auv::communication::lua::setup_env;
+    initial_invocation = false;
+  }
 }

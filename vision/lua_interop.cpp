@@ -110,4 +110,9 @@ void auv::vision::lua::setup_env(sol::state &state) {
       "FindBarBlock",
       sol::constructors<auv::vision::FindBarBlock(bool)>(),
       AUV_BLOCK_SOL_METHODS(auv::vision::FindBarBlock));
+  static bool initial_invocation = true;
+  if (initial_invocation) {
+    auv::lua::setup_env_all = auv::vision::lua::setup_env;
+    initial_invocation = false;
+  }
 }

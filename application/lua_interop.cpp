@@ -7,16 +7,9 @@ void auv::application::lua::setup_env(sol::state &state) {
   auv::lua::setup_env(state);
   auv::communication::lua::setup_env(state);
   auv::vision::lua::setup_env(state);
-  state["LuaBlock"]["new"] = [](const std::string& filename) -> auv::UntypedLuaBlock {
-    auv::UntypedLuaBlock block {};
-    setup_env(block.lua());
-    block.lua().script_file(filename);
-    return block;
-  };
-  state["LuaMuxBlock"]["new"] = [](const std::string& filename) -> auv::UntypedLuaMuxBlock {
-    auv::UntypedLuaMuxBlock block {};
-    setup_env(block.lua());
-    block.lua().script_file(filename);
-    return block;
-  };
+  static bool initial_invocation = true;
+  if (initial_invocation) {
+    auv::lua::setup_env_all = auv::application::lua::setup_env;
+    initial_invocation = false;
+  }
 }

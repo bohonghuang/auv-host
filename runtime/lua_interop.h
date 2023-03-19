@@ -39,7 +39,7 @@ auto block_process_overload() {
 
 void setup_env(sol::state &state);
 
-inline static void (*setup_env_all)(sol::state &) = &setup_env;
+extern void (*setup_env_all)(sol::state &);
 
 }// namespace auv::lua
 
