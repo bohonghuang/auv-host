@@ -32,6 +32,8 @@ auto block_process_overload() {
 
 void setup_env(sol::state &state);
 
+inline static void (*setup_env_all)(sol::state &) = &setup_env;
+
 }// namespace auv::lua
 
 #endif//AUV_HOST_RUNTIME_LUA_INTEROP_H

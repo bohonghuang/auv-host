@@ -5,9 +5,9 @@ std::any auv::UntypedLuaMuxBlock::process(auv::unit_t in) {
 }
 
 auv::UntypedLuaMuxBlock::UntypedLuaMuxBlock() {
-  auv::lua::setup_env(*m_state);
+  auv::lua::setup_env_all(*m_state);
 }
 
 auv::UntypedLuaBlock::UntypedLuaBlock() {
-  auv::lua::setup_env(*m_state);
+  auv::lua::setup_env_all(*m_state);
 }
