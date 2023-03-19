@@ -16,19 +16,23 @@ cvtcolor = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
 
 inrange_params = InRangeParams.new()
 inrange_params.low_1 = 33
-inrange_params.high_1 = 146
-inrange_params.low_2 = 65
-inrange_params.high_2 = 177
-inrange_params.low_3 = 255
+inrange_params.high_1 = 177
+inrange_params.low_2 = 146
+inrange_params.high_2 = 255
+inrange_params.low_3 = 65
 inrange_params.high_3 = 130
 inrange = InRangeBlock.new(inrange_params)
 
 find_bar = FindBarBlock.new(true)
 
+show = ImshowBlock.new()
+
 writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
 
-pipeline = connect(cam, cvtcolor, inrange, find_bar)
+pipeline = connect(cam, cvtcolor, show, inrange, find_bar)
+--frame = pipeline:process()
+
 --pipeline = connect(cam, cvtcolor)
---while(true) do
---    pipeline:process()
---end
+while(true) do
+    pipeline:process()
+end

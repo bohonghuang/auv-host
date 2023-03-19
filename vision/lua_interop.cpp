@@ -41,6 +41,10 @@ void auv::vision::lua::setup_env(sol::state &state) {
       sol::constructors<auv::vision::UploadBlock(const std::string &, int, int)>(),
       AUV_BLOCK_SOL_METHODS(auv::vision::UploadBlock));
 
+  state.new_usertype<auv::vision::ImshowBlock>(
+      "ImshowBlock",
+      sol::default_constructor,
+      AUV_BLOCK_SOL_METHODS(auv::vision::ImshowBlock));
   /*-----------------------------------------------------------------------------------------------*/
   state.new_usertype<auv::vision::CameraParams>(
       "CameraParams",
@@ -92,6 +96,11 @@ void auv::vision::lua::setup_env(sol::state &state) {
   cv_namespace["COLOR_GRAY2BGR"] = cv::COLOR_GRAY2BGR;
 
   /*-----------------------------------------------------------------------------------------------*/
+  state.new_usertype<auv::vision::FindBarResults>(
+      "FindBarResults",
+      "frame", &auv::vision::FindBarResults::frame,
+      "result", &auv::vision::FindBarResults::result);
+
   state.new_usertype<auv::vision::FindBarResult>(
       "FindBarResult",
       "short_side_cent_point", &auv::vision::FindBarResult::short_side_cent_point,

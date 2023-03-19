@@ -12,14 +12,19 @@ struct FindBarResult {
   double long_side_rot;
 };
 
-class FindBarBlock : public auv::Block<cv::Mat, std::tuple<cv::Mat, std::vector<FindBarResult>>> {
+struct FindBarResults {
+  cv::Mat frame;
+  std::vector<FindBarResult> result;
+};
+
+class FindBarBlock : public auv::Block<cv::Mat, std::tuple<FindBarResults>> {
 public:
-  explicit FindBarBlock(bool draw_contours = false);
+  explicit FindBarBlock(bool debug = false);
 
   Out process(In frame) override;
   AUV_BLOCK;
 private:
-  bool m_draw_contours = false;
+  bool m_debug = false;
 };
 
 }

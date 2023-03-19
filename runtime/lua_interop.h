@@ -16,10 +16,17 @@ struct block_process_overload_impl {
   }
 };
 
-template<class T, class R, class A>
-struct block_process_overload_impl<T, R (T::*)(A), std::enable_if_t<std::is_same_v<A, std::any> || std::is_same_v<A, unit_t>>> {
+template<class T, class R, class A, class N>
+struct block_process_overload_impl<T, R (N::*)(A), std::enable_if_t<std::is_same_v<A, std::any> || std::is_same_v<A, auv::unit_t>>> {
   static auto get() {
     return sol::overload([](T &self) -> R { return self.process(unit_t{}); }, &T::process);
+  }
+};
+
+template<class T, class R, class A, class N>
+struct block_process_overload_impl<T, R (N::*)(A) noexcept, std::enable_if_t<std::is_same_v<A, std::any> || std::is_same_v<A, auv::unit_t>>> {
+  static auto get() {
+    return block_process_overload_impl<T, R (N::*)(A)>::get();
   }
 };
 

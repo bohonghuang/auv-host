@@ -24,6 +24,8 @@ void Application::run() noexcept {
     }
   }
 }
+
+
 sol::state &Application::lua() {
   return m_lua;
 }

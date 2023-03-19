@@ -4,8 +4,8 @@
 
 namespace auv::vision {
 
-FindBarBlock::FindBarBlock(bool draw_contours)
-    : m_draw_contours(draw_contours) {}
+FindBarBlock::FindBarBlock(bool debug)
+    : m_debug(debug) {}
 
 FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
   if (frame.channels() != 1) {
@@ -14,7 +14,7 @@ FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
   }
 
   cv::Mat preview;
-  if (m_draw_contours) {
+  if (m_debug) {
     preview = frame.clone();
     cv::cvtColor(preview, preview, cv::COLOR_GRAY2BGR);
   }
@@ -39,7 +39,8 @@ FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
               return p1.y < p2.y;
             });
 
-  std::vector<FindBarResult> results;
+  FindBarResults output;
+  auto& results = output.result;
   results.resize(contours.size());
   for (const auto &contour: contours) {
     cv::Point2f rect_points[4];
@@ -80,7 +81,7 @@ FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
     if (std::abs(deg) > 60)
       continue;
 
-    if (m_draw_contours) {
+    if (m_debug) {
       for (size_t i = 0; i < 4; i++)
         line(preview, rect_points[i], rect_points[(i + 1) % 4],
              cv::Scalar(0, 255, 255), 2, cv::LINE_AA);
@@ -90,8 +91,12 @@ FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
     results.push_back({cent_point, deg});
   }
 
-  return {preview,
-          results};
+  if(m_debug) {
+    cv::imshow("find_bar", preview);
+    cv::waitKey(1);
+  }
+
+  return output;
 }
 
 }// namespace auv::vision

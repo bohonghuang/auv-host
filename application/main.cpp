@@ -5,15 +5,6 @@
 
 int main() {
   auv::Application app;
-
-  auv::vision::network::ModelLibs::GetInstance()
-      .add_model("marine", "./model_data/marine.onnx",
-                 auv::vision::network::NetWorkAccType::GPU);
-
-  auv::vision::CameraManager::GetInstance()
-      .add_capture({{0, {640, 480}},
-                    {2, {640, 480}}});
-
   auv::application::lua::setup_env(app.lua());
   app.run();
 
