@@ -22,7 +22,7 @@ TEST_CASE("C++ 中的静态 Block 连接") {
   SECTION("并联") {
     auto test = [&](int i) {
       auto buf = std::make_shared<BufferedBlock>();
-      TestBlock test { [=](int j) { REQUIRE(j == f(i)); } };
+      TestBlock test{[=](int j) { REQUIRE(j == f(i)); }};
       auto block2 = block | buf & test;
       block2(i);
       REQUIRE(buf->i == f(i));
@@ -110,8 +110,10 @@ state:script("function process(x) return int.to_any(int.from_any(x[\"i\"]) + 1) 
 mux_block = LuaMuxBlock.new(function (x) return int.to_any(int.from_any(x["i"]) * int.from_any(x["j"]) + 1) end)
 block_i = LuaBlock.new(function (x) return int.to_any(3) end)
 block_j = LuaBlock.new(function (x) return int.to_any(2) end)
-connect(block_i, mux_block:input_block("i")):process()
-connect(block_j, mux_block:input_block("j")):process()
+block_k = LuaBlock.new(function (x) assert(int.from_any(x) == 3) return void.to_any() end)
+block_l = LuaBlock.new(function (x) assert(int.from_any(x) == 2) return void.to_any() end)
+chain(block_i, tee(mux_block:input_block("i")), block_k):process()
+block_j:as_untyped():connect(mux_block:input_block("j"), block_l):process()
 result = int.from_any(mux_block:process())
     )?");
     REQUIRE(state.get<int>("result") == 7);

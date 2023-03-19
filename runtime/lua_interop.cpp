@@ -153,9 +153,9 @@ void register_conversion(sol::state &state) {
       case sol::type::boolean:
         return obj.as<bool>();
       case sol::type::userdata:
-        return obj.as<sol::userdata>()["as_untyped"].call<std::any>(obj);
+        return obj.as<sol::userdata>()["to_any"].call<std::any>(obj);
       case sol::type::table:
-        return obj.as<sol::table>()["as_untyped"].call<std::any>(obj);
+        return obj.as<sol::table>()["to_any"].call<std::any>(obj);
       default:
         type_name = sol_type_name(obj.get_type());
         break;
@@ -171,7 +171,7 @@ void auv::lua::setup_env(sol::state &state) {
   state.open_libraries(sol::lib::base, sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::package, sol::lib::jit);
   sol::table ns_runtime = state.create_named_table("runtime");
   state.new_usertype<auv::unit_t>("unit", sol::default_constructor,
-                                  "as_untyped", [](auv::unit_t in) -> std::any { return in; });
+                                  "to_any", [](auv::unit_t in) -> std::any { return in; });
   state["void"] = unit_t{};
   register_conversion(state);
   state.new_usertype<sol::state>(
@@ -181,26 +181,30 @@ void auv::lua::setup_env(sol::state &state) {
   static constexpr auto to_any_block = [](const sol::userdata &&block) -> auv::AnyBlock {
     return block.is<auv::AnyBlock>() ? block.as<auv::AnyBlock>() : block["as_untyped"].call<auv::AnyBlock>(block);
   };
-  AUV_NEW_SOL_TYPE(
-      state, auv::AnyBlock, sol::no_constructor,
-      "connect", [](auv::AnyBlock &self, sol::variadic_args va) -> auv::AnyBlock {
-        auto &&begin = *va.cbegin();
-        auto prev_block = to_any_block(begin);
-        for (auto iter = va.cbegin() + 1; iter != va.cend(); iter++) {
-          prev_block = TeeBlock<AnyBlock, AnyBlock>{prev_block, to_any_block(*iter)}.as_untyped();
-        }
-        return self.connect(prev_block);
-      },
-      AUV_BLOCK_SOL_METHODS(auv::AnyBlock));
-  state.set_function("connect", [](sol::variadic_args va) -> auv::AnyBlock {
+  static constexpr auto tee_block = [](sol::variadic_args va) -> auv::AnyBlock {
+    auto &&begin = *va.cbegin();
+    auto prev_block = to_any_block(begin);
+    for (auto iter = va.cbegin() + 1; iter != va.cend(); iter++) {
+      prev_block = TeeBlock<AnyBlock, AnyBlock>{prev_block, to_any_block(*iter)}.as_untyped();
+    }
+    return prev_block;
+  };
+  static constexpr auto chain_block = [](sol::variadic_args va) -> auv::AnyBlock {
     auto &&begin = *va.cbegin();
     auto prev_block = to_any_block(begin);
     for (auto iter = va.cbegin() + 1; iter != va.cend(); iter++) {
       prev_block = prev_block.connect(to_any_block(*iter));
     }
     return prev_block;
-  });
-
+  };
+  AUV_NEW_SOL_TYPE(
+      state, auv::AnyBlock, sol::no_constructor,
+      "connect", [](auv::AnyBlock &self, sol::variadic_args va) -> auv::AnyBlock {
+        return self.connect(tee_block(va));
+      },
+      AUV_BLOCK_SOL_METHODS(auv::AnyBlock));
+  state["tee"] = tee_block;
+  state["chain"] = state["connect"] = chain_block;
   using LuaBlock = UntypedLuaBlock;
   AUV_NEW_SOL_TYPE(state, LuaBlock,
                    sol::factories(

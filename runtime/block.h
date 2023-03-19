@@ -300,6 +300,7 @@ public:
       return {};
     }
     AUV_BLOCK;
+
   private:
     std::weak_ptr<UntypedMuxBlock> m_ref_parent;
     Key m_key;
@@ -323,6 +324,7 @@ public:
     return {};
   }
   AUV_BLOCK;
+
 private:
   Block1 m_block_1;
   Block2 m_block_2;
