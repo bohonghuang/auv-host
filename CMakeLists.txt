@@ -13,6 +13,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 find_package(LuaJit REQUIRED)
 find_package(Readline REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(Catch2 3 REQUIRED)
 
 include_directories(${LUAJIT_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})

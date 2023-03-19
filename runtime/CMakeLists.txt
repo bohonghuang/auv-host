@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-find_package(Catch2 3 REQUIRED)
-
 include_directories(.)
 include_directories(${Readline_INCLUDE_DIR})
 
