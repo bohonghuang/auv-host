@@ -43,7 +43,7 @@ function test(i)
   plus1 = Plus1Block.new()
   times2 = Times2Block.new()
   block = connect(plus1, times2, plus1, times2)
-  return any_int(block:process(int_any(i)))
+  return int.from_any(block:process(int.to_any(i)))
 end
 )");
   auto test = [&](int i) {
