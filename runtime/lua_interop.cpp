@@ -2,6 +2,8 @@
 #include "block.h"
 #include "lua_block.h"
 
+void (*auv::lua::setup_env_all)(sol::state &);
+
 const char *sol_type_name(sol::type tpe) {
   switch (tpe) {
     case sol::type::none:
@@ -234,4 +236,9 @@ void auv::lua::setup_env(sol::state &state) {
                                          "lua", &UntypedLuaMuxBlock::lua,
                                          "input_block", &UntypedLuaMuxBlock::input_block,
                                          AUV_BLOCK_SOL_METHODS(UntypedLuaMuxBlock));
+  static bool initial_invocation = true;
+  if (initial_invocation) {
+    auv::lua::setup_env_all = auv::lua::setup_env;
+    initial_invocation = false;
+  }
 }
