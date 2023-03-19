@@ -20,9 +20,15 @@ void ModelLibs::add_model(const std::string &model_name, const std::string &file
 
 ModelParams &ModelLibs::get_model(const std::string &model_name) noexcept {
   auto it = m_models.find(model_name);
-  if (it == m_models.end())
-    ASSERT(false, "could not find the model!")
+  if (it == m_models.end()) {
+    std::string file_path = "./model_data/";
+    file_path += model_name;
+    file_path += ".onnx";
+    std::cout << file_path << std::endl;
+    this->add_model(model_name, file_path, auv::vision::network::NetWorkAccType::GPU);
+  }
 
+  it = m_models.find(model_name);
   if (!it->second.is_loaded) {
     auto &param = it->second;
     param.is_loaded = true;
@@ -48,7 +54,7 @@ ModelParams &ModelLibs::get_model(const std::string &model_name) noexcept {
 }
 
 
-cv::dnn::Net& ModelLibs::get_net(const std::string &model_name) noexcept {
+cv::dnn::Net &ModelLibs::get_net(const std::string &model_name) noexcept {
   return this->get_model(model_name).net;
 }
 

@@ -45,7 +45,7 @@ YoloFastV2::YoloFastV2(const std::string& module_config_file_path, float obj_thr
         m_anchors.at<float>(i) = m_model_config.anchors[i];
     }
 
-    m_net = ModelLibs::GetInstance().get_net("marine"); //"./marine_model.onnx"
+    m_net = ModelLibs::GetInstance().get_net("marine"); //"./marine.onnx"
 }
 
 void YoloFastV2::load_data_file(const std::string& file_path) {

@@ -11,15 +11,11 @@ CameraManager &CameraManager::GetInstance() noexcept {
 }
 
 
-void CameraManager::add_capture(const std::function<std::vector<cv::VideoCapture>()> &init_func) noexcept {
-  for (const auto &i: init_func()) {
-    m_video_captures.push_back(i);
-  }
-}
-
-
 void CameraManager::add_capture(const std::vector<CaptureParams> &indexs) noexcept {
   for (const auto &i: indexs) {
+    if (i.index < m_video_captures.size())
+      continue;
+    m_video_captures.resize(i.index + 1);
     std::stringstream ss;
     ss << "v4l2src device=/dev/video"
        << i.index
@@ -29,14 +25,19 @@ void CameraManager::add_capture(const std::vector<CaptureParams> &indexs) noexce
        << i.size.height
        << " ! videoconvert ! appsink ";
     auto cap = cv::VideoCapture(ss.str());
-    m_video_captures.push_back(cap);
+    m_video_captures[i.index] = cap;
   }
 }
 
 
 cv::VideoCapture &CameraManager::get_capture(int index) noexcept {
-  if (index >= m_video_captures.size())
-    ASSERT(false, "The index is out of the video vector size!");
+  if (index >= m_video_captures.size()) {
+    this->add_capture({{index, {640, 480}}});
+    return m_video_captures[index];
+  }
+
+  if (!m_video_captures[index].isOpened())
+    ASSERT(false, "The Capture is not opened! Please check the index!")
   return m_video_captures[index];
 }
 

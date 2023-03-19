@@ -13,11 +13,6 @@
 
 TEST_CASE("视觉算法集成测试") {
   namespace vision = auv::vision;
-  auv::vision::network::ModelLibs::GetInstance()
-      .add_model("marine", "./model_data/marine_model.onnx",
-                 auv::vision::network::NetWorkAccType::GPU);
-  vision::CameraManager::GetInstance()
-      .add_capture({{0, {640, 480}}});
 
   auto cam = vision::CameraBlock(vision::CameraManager::GetInstance().get_capture(0));
   auto cal = vision::CameraCalibrateBlock(

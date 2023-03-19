@@ -7,7 +7,7 @@ int main() {
   auv::Application app;
 
   auv::vision::network::ModelLibs::GetInstance()
-      .add_model("marine", "./model_data/marine_model.onnx",
+      .add_model("marine", "./model_data/marine.onnx",
                  auv::vision::network::NetWorkAccType::GPU);
 
   auv::vision::CameraManager::GetInstance()

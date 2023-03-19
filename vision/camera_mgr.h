@@ -12,14 +12,14 @@ struct CaptureParams {
 
 class CameraManager {
 public:
-  static CameraManager& GetInstance() noexcept;
+  static CameraManager &GetInstance() noexcept;
 
-  void add_capture(const std::function<std::vector<cv::VideoCapture>()>& init_func) noexcept;
   void add_capture(const std::vector<CaptureParams> &indexs) noexcept;
-
   cv::VideoCapture &get_capture(int index) noexcept;
+
 private:
   CameraManager() = default;
+
 private:
   std::vector<cv::VideoCapture> m_video_captures;
 };
