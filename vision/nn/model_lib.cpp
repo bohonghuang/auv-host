@@ -27,8 +27,10 @@ ModelParams &ModelLibs::get_model(const std::string &model_name) noexcept {
     auto &param = it->second;
     param.is_loaded = true;
 
-    it->second.net = cv::dnn::readNet(param.file_name);
-    cv::dnn::Net net;
+    cv::dnn::Net net = cv::dnn::readNet(param.file_name);
+    if (net.empty())
+      ASSERT(false, "could not load the onnx")
+
     switch (param.acc_type) {
       case NetWorkAccType::CPU:
         net.setPreferableBackend(cv::dnn::DNN_BACKEND_DEFAULT);
@@ -46,9 +48,13 @@ ModelParams &ModelLibs::get_model(const std::string &model_name) noexcept {
 }
 
 
-cv::dnn::Net &ModelLibs::get_net(const std::string &model_name) noexcept {
-  auto &model = this->get_model(model_name);
-  return model.net;
+cv::dnn::Net& ModelLibs::get_net(const std::string &model_name) noexcept {
+  return this->get_model(model_name).net;
+}
+
+
+void ModelLibs::clear() noexcept {
+  m_models.clear();
 }
 
 }// namespace auv::vision::network

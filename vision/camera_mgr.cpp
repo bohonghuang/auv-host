@@ -11,7 +11,7 @@ CameraManager &CameraManager::GetInstance() noexcept {
 }
 
 
-void CameraManager::add_capture(std::function<std::vector<cv::VideoCapture>()> init_func) noexcept {
+void CameraManager::add_capture(const std::function<std::vector<cv::VideoCapture>()> &init_func) noexcept {
   for (const auto &i: init_func()) {
     m_video_captures.push_back(i);
   }
@@ -20,9 +20,15 @@ void CameraManager::add_capture(std::function<std::vector<cv::VideoCapture>()> i
 
 void CameraManager::add_capture(const std::vector<CaptureParams> &indexs) noexcept {
   for (const auto &i: indexs) {
-    auto cap = cv::VideoCapture(i.index);
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, i.size.width);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, i.size.height);
+    std::stringstream ss;
+    ss << "v4l2src device=/dev/video"
+       << i.index
+       << " ! video/x-raw, format=(string)YUY2, width=(int)"
+       << i.size.width
+       << ", height=(int)"
+       << i.size.height
+       << " ! videoconvert ! appsink ";
+    auto cap = cv::VideoCapture(ss.str());
     m_video_captures.push_back(cap);
   }
 }

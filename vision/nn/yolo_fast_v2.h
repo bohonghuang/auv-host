@@ -34,6 +34,8 @@ struct YoloFastV2ModelConfig {
 
 class YoloFastV2 {
 public:
+  static void draw_pred(cv::Mat& img, float confidence, const std::string& name, const cv::Rect& rect_range);
+
   explicit YoloFastV2(const std::string& module_config_file_path, float obj_threshold=0.3,
                float conf_threshold=0.3, float nms_threshold=0.4);
 
@@ -41,7 +43,6 @@ public:
   std::map<std::string, std::vector<YoloFastV2Result>> process(const cv::Mat& img, const cv::Mat& detect_result);
 private:
   void load_data_file(const std::string& file_path);
-  void draw_pred(cv::Mat& img, float confidence, int class_id, const cv::Rect& rect_range);
 private:
   YoloFastV2ModelConfig m_model_config;
   std::map<std::string, std::string> m_configs;

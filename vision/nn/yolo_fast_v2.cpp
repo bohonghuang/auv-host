@@ -234,11 +234,11 @@ end_up:
     return results;
 }
 
-void YoloFastV2::draw_pred(cv::Mat& img, float confidence, int class_id, const cv::Rect& rect_range) {
+void YoloFastV2::draw_pred(cv::Mat& img, float confidence, const std::string& name, const cv::Rect& rect_range) {
         cv::rectangle(img, rect_range, cv::Scalar(0, 0, 255), 2);
 
         static std::string label;
-        label = m_classes[class_id];
+        label = name;
         label += std::to_string(confidence);
 
         auto label_size = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, nullptr);

@@ -5,6 +5,7 @@
 #include "block/camera_calibr.h"
 #include "block/color.h"
 #include "block/find_bar.h"
+#include "block/imshow.h"
 
 #include "camera_mgr.h"
 
@@ -31,6 +32,15 @@ void auv::vision::lua::setup_env(sol::state &state) {
     return auv::vision::CameraManager::GetInstance();
   });
 
+  state.set_function("GetCapture", [](int index) -> cv::VideoCapture & {
+    return auv::vision::CameraManager::GetInstance().get_capture(index);
+  });
+  /*-----------------------------------------------------------------------------------------------*/
+  state.new_usertype<auv::vision::UploadBlock>(
+      "UploadBlock",
+      sol::constructors<auv::vision::UploadBlock(const std::string &, int, int)>(),
+      AUV_BLOCK_SOL_METHODS(auv::vision::UploadBlock));
+
   /*-----------------------------------------------------------------------------------------------*/
   state.new_usertype<auv::vision::CameraParams>(
       "CameraParams",
@@ -44,10 +54,6 @@ void auv::vision::lua::setup_env(sol::state &state) {
       "k3", &auv::vision::CameraParams::k3,
       "k4", &auv::vision::CameraParams::k4,
       "k5", &auv::vision::CameraParams::k5);
-
-  state.new_usertype<auv::vision::CameraManager>(
-      "CameraManager",
-      "get_capture", &auv::vision::CameraManager::get_capture);
 
   state.new_usertype<auv::vision::CameraBlock>(
       "CameraBlock",

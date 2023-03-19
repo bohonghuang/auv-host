@@ -27,6 +27,7 @@ const char *sol_type_name(sol::type tpe) {
     case sol::type::poly:
       return "sol::type::poly";
   }
+  return "";
 };
 
 template<sol::type tpe>

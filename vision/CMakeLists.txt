@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 include_directories(.)
 include_directories(..)
 
+find_package(Catch2 3 REQUIRED)
+
 set(auv_vision_srcs
         block/camera.cpp
         utils.cpp
@@ -20,3 +22,6 @@ target_link_libraries(auv-vision ${OpenCV_LIBS})
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
+
+add_executable(auv-vision-test test/test.cpp)
+target_link_libraries(auv-vision-test PUBLIC auv-vision PRIVATE Catch2::Catch2WithMain)

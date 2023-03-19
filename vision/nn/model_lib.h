@@ -29,6 +29,7 @@ public:
   [[nodiscard]] ModelParams &get_model(const std::string &model_name) noexcept;
   [[nodiscard]] cv::dnn::Net &get_net(const std::string &model_name) noexcept;
 
+  void clear() noexcept;
 private:
   ModelLibs() = default;
 
