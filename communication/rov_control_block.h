@@ -15,14 +15,14 @@ struct OperatorMotion {
   float z;
 };
 
-class RovControlBlock : public auv::Block<std::function<void(std::shared_ptr<RovController>)>, auv::unit_t> {
+class RovControlBlock : public auv::Block<std::function<void(RovController&)>, auv::unit_t> {
 public:
-  explicit RovControlBlock(std::shared_ptr<RovController> rov);
+  explicit RovControlBlock(RovController& rov);
   Out process(In) noexcept override;
   AUV_BLOCK;
 
 private:
-  std::shared_ptr<RovController> m_rov;
+  RovController& m_rov;
 };
 
 }// namespace auv

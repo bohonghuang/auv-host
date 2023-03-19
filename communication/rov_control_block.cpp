@@ -7,11 +7,11 @@
 
 namespace auv {
 
-RovControlBlock::RovControlBlock(std::shared_ptr<RovController> rov)
-    : m_rov(std::move(rov)) {}
+RovControlBlock::RovControlBlock(RovController& rov)
+    : m_rov(rov) {}
 
 
-auv::unit_t RovControlBlock::process(std::function<void(std::shared_ptr<RovController>)> send) noexcept {
+auv::unit_t RovControlBlock::process(std::function<void(RovController&)> send) noexcept {
   send(m_rov);
   return {};
 }

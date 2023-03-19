@@ -18,10 +18,10 @@ void auv::communication::lua::setup_env(sol::state &state) {
       "set_depth_locked", &auv::RovController::set_depth_locked);
 
   AUV_NEW_SOL_TYPE(state, auv::RovControlBlock,
-                   sol::constructors<auv::RovControlBlock(std::shared_ptr<auv::RovController>)>(),
+                   sol::constructors<auv::RovControlBlock(auv::RovController&)>(),
                    AUV_BLOCK_SOL_METHODS(auv::RovControlBlock));
+
   static bool initial_invocation = true;
-  
   if (initial_invocation) {
     auv::lua::setup_env_all = auv::communication::lua::setup_env;
     initial_invocation = false;

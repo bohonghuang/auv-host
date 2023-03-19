@@ -44,6 +44,7 @@ std::string CppHttpLibClientConnector::Send(const std::string &request) noexcept
 
 CppHttpLibClientConnector::CppHttpLibClientConnector(const std::string &host, int port) noexcept
     : m_http_client(host, port) {
+  m_http_client.set_connection_timeout(1);
 }
 
 bool CppHttpLibClientConnector::is_valid() const noexcept {

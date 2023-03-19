@@ -17,7 +17,7 @@ struct FindBarResults {
   std::vector<FindBarResult> result;
 };
 
-class FindBarBlock : public auv::Block<cv::Mat, std::tuple<FindBarResults>> {
+class FindBarBlock : public auv::Block<cv::Mat, FindBarResults> {
 public:
   explicit FindBarBlock(bool debug = false);
 
