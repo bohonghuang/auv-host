@@ -108,7 +108,7 @@ public:
   using In = I;
   using Out = O;
   virtual O process(I in) = 0;
-  O operator() (I in) {
+  O operator()(I in) {
     return process(std::move(in));
   }
 };
@@ -209,9 +209,6 @@ public:
   std::any process(std::any in) override {
     return m_block->process(in);
   }
-  std::any process() {
-    return process(auv::unit_t{});
-  }
   AUV_BASIC_BLOCK;
   AnyBlock connect(AnyBlock block) {
     return (*this | std::move(block)).as_untyped();
@@ -292,7 +289,7 @@ protected:
 };
 
 class UntypedMuxBlock : public Block<unit_t, std::any> {
-private:
+public:
   using Key = std::string;
   class InputBlock : public Block<std::any, unit_t> {
   public:
@@ -303,20 +300,18 @@ private:
       }
       return {};
     }
-
+    AUV_BLOCK
   private:
     std::weak_ptr<UntypedMuxBlock> m_ref_parent;
     Key m_key;
   };
-  std::weak_ptr<UntypedMuxBlock> m_ref_self;
-
-protected:
-  std::unordered_map<Key, std::any> m_buffer;
-
-public:
   InputBlock input_block(Key key) {
     return {m_ref_self, std::move(key)};
   }
+
+protected:
+  std::unordered_map<Key, std::any> m_buffer;
+  std::weak_ptr<UntypedMuxBlock> m_ref_self;
 };
 
 }// namespace auv

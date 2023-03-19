@@ -166,13 +166,19 @@ void register_conversion(sol::state &state) {
 void auv::lua::setup_env(sol::state &state) {
   if (state["runtime"].is<sol::table>()) return;
   state.open_libraries(sol::lib::base, sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::package, sol::lib::jit);
-  state.create_named_table("runtime");
+  sol::table ns_runtime = state.create_named_table("runtime");
+  state.new_usertype<auv::unit_t>("unit", sol::default_constructor,
+                                  "as_untyped", [](auv::unit_t in) -> std::any { return in; });
+  state["void"] = unit_t{};
   register_conversion(state);
+  state.new_usertype<sol::state>(
+      "LuaState", sol::default_constructor,
+      "script", [](sol::state &state, const std::string &script) { return state.script(script); },
+      "script_file", [](sol::state &state, const std::string &filename) { return state.script_file(filename); });
   state.new_usertype<auv::AnyBlock>(
       "AnyBlock", sol::no_constructor,
-      "process", sol::overload(sol::resolve<std::any(std::any)>(&auv::AnyBlock::process), sol::resolve<std::any()>(&auv::AnyBlock::process)),
-      "connect", &auv::AnyBlock::connect);
-
+      "connect", &auv::AnyBlock::connect,
+      AUV_BLOCK_SOL_METHODS(auv::AnyBlock));
   state.set_function("connect", [](sol::variadic_args va) -> auv::AnyBlock {
     auto &&begin = *va.cbegin();
     static constexpr auto to_any_block = [](const sol::userdata &&block) -> auv::AnyBlock {
@@ -185,9 +191,46 @@ void auv::lua::setup_env(sol::state &state) {
     return prev_block;
   });
   state.new_usertype<UntypedLuaBlock>("LuaBlock",
-                                      sol::no_constructor,
-                                      AUV_BLOCK_SOL_METHODS(auv::UntypedLuaBlock));
+                                      sol::factories(
+                                          []() -> UntypedLuaBlock {
+                                            UntypedLuaBlock block{};
+                                            return block;
+                                          },
+                                          [](const std::string &filename) -> UntypedLuaBlock {
+                                            UntypedLuaBlock block{};
+                                            block.lua().script_file(filename);
+                                            return block;
+                                          },
+                                          [](sol::function fun) -> UntypedLuaBlock {
+                                            UntypedLuaBlock block{};
+                                            block.lua()["process"] = [=](std::any in) -> std::any {
+                                              return fun.call<std::any>(in);
+                                            };
+                                            return block;
+                                          }),
+                                      "lua", &UntypedLuaBlock::lua,
+                                      AUV_BLOCK_SOL_METHODS(UntypedLuaBlock));
+  state.new_usertype<UntypedLuaMuxBlock::InputBlock>("LuaMuxBlock_InputBlock", sol::no_constructor,
+                                                     AUV_BLOCK_SOL_METHODS(UntypedLuaMuxBlock::InputBlock));
   state.new_usertype<UntypedLuaMuxBlock>("LuaMuxBlock",
-                                         sol::no_constructor,
-                                         AUV_BLOCK_SOL_METHODS(auv::UntypedLuaMuxBlock));
+                                         sol::factories(
+                                             []() -> std::shared_ptr<UntypedLuaMuxBlock> {
+                                               auto block = UntypedLuaMuxBlock::make_shared();
+                                               return block;
+                                             },
+                                             [](std::string filename) -> std::shared_ptr<UntypedLuaMuxBlock> {
+                                               auto block = UntypedLuaMuxBlock::make_shared();
+                                               block->lua().script_file(filename);
+                                               return block;
+                                             },
+                                             [](sol::function fun) -> std::shared_ptr<UntypedLuaMuxBlock> {
+                                               auto block = UntypedLuaMuxBlock::make_shared();
+                                               block->lua()["process"] = [=](std::unordered_map<std::string, std::any> &in) -> std::any {
+                                                 return fun.call<std::any>(in);
+                                               };
+                                               return block;
+                                             }),
+                                         "lua", &UntypedLuaMuxBlock::lua,
+                                         "input_block", &UntypedLuaMuxBlock::input_block,
+                                         AUV_BLOCK_SOL_METHODS(UntypedLuaMuxBlock));
 }

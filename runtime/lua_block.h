@@ -25,12 +25,17 @@ protected:
 
 class UntypedLuaMuxBlock : public LuaBlock<unit_t, std::any>, public UntypedMuxBlock {
 public:
+  UntypedLuaMuxBlock();
   std::any process(unit_t in) override;
+  std::any operator() (unit_t in) {
+    return process(in);
+  }
   AUV_MUX_BLOCK
 };
 
 class UntypedLuaBlock : public LuaBlock<std::any, std::any> {
 public:
+  UntypedLuaBlock();
   AUV_BLOCK
 };
 
