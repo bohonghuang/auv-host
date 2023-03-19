@@ -12,10 +12,23 @@ TEST_CASE("C++ 中的静态 Block 连接") {
   Plus1Block plus1;
   Times2Block times2;
   auto block = plus1 | times2 | plus1 | times2;
-  auto test = [&](int i) {
-    REQUIRE(block(i) == ((i + 1) * 2 + 1) * 2);
-  };
-  for (int i = 0; i < 10; i++) test(i);
+  auto f = [](int i) { return ((i + 1) * 2 + 1) * 2; };
+  SECTION("级联") {
+    auto test = [&](int i) {
+      REQUIRE(block(i) == f(i));
+    };
+    for (int i = 0; i < 10; i++) test(i);
+  }
+  SECTION("并联") {
+    auto test = [&](int i) {
+      auto buf = std::make_shared<BufferedBlock>();
+      TestBlock test { [=](int j) { REQUIRE(j == f(i)); } };
+      auto block2 = block | buf & test;
+      block2(i);
+      REQUIRE(buf->i == f(i));
+    };
+    for (int i = 0; i < 10; i++) test(i);
+  }
 }
 
 TEST_CASE("Block 的类型擦除") {

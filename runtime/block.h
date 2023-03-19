@@ -261,9 +261,8 @@ private:
 template<class O>
 class MuxBlock : public Block<unit_t, O> {
 public:
-  template<class P>
-  class InputBlock : public Block<member_object_pointer_target_t<P>, unit_t> {
-    using In = member_object_pointer_target_t<P>;
+  template<class P, class In = member_object_pointer_target_t<P>>
+  class InputBlock : public Block<In, unit_t> {
     using Parent = member_object_pointer_parent_t<P>;
 
   public:
@@ -300,7 +299,7 @@ public:
       }
       return {};
     }
-    AUV_BLOCK
+    AUV_BLOCK;
   private:
     std::weak_ptr<UntypedMuxBlock> m_ref_parent;
     Key m_key;
@@ -313,6 +312,26 @@ protected:
   std::unordered_map<Key, std::any> m_buffer;
   std::weak_ptr<UntypedMuxBlock> m_ref_self;
 };
+
+template<class Block1, class Block2, class In = std::common_type_t<typename Block1::In, typename Block2::In>>
+class TeeBlock : public Block<In, unit_t> {
+public:
+  TeeBlock(Block1 block1, Block2 block2) : m_block_1(block1), m_block_2(block2) {}
+  unit_t process(In in) override {
+    m_block_1.process(in);
+    m_block_2.process(in);
+    return {};
+  }
+  AUV_BLOCK;
+private:
+  Block1 m_block_1;
+  Block2 m_block_2;
+};
+
+template<class Block1, class Block2>
+auto operator&(Block1 block1, Block2 block2) {
+  return TeeBlock<wrap_ref_block<Block1>, wrap_ref_block<Block2>>{block1, block2};
+}
 
 }// namespace auv
 

@@ -178,21 +178,29 @@ void auv::lua::setup_env(sol::state &state) {
       "LuaState", sol::default_constructor,
       "script", [](sol::state &state, const std::string &script) { return state.script(script); },
       "script_file", [](sol::state &state, const std::string &filename) { return state.script_file(filename); });
-  AUV_NEW_SOL_TYPE(state, auv::AnyBlock, sol::no_constructor,
-                   "connect", &auv::AnyBlock::connect,
-                   AUV_BLOCK_SOL_METHODS(auv::AnyBlock));
+  static constexpr auto to_any_block = [](const sol::userdata &&block) -> auv::AnyBlock {
+    return block.is<auv::AnyBlock>() ? block.as<auv::AnyBlock>() : block["as_untyped"].call<auv::AnyBlock>(block);
+  };
+  AUV_NEW_SOL_TYPE(
+      state, auv::AnyBlock, sol::no_constructor,
+      "connect", [](auv::AnyBlock &self, sol::variadic_args va) -> auv::AnyBlock {
+        auto &&begin = *va.cbegin();
+        auto prev_block = to_any_block(begin);
+        for (auto iter = va.cbegin() + 1; iter != va.cend(); iter++) {
+          prev_block = TeeBlock<AnyBlock, AnyBlock>{prev_block, to_any_block(*iter)}.as_untyped();
+        }
+        return self.connect(prev_block);
+      },
+      AUV_BLOCK_SOL_METHODS(auv::AnyBlock));
   state.set_function("connect", [](sol::variadic_args va) -> auv::AnyBlock {
     auto &&begin = *va.cbegin();
-    static constexpr auto to_any_block = [](const sol::userdata &&block) -> auv::AnyBlock {
-      return block.is<auv::AnyBlock>() ? block.as<auv::AnyBlock>() : block["as_untyped"].call<auv::AnyBlock>(block);
-    };
     auto prev_block = to_any_block(begin);
     for (auto iter = va.cbegin() + 1; iter != va.cend(); iter++) {
       prev_block = prev_block.connect(to_any_block(*iter));
     }
     return prev_block;
   });
-  
+
   using LuaBlock = UntypedLuaBlock;
   AUV_NEW_SOL_TYPE(state, LuaBlock,
                    sol::factories(
@@ -216,7 +224,7 @@ void auv::lua::setup_env(sol::state &state) {
                    AUV_BLOCK_SOL_METHODS(UntypedLuaBlock));
   AUV_NEW_SOL_TYPE(state, UntypedLuaMuxBlock::InputBlock, sol::no_constructor,
                    AUV_BLOCK_SOL_METHODS(UntypedLuaMuxBlock::InputBlock));
-  
+
   using LuaMuxBlock = UntypedLuaMuxBlock;
   AUV_NEW_SOL_TYPE(state, LuaMuxBlock,
                    sol::factories(
@@ -239,7 +247,7 @@ void auv::lua::setup_env(sol::state &state) {
                    "lua", &UntypedLuaMuxBlock::lua,
                    "input_block", &UntypedLuaMuxBlock::input_block,
                    AUV_BLOCK_SOL_METHODS(UntypedLuaMuxBlock));
-  
+
   static bool initial_invocation = true;
   if (initial_invocation) {
     auv::lua::setup_env_all = auv::lua::setup_env;
