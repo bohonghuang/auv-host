@@ -139,8 +139,10 @@ void register_conversion(sol::state &state) {
   ns_double["to_any"] = ns_f64["to_any"] = sol_object_any<double>;
   ns_float["from_any"] = ns_f32["from_any"] = any_sol_object<float>;
   ns_double["from_any"] = ns_f64["from_any"] = any_sol_object<double>;
-  sol::table ns_any = state.create_named_table("any");
-  ns_any["from"] = [](sol::object obj) -> std::any {
+  AUV_NEW_SOL_TYPE(state, std::any, sol::default_constructor,
+                   "has_value", &std::any::has_value,
+                   "reset", &std::any::reset);
+  state["any"]["from"] = [](sol::object obj) -> std::any {
     const char *type_name;
     switch (obj.get_type()) {
       case sol::type::none:
