@@ -3,6 +3,7 @@
 
 #include <any>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -108,9 +109,6 @@ public:
   using In = I;
   using Out = O;
   virtual O process(I in) = 0;
-  O operator()(I in) {
-    return process(std::move(in));
-  }
 };
 
 template<class T>
@@ -290,11 +288,13 @@ protected:
 class UntypedMuxBlock : public Block<unit_t, std::any> {
 public:
   using Key = std::string;
+  friend class UntypedLuaMuxBlock;
   class InputBlock : public Block<std::any, unit_t> {
   public:
     InputBlock(std::weak_ptr<UntypedMuxBlock> parent, Key key) : m_ref_parent(std::move(parent)), m_key(std::move(key)) {}
     unit_t process(std::any in) override {
       if (auto parent = m_ref_parent.lock()) {
+        std::lock_guard<std::mutex> lock_guard{parent->m_buffer_mutex};
         parent->m_buffer[m_key] = in;
       }
       return {};
@@ -305,13 +305,10 @@ public:
     std::weak_ptr<UntypedMuxBlock> m_ref_parent;
     Key m_key;
   };
-  InputBlock input_block(Key key) {
-    return {m_ref_self, std::move(key)};
-  }
 
-protected:
+private:
+  std::mutex m_buffer_mutex;
   std::unordered_map<Key, std::any> m_buffer;
-  std::weak_ptr<UntypedMuxBlock> m_ref_self;
 };
 
 template<class Block1, class Block2, class In = std::common_type_t<typename Block1::In, typename Block2::In>>

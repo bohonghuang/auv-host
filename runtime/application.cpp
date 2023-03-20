@@ -7,8 +7,10 @@
 namespace auv {
 
 void Application::run() noexcept {
+  static const char *history_file = ".auv-host.history";
   char *line;
   std::string prompt;
+  read_history(history_file);
   if (m_lua["jit"].is<sol::table>()) {
     prompt = m_lua["jit"]["version"];
   } else {
@@ -17,6 +19,7 @@ void Application::run() noexcept {
   prompt += "> ";
   while ((line = readline(prompt.c_str())) != nullptr) {
     add_history(line);
+    append_history(1, history_file);
     try {
       m_lua.script(line);
     } catch (std::exception &e) {

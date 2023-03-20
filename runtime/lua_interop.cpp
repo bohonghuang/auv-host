@@ -1,5 +1,6 @@
 #include "lua_interop.h"
 #include "block.h"
+#include "concurrent.h"
 #include "lua_block.h"
 
 void (*auv::lua::setup_env_all)(sol::state &);
@@ -228,24 +229,24 @@ void auv::lua::setup_env(sol::state &state) {
                        }),
                    "lua", &UntypedLuaBlock::lua,
                    AUV_BLOCK_SOL_METHODS(UntypedLuaBlock));
-  AUV_NEW_SOL_TYPE(state, UntypedLuaMuxBlock::InputBlock, sol::no_constructor,
-                   AUV_BLOCK_SOL_METHODS(UntypedLuaMuxBlock::InputBlock));
+  AUV_NEW_SOL_TYPE(state, UntypedMuxBlock::InputBlock, sol::no_constructor,
+                   AUV_BLOCK_SOL_METHODS(UntypedMuxBlock::InputBlock));
 
   using LuaMuxBlock = UntypedLuaMuxBlock;
   AUV_NEW_SOL_TYPE(state, LuaMuxBlock,
                    sol::factories(
-                       []() -> std::shared_ptr<UntypedLuaMuxBlock> {
-                         auto block = UntypedLuaMuxBlock::make_shared();
+                       []() -> UntypedLuaMuxBlock {
+                         UntypedLuaMuxBlock block {};
                          return block;
                        },
-                       [](std::string filename) -> std::shared_ptr<UntypedLuaMuxBlock> {
-                         auto block = UntypedLuaMuxBlock::make_shared();
-                         block->lua().script_file(filename);
+                       [](std::string filename) -> UntypedLuaMuxBlock {
+                         UntypedLuaMuxBlock block {};
+                         block.lua().script_file(filename);
                          return block;
                        },
-                       [](sol::function fun) -> std::shared_ptr<UntypedLuaMuxBlock> {
-                         auto block = UntypedLuaMuxBlock::make_shared();
-                         block->lua()["process"] = [=](std::unordered_map<std::string, std::any> &in) -> std::any {
+                       [](sol::function fun) -> UntypedLuaMuxBlock {
+                         UntypedLuaMuxBlock block {};
+                         block.lua()["process"] = [=](std::unordered_map<std::string, std::any> &in) -> std::any {
                            return fun.call<std::any>(in);
                          };
                          return block;
@@ -253,6 +254,19 @@ void auv::lua::setup_env(sol::state &state) {
                    "lua", &UntypedLuaMuxBlock::lua,
                    "input_block", &UntypedLuaMuxBlock::input_block,
                    AUV_BLOCK_SOL_METHODS(UntypedLuaMuxBlock));
+
+  state.new_usertype<Scheduler>("Scheduler",
+                                sol::factories([](AnyBlock block, int millis) { return std::make_shared<Scheduler>(block, std::chrono::milliseconds(millis)); }),
+                                "start", &Scheduler::start,
+                                "stop", &Scheduler::stop,
+                                "pause", &Scheduler::pause,
+                                "resume", &Scheduler::resume);
+  state["Scheduler"]["from_any"] = object_from_any_function<std::shared_ptr<Scheduler>>;
+  state["Scheduler"]["to_any"] = object_to_any_function<std::shared_ptr<Scheduler>>;
+
+  state.set_function("sleep", [](int millis) -> void {
+    std::this_thread::sleep_for(std::chrono::milliseconds(millis));
+  });
 
   static bool initial_invocation = true;
   if (initial_invocation) {

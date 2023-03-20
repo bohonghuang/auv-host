@@ -4,7 +4,7 @@ include_directories(.)
 include_directories(${Readline_INCLUDE_DIR})
 
 set(auv_runtime_src
-        application.cpp lua_interop.cpp lua_block.cpp lua_block.h)
+        application.cpp lua_interop.cpp lua_block.cpp concurrent.cpp)
 
 add_library(auv-runtime STATIC ${auv_runtime_src})
 target_link_libraries(auv-runtime ${LUAJIT_LIBRARY} ${Readline_LIBRARY})

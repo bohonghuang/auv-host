@@ -23,14 +23,16 @@ protected:
   std::shared_ptr<sol::state> m_state;
 };
 
-class UntypedLuaMuxBlock : public LuaBlock<unit_t, std::any>, public UntypedMuxBlock {
+class UntypedLuaMuxBlock : public LuaBlock<unit_t, std::any> {
 public:
   UntypedLuaMuxBlock();
   std::any process(unit_t in) override;
-  std::any operator() (unit_t in) {
-    return process(in);
+  UntypedMuxBlock::InputBlock input_block(UntypedMuxBlock::Key key) {
+    return {m_block, std::move(key)};
   }
-  AUV_MUX_BLOCK
+  AUV_BLOCK
+private:
+  std::shared_ptr<UntypedMuxBlock> m_block;
 };
 
 class UntypedLuaBlock : public LuaBlock<std::any, std::any> {
