@@ -41,7 +41,7 @@ FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
 
   FindBarResults output;
   auto& results = output.result;
-  results.resize(contours.size());
+  results.reserve(contours.size());
   for (const auto &contour: contours) {
     cv::Point2f rect_points[4];
     auto rect = cv::minAreaRect(contour);

@@ -15,14 +15,6 @@ void auv::vision::lua::setup_env(sol::state &state) {
   auv::lua::setup_env(state);
   state.create_named_table("vision");
 
-  AUV_NEW_SOL_TYPE(state, cv::Point, sol::default_constructor, "x", &cv::Point::x, "y", &cv::Point::y);
-  AUV_NEW_SOL_TYPE(state, cv::Size, sol::default_constructor, "width", &cv::Size::width, "height", &cv::Size::height);
-
-  state.set_function("imshow", [](const cv::Mat &frame) {
-    cv::imshow("pre", frame);
-    cv::waitKey(1);
-  });
-
   state.set_function("GetCaptureManager", []() -> auv::vision::CameraManager & {
     return auv::vision::CameraManager::GetInstance();
   });
@@ -73,11 +65,16 @@ void auv::vision::lua::setup_env(sol::state &state) {
                    sol::constructors<auv::vision::ConvertColorBlock(int)>(),
                    AUV_BLOCK_SOL_METHODS(auv::vision::ConvertColorBlock));
 
-  sol::table cv_namespace = state.create_named_table("cv");
-  cv_namespace["COLOR_BGR2HSV"] = cv::COLOR_BGR2HSV;
-  cv_namespace["COLOR_BGR2YCrCb"] = cv::COLOR_BGR2YCrCb;
-  cv_namespace["COLOR_GRAY2BGR"] = cv::COLOR_GRAY2BGR;
-
+  sol::table ns_cv = state.create_named_table("cv");
+  ns_cv["COLOR_BGR2HSV"] = cv::COLOR_BGR2HSV;
+  ns_cv["COLOR_BGR2YCrCb"] = cv::COLOR_BGR2YCrCb;
+  ns_cv["COLOR_GRAY2BGR"] = cv::COLOR_GRAY2BGR;
+  AUV_NEW_SOL_TYPE(ns_cv, cv::Mat, sol::default_constructor);
+  AUV_NEW_SOL_TYPE(ns_cv, cv::Point, sol::default_constructor, "x", &cv::Point::x, "y", &cv::Point::y);
+  AUV_NEW_SOL_TYPE(ns_cv, cv::Size, sol::default_constructor, "width", &cv::Size::width, "height", &cv::Size::height);
+  ns_cv.set_function("imshow", sol::resolve<void(const std::string&, cv::InputArray)>(&cv::imshow));
+  ns_cv.set_function("waitKey", sol::resolve<int(int)>(&cv::waitKey));
+  ns_cv.set_function("destroyAllWindows", &cv::destroyAllWindows);
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBarResults, sol::no_constructor,
                    "frame", &auv::vision::FindBarResults::frame,
                    "result", &auv::vision::FindBarResults::result);

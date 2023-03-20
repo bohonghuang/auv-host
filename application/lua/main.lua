@@ -25,25 +25,23 @@ inrange = InRangeBlock.new(inrange_params)
 
 find_bar = FindBarBlock.new(true)
 
-show = ImshowBlock.new()
-bio = FindBiologyBlock.new()
+-- show = ImshowBlock.new()
+-- bio = ObjectDetectBlock.new()
 
-writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
+-- writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
 
-pipeline = connect(cam, bio)
---frame = pipeline:process()
+mux_block = LuaMuxBlock.new("application/lua/main_block.lua")
+input_find_bar = connect(cam, cvtcolor, inrange, find_bar, mux_block:input_block("find_bar"))
 
---pipeline = connect(cam, cvtcolor)
+find_bar_task = Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0)
+main_task = Scheduler.new(mux_block:as_untyped(), 1.0 / 15.0)
 
---rov = ROV.new("192.168.137.219", 8888)
---con = RovControlBlock.new(rov)
+function start_all()
+   find_bar_task:start()
+   main_task:start()
+end
 
---function send(rov_sender)
---    rov_sender:move(1, 1, 1, 1)
---end
-
-while (true) do
-    --con:process(send)
-    result = pipeline:process()
-    writer:process(result.frame)
+function stop_all()
+   main_task:stop()
+   find_bar_task:stop()
 end
