@@ -7,10 +7,10 @@
 namespace auv {
 
 void Application::run() noexcept {
-  static const char *history_file = ".auv-host.history";
+  static std::string history_file = std::string { getenv("HOME") } + "/.auv-host.history";
   char *line;
   std::string prompt;
-  read_history(history_file);
+  read_history(history_file.c_str());
   if (m_lua["jit"].is<sol::table>()) {
     prompt = m_lua["jit"]["version"];
   } else {
@@ -19,13 +19,14 @@ void Application::run() noexcept {
   prompt += "> ";
   while ((line = readline(prompt.c_str())) != nullptr) {
     add_history(line);
-    append_history(1, history_file);
+    append_history(1, history_file.c_str());
     try {
       m_lua.script(line);
     } catch (std::exception &e) {
        std::cout << "Evaluation error: " << e.what() << std::endl;
     }
   }
+  write_history(history_file.c_str());
 }
 
 
