@@ -163,13 +163,13 @@ end
 )?");
     block1.lua()["block"] = block2;
     block1.lua().script(R"?(
-scheduler = Scheduler.new(block:as_untyped(), 5)
+scheduler = Scheduler.new(block:as_untyped(), 0.005)
 scheduler:start()
-sleep(50)
+sleep(0.05)
 scheduler:pause()
-sleep(10)
+sleep(0.01)
 scheduler:resume()
-sleep(50)
+sleep(0.05)
 scheduler:stop()
 )?");
     int i = block2.lua()["i"];

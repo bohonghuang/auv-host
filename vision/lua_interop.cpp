@@ -96,7 +96,7 @@ void auv::vision::lua::setup_env(sol::state &state) {
 
   AUV_NEW_SOL_TYPE(state, auv::vision::ObjectDetectBlock,
                    sol::default_constructor,
-                   AUV_BLOCK_SOL_METHODS(auv::vision::FindBiologyBlock));
+                   AUV_BLOCK_SOL_METHODS(auv::vision::ObjectDetectBlock));
 
   static bool initial_invocation = true;
   if (initial_invocation) {

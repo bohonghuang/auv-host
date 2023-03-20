@@ -256,7 +256,7 @@ void auv::lua::setup_env(sol::state &state) {
                    AUV_BLOCK_SOL_METHODS(UntypedLuaMuxBlock));
 
   state.new_usertype<Scheduler>("Scheduler",
-                                sol::factories([](AnyBlock block, int millis) { return std::make_shared<Scheduler>(block, std::chrono::milliseconds(millis)); }),
+                                sol::factories([](AnyBlock block, float secs) { return std::make_shared<Scheduler>(block, std::chrono::milliseconds(static_cast<int>(secs * 1000.0f))); }),
                                 "start", &Scheduler::start,
                                 "stop", &Scheduler::stop,
                                 "pause", &Scheduler::pause,
@@ -264,8 +264,12 @@ void auv::lua::setup_env(sol::state &state) {
   state["Scheduler"]["from_any"] = object_from_any_function<std::shared_ptr<Scheduler>>;
   state["Scheduler"]["to_any"] = object_to_any_function<std::shared_ptr<Scheduler>>;
 
-  state.set_function("sleep", [](int millis) -> void {
-    std::this_thread::sleep_for(std::chrono::milliseconds(millis));
+  state.set_function("sleep", [](float sec) -> void {
+    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sec * 1000)));
+  });
+
+  state.set_function("current_time", []() -> float {
+    return static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) / 1000.0f;
   });
 
   static bool initial_invocation = true;
