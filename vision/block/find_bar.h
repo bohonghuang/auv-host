@@ -8,8 +8,8 @@
 namespace auv::vision {
 
 struct FindBarResult {
-  cv::Point short_side_cent_point;
-  double long_side_rot;
+  cv::Point point;
+  double angle;
 };
 
 struct FindBarResults {

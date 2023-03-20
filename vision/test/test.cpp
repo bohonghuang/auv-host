@@ -1,9 +1,9 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "block/biology.h"
 #include "block/camera.h"
 #include "block/camera_calibr.h"
 #include "block/color.h"
+#include "block/detect.h"
 #include "block/find_bar.h"
 #include "block/imshow.h"
 #include "camera_mgr.h"
@@ -30,7 +30,7 @@ TEST_CASE("视觉算法集成测试") {
   auto cvt = vision::ConvertColorBlock(cv::COLOR_BGR2YCrCb);
   auto range = vision::InRangeBlock({33, 146, 65, 177, 255, 130});
   auto find = vision::FindBarBlock(true);
-  auto bio = vision::FindBiologyBlock();
+  auto bio = vision::ObjectDetectBlock();
   SECTION("FindBar 巡线算法") {
     auto pipe = cam | cal | cvt | range | find;
     auto begin = std::chrono::steady_clock::now();
@@ -78,7 +78,7 @@ TEST_CASE("神经网络水下测试") {
        0.0,
        0.0,
        -2.40283983476799});
-  auto bio = vision::FindBiologyBlock();
+  auto bio = vision::ObjectDetectBlock();
   auto upload = vision::UploadBlock("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480);
   auto pipe = cam | cal | bio;
   auto begin = std::chrono::steady_clock::now();

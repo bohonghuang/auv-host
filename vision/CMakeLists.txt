@@ -8,7 +8,7 @@ set(auv_vision_srcs
         utils.cpp
         block/color.cpp
         block/find_bar.cpp
-        block/biology.cpp
+        block/detect.cpp
         block/camera_calibr.cpp
         block/imshow.cpp
         nn/model_lib.cpp

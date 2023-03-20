@@ -4,9 +4,9 @@
 #include "block/camera.h"
 #include "block/camera_calibr.h"
 #include "block/color.h"
+#include "block/detect.h"
 #include "block/find_bar.h"
 #include "block/imshow.h"
-#include "block/biology.h"
 
 #include "camera_mgr.h"
 
@@ -83,18 +83,18 @@ void auv::vision::lua::setup_env(sol::state &state) {
                    "result", &auv::vision::FindBarResults::result);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBarResult, sol::no_constructor,
-                   "short_side_cent_point", &auv::vision::FindBarResult::short_side_cent_point,
-                   "long_side_rot", &auv::vision::FindBarResult::long_side_rot);
+                   "point", &auv::vision::FindBarResult::point,
+                   "angle", &auv::vision::FindBarResult::angle);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBarBlock,
                    sol::constructors<auv::vision::FindBarBlock(bool)>(),
                    AUV_BLOCK_SOL_METHODS(auv::vision::FindBarBlock));
 
-  AUV_NEW_SOL_TYPE(state, auv::vision::FindBiologyBlockResults, sol::no_constructor,
-                   "frame", &auv::vision::FindBiologyBlockResults::frame,
-                   "result", &auv::vision::FindBiologyBlockResults::result);
+  AUV_NEW_SOL_TYPE(state, auv::vision::ObjectDetectResults, sol::no_constructor,
+                   "frame", &auv::vision::ObjectDetectResults::frame,
+                   "result", &auv::vision::ObjectDetectResults::result);
 
-  AUV_NEW_SOL_TYPE(state, auv::vision::FindBiologyBlock,
+  AUV_NEW_SOL_TYPE(state, auv::vision::ObjectDetectBlock,
                    sol::default_constructor,
                    AUV_BLOCK_SOL_METHODS(auv::vision::FindBiologyBlock));
 

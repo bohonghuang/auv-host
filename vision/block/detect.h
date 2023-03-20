@@ -1,5 +1,5 @@
-#ifndef AUV_HOST_BIOLOGY_H
-#define AUV_HOST_BIOLOGY_H
+#ifndef AUV_HOST_DETECT_H
+#define AUV_HOST_DETECT_H
 
 #include "block.h"
 
@@ -9,14 +9,14 @@
 
 namespace auv::vision {
 
-struct FindBiologyBlockResults {
+struct ObjectDetectResults {
   cv::Mat frame;
   std::map<std::string, std::vector<network::YoloFastV2Result>> result;
 };
 
-class FindBiologyBlock : public Block<cv::Mat, FindBiologyBlockResults> {
+class ObjectDetectBlock : public Block<cv::Mat, ObjectDetectResults> {
 public:
-  explicit FindBiologyBlock(const std::string &data_path = "./model_data/marine.data");
+  explicit ObjectDetectBlock(const std::string &data_path = "./model_data/marine.data");
   Out process(In) override;
   AUV_BLOCK;
 
@@ -26,4 +26,4 @@ private:
 
 }// namespace auv::vision
 
-#endif//AUV_HOST_BIOLOGY_H
+#endif//AUV_HOST_DETECT_H
