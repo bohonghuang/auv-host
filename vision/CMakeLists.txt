@@ -13,7 +13,8 @@ set(auv_vision_srcs
         block/imshow.cpp
         nn/model_lib.cpp
         nn/yolo_fast_v2.cpp
-        lua_interop.cpp camera_mgr.h camera_mgr.cpp)
+        lua_interop.cpp
+        camera_mgr.cpp)
 
 add_library(auv-vision STATIC ${auv_vision_srcs})
 target_link_libraries(auv-vision ${OpenCV_LIBS})

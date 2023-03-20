@@ -26,21 +26,24 @@ inrange = InRangeBlock.new(inrange_params)
 find_bar = FindBarBlock.new(true)
 
 show = ImshowBlock.new()
+bio = FindBiologyBlock.new()
 
 writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
 
-pipeline = connect(cam, cvtcolor, inrange, find_bar)
+pipeline = connect(cam, bio)
 --frame = pipeline:process()
 
 --pipeline = connect(cam, cvtcolor)
-rov = ROV.new("192.168.31.100", 8888)
-con = RovControlBlock.new(rov)
 
-function send(rov_sender)
-    rov_sender:move(1,1,1,1)
-end
+--rov = ROV.new("192.168.137.219", 8888)
+--con = RovControlBlock.new(rov)
+
+--function send(rov_sender)
+--    rov_sender:move(1, 1, 1, 1)
+--end
 
 while (true) do
-    con:process(send)
-    pipeline:process()
+    --con:process(send)
+    result = pipeline:process()
+    writer:process(result.frame)
 end

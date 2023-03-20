@@ -11,8 +11,10 @@
 
 #include <chrono>
 
+namespace vision = auv::vision;
+
 TEST_CASE("视觉算法集成测试") {
-  namespace vision = auv::vision;
+
 
   auto cam = vision::CameraBlock(vision::CameraManager::GetInstance().get_capture(0));
   auto cal = vision::CameraCalibrateBlock(
@@ -61,5 +63,37 @@ TEST_CASE("视觉算法集成测试") {
     }
     auto end = std::chrono::steady_clock::now();
     std::cout << "total time(s):" << std::chrono::duration_cast<std::chrono::duration<double>>(end - begin).count() << std::endl;
+  }
+}
+
+TEST_CASE("神经网络水下测试") {
+  auto cam = vision::CameraBlock(vision::CameraManager::GetInstance().get_capture(0));
+  auto cal = vision::CameraCalibrateBlock(
+      {588.4306598875787,
+       322.7472860229715,
+       592.781786987308,
+       242.4471017083893,
+       -0.1443039341764572,
+       0.91856728920134,
+       0.0,
+       0.0,
+       -2.40283983476799});
+  auto bio = vision::FindBiologyBlock();
+  auto upload = vision::UploadBlock("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480);
+  auto pipe = cam | cal | bio;
+  auto begin = std::chrono::steady_clock::now();
+  while (true) {
+    auto t1 = std::chrono::steady_clock::now();
+    auto [frame, result] = pipe.process({});
+    auto t2 = std::chrono::steady_clock::now();
+    std::cout << "time(s):" << std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count() << std::endl;
+
+    for (const auto &it: result) {
+      const auto &vec = it.second;
+      for (const auto &j: vec) {
+        auv::vision::network::YoloFastV2::YoloFastV2::draw_pred(frame, j.confidences, j.name, j.rect);
+      }
+    }
+    upload.process(frame);
   }
 }

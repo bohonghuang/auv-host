@@ -6,6 +6,7 @@
 #include "block/color.h"
 #include "block/find_bar.h"
 #include "block/imshow.h"
+#include "block/biology.h"
 
 #include "camera_mgr.h"
 
@@ -88,6 +89,14 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBarBlock,
                    sol::constructors<auv::vision::FindBarBlock(bool)>(),
                    AUV_BLOCK_SOL_METHODS(auv::vision::FindBarBlock));
+
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindBiologyBlockResults, sol::no_constructor,
+                   "frame", &auv::vision::FindBiologyBlockResults::frame,
+                   "result", &auv::vision::FindBiologyBlockResults::result);
+
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindBiologyBlock,
+                   sol::default_constructor,
+                   AUV_BLOCK_SOL_METHODS(auv::vision::FindBiologyBlock));
 
   static bool initial_invocation = true;
   if (initial_invocation) {

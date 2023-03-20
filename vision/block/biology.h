@@ -9,15 +9,21 @@
 
 namespace auv::vision {
 
-class FindBiologyBlock : public Block<cv::Mat, std::tuple<cv::Mat,std::map<std::string, std::vector<network::YoloFastV2Result>>>> {
+struct FindBiologyBlockResults {
+  cv::Mat frame;
+  std::map<std::string, std::vector<network::YoloFastV2Result>> result;
+};
+
+class FindBiologyBlock : public Block<cv::Mat, FindBiologyBlockResults> {
 public:
-  explicit FindBiologyBlock(const std::string& data_path = "./model_data/marine.data");
+  explicit FindBiologyBlock(const std::string &data_path = "./model_data/marine.data");
   Out process(In) override;
   AUV_BLOCK;
+
 private:
   network::YoloFastV2 m_yolo;
 };
 
-}
+}// namespace auv::vision
 
 #endif//AUV_HOST_BIOLOGY_H

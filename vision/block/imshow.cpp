@@ -19,6 +19,7 @@ UploadBlock::UploadBlock(std::string address, int width, int height)
 
 cv::Mat UploadBlock::process(cv::Mat frame) noexcept {
   static cv::VideoWriter writer = [this]() -> cv::VideoWriter {
+    std::cout << m_address << std::endl;
     cv::VideoWriter writer(m_address, 0, 30.0, cv::Size(width, height));
     return writer;
   }();
