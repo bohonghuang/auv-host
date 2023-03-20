@@ -2,6 +2,7 @@
 #define AUV_HOST_BLOCK_H
 
 #include <any>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -328,6 +329,59 @@ auto operator&(Block1 block1, Block2 block2) {
   using Block2_ = wrap_ref_block<Block2>;
   return TeeBlock<Block1_, Block2_>{Block1_{block1}, Block2_{block2}};
 }
+
+template<class F>
+struct function_type_impl;
+
+template<class T, class R>
+struct function_type_impl<R(T)> {
+  using arg_type = T;
+  using return_type = R;
+};
+
+template<class X>
+struct function_type_impl<std::function<X>> {
+  using arg_type = typename function_type_impl<X>::arg_type;
+  using return_type = typename function_type_impl<X>::return_type;
+};
+
+template<class F>
+using function_arg_type = typename function_type_impl<F>::arg_type;
+
+template<class F>
+using function_return_type = typename function_type_impl<F>::return_type;
+
+template<class F, class In = function_arg_type<F>, class Out = function_return_type<F>>
+class FunctionBlock : public Block<In, Out> {
+public:
+  template<class L>
+  explicit FunctionBlock(L function) : m_function(function) {}
+  Out process(In in) override {
+    return m_function(in);
+  }
+
+private:
+  std::function<Out(In)> m_function;
+};
+
+template<typename T>
+struct memfun_type {
+  using type = void;
+};
+
+template<typename Ret, typename Class, typename... Args>
+struct memfun_type<Ret (Class::*)(Args...) const> {
+  using type = std::function<Ret(Args...)>;
+};
+
+template<typename F>
+typename memfun_type<decltype(&F::operator())>::type
+function_from_lambda(F const &func) {
+  return func;
+}
+
+template<class F>
+FunctionBlock(F) -> FunctionBlock<decltype(function_from_lambda(std::declval<F>()))>;
 
 }// namespace auv
 

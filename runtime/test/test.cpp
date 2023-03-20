@@ -13,8 +13,9 @@ namespace auv::runtime::test {
 TEST_CASE("C++ 中的静态 Block 连接") {
   Plus1Block plus1;
   Times2Block times2;
-  auto block = plus1 | times2 | plus1 | times2;
+  auto block = plus1 | times2 | FunctionBlock{[](int i) { return i + 1; }} | times2;
   auto f = [](int i) { return ((i + 1) * 2 + 1) * 2; };
+  auto l = auv::function_from_lambda(f);
   SECTION("级联") {
     auto test = [&](int i) {
       REQUIRE(block.process(i) == f(i));
@@ -151,8 +152,8 @@ TEST_CASE("任务调度器") {
   }
   SECTION("Lua 集成") {
     auv::lua::setup_env_all = &auv::lua::setup_env;
-    auv::UntypedLuaBlock block1 {};
-    auv::UntypedLuaBlock block2 {};
+    auv::UntypedLuaBlock block1{};
+    auv::UntypedLuaBlock block2{};
     block2.lua().script(R"?(
 i = 0
 function process(x)
