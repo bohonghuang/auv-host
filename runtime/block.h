@@ -126,7 +126,9 @@ using wrap_ref_block = typename wrap_ref_block_impl<T>::type;
 
 template<class Block1, class Block2>
 auto operator|(Block1 block1, Block2 block2) {
-  return ChainBlock<wrap_ref_block<Block1>, wrap_ref_block<Block2>>{block1, block2};
+  using Block1_ = wrap_ref_block<Block1>;
+  using Block2_ = wrap_ref_block<Block2>;
+  return ChainBlock<Block1_, Block2_>{Block1_{block1}, Block2_{block2}};
 }
 
 template<class Block>
@@ -247,54 +249,26 @@ using member_object_pointer_parent_t = typename member_object_pointer_type_impl<
 template<class B>
 class SharedBlock : public Block<typename B::In, typename B::Out> {
 public:
-  SharedBlock(std::shared_ptr<B> ptr) : m_ptr(ptr) {}
+  explicit SharedBlock(std::shared_ptr<B> ptr) : m_ptr(ptr) {}
+  explicit SharedBlock(B &&b) : m_ptr(std::make_shared<B>(std::move(b))) {}
   typename B::Out process(typename B::In in) override {
     return m_ptr->process(in);
   }
 
-private:
+protected:
   std::shared_ptr<B> m_ptr;
 };
 
-template<class O>
-class MuxBlock : public Block<unit_t, O> {
-public:
-  template<class P, class In = member_object_pointer_target_t<P>>
-  class InputBlock : public Block<In, unit_t> {
-    using Parent = member_object_pointer_parent_t<P>;
-
-  public:
-    InputBlock(std::weak_ptr<MuxBlock<O>> parent, P pointer) : m_ref_parent(parent), m_member_pointer(pointer) {}
-    unit_t process(In in) override {
-      if (auto parent = std::dynamic_pointer_cast<Parent>(m_ref_parent.lock())) {
-        parent.get()->*m_member_pointer = in;
-      }
-      return {};
-    }
-
-  private:
-    std::weak_ptr<MuxBlock<O>> m_ref_parent;
-    P m_member_pointer;
-  };
-  template<class P>
-  InputBlock<P> input_block(P member_ptr) {
-    return {m_ref_self, member_ptr};
-  }
-
-protected:
-  std::weak_ptr<MuxBlock<O>> m_ref_self;
-};
 
 class UntypedMuxBlock : public Block<unit_t, std::any> {
 public:
   using Key = std::string;
-  friend class UntypedLuaMuxBlock;
   class InputBlock : public Block<std::any, unit_t> {
   public:
     InputBlock(std::weak_ptr<UntypedMuxBlock> parent, Key key) : m_ref_parent(std::move(parent)), m_key(std::move(key)) {}
     unit_t process(std::any in) override {
       if (auto parent = m_ref_parent.lock()) {
-        std::lock_guard<std::mutex> lock_guard{parent->m_buffer_mutex};
+        auto lock_guard = parent->buffer_lock_guard();
         parent->m_buffer[m_key] = in;
       }
       return {};
@@ -305,10 +279,31 @@ public:
     std::weak_ptr<UntypedMuxBlock> m_ref_parent;
     Key m_key;
   };
+  std::lock_guard<std::mutex> buffer_lock_guard() {
+    return std::lock_guard<std::mutex>{m_buffer_mutex};
+  }
+
+  const std::unordered_map<Key, std::any> &buffer() const {
+    return m_buffer;
+  }
 
 private:
-  std::mutex m_buffer_mutex;
-  std::unordered_map<Key, std::any> m_buffer;
+  std::mutex m_buffer_mutex{};
+  std::unordered_map<Key, std::any> m_buffer{};
+};
+
+class SharedUntypedMuxBlock : public SharedBlock<UntypedMuxBlock> {
+public:
+  using SharedBlock<UntypedMuxBlock>::SharedBlock;
+  UntypedMuxBlock::InputBlock input_block(UntypedMuxBlock::Key key) {
+    return {m_ptr, key};
+  }
+
+protected:
+  std::lock_guard<std::mutex> buffer_lock_guard() {
+    return m_ptr->buffer_lock_guard();
+  }
+  const std::unordered_map<UntypedMuxBlock::Key, std::any> &m_buffer = m_ptr->buffer();
 };
 
 template<class Block1, class Block2, class In = std::common_type_t<typename Block1::In, typename Block2::In>>
@@ -329,7 +324,9 @@ private:
 
 template<class Block1, class Block2>
 auto operator&(Block1 block1, Block2 block2) {
-  return TeeBlock<wrap_ref_block<Block1>, wrap_ref_block<Block2>>{block1, block2};
+  using Block1_ = wrap_ref_block<Block1>;
+  using Block2_ = wrap_ref_block<Block2>;
+  return TeeBlock<Block1_, Block2_>{Block1_{block1}, Block2_{block2}};
 }
 
 }// namespace auv

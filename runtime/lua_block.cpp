@@ -1,15 +1,15 @@
 #include "lua_block.h"
 
 std::any auv::UntypedLuaMuxBlock::process(auv::unit_t in) {
-  decltype(this->m_block->m_buffer) buffer;
+  std::unordered_map<UntypedMuxBlock::Key, std::any> buffer;
   {
-    std::lock_guard<std::mutex> lock_guard { this->m_block->m_buffer_mutex };
-    buffer = m_block->m_buffer;
+    auto lock_guard = m_ptr->buffer_lock_guard();
+    buffer = m_ptr->buffer();
   }
   return (*m_state)["process"].call<std::any>(std::move(buffer));
 }
 
-auv::UntypedLuaMuxBlock::UntypedLuaMuxBlock() {
+auv::UntypedLuaMuxBlock::UntypedLuaMuxBlock(): SharedUntypedMuxBlock(std::make_shared<MuxBlock>()) {
   auv::lua::setup_env_all(*m_state);
 }
 

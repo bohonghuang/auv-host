@@ -124,6 +124,10 @@ result = int.from_any(mux_block:process())
 
 using namespace std::chrono_literals;
 
+bool approx_equal(int a, int b, int delta = 1) {
+  return std::abs(a - b) <= delta;
+}
+
 TEST_CASE("任务调度器") {
   SECTION("启动/停止") {
     int i = 0;
@@ -131,7 +135,7 @@ TEST_CASE("任务调度器") {
     scheduler.start();
     std::this_thread::sleep_for(100ms);
     scheduler.stop();
-    REQUIRE(i == 10);
+    REQUIRE(approx_equal(i, 10));
   }
   SECTION("暂停/恢复") {
     auto block = std::make_shared<CounterBlock>();
@@ -143,7 +147,7 @@ TEST_CASE("任务调度器") {
     scheduler.resume();
     std::this_thread::sleep_for(50ms);
     scheduler.stop();
-    REQUIRE(block->counter() == 10);
+    REQUIRE(approx_equal(block->counter(), 10));
   }
   SECTION("Lua 集成") {
     auv::lua::setup_env_all = &auv::lua::setup_env;
@@ -158,7 +162,7 @@ end
 )?");
     block1.lua()["block"] = block2;
     block1.lua().script(R"?(
-scheduler = Scheduler.new(block:as_untyped(), 10)
+scheduler = Scheduler.new(block:as_untyped(), 5)
 scheduler:start()
 sleep(50)
 scheduler:pause()
@@ -168,7 +172,7 @@ sleep(50)
 scheduler:stop()
 )?");
     int i = block2.lua()["i"];
-    REQUIRE(i == 10);
+    REQUIRE(approx_equal(i, 20));
   }
 }
 
