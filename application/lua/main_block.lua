@@ -1,12 +1,15 @@
 time = current_time()
+rov = RovController.new("localhost", 8888)
 
 function main(input)
-   local bar, detect
+   local bar, bars, detect
+   bars = {}
+   bar = FindBarResult.new()
    function update()
       input = coroutine.yield()
       local bar_any = input["find_bar"]
       if bar_any then
-         bar = FindBarResults.from_any(bar_any).result
+         bars = FindBarResults.from_any(bar_any).result
       end
       local detect_any = input["detect"]
       if detect_any then
@@ -18,16 +21,26 @@ function main(input)
       update()
    end
    while true do
-      update()
-      if bar then
-         for i=1,#bar do
-            box = bar[i]
-            print(box.point.x, box.point.y, box.angle)
+      if #bars > 0 then
+         bar = FindBarResult.new()
+         bar.point.x = 0.0
+         bar.point.y = 0.0
+         bar.angle = 0.0
+         for i=1,#bars do
+            local bar_i = bars[i]
+            bar.point.x = bar.point.x + bar_i.point.x
+            bar.point.y = bar.point.y + bar_i.point.y
+            bar.angle = bar.angle + bar_i.angle
          end
+         bar.point.x = bar.point.x / #bars
+         bar.point.y = bar.point.y / #bars
+         bar.angle = bar.angle / #bars
       end
-      if detect then
-         print(detect)
-      end
+      -- print(bar.angle)
+      -- if detect then
+      --    print(detect)
+      -- end
+      sleep(0.5)
    end
 end
 
@@ -35,7 +48,12 @@ co = coroutine.create(main)
 
 function process(input)
    if time <= current_time() then
-      coroutine.resume(co, input)
+      local result, err = coroutine.resume(co, input)
+      if not result then
+         print(err)
+         tasks = SchedulerList.from_any(input["scheduler"])
+         tasks:stop()
+      end
    end
    return void:to_any()
 end

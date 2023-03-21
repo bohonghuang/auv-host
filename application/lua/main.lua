@@ -23,25 +23,27 @@ inrange_params.low_3 = 65
 inrange_params.high_3 = 130
 inrange = InRangeBlock.new(inrange_params)
 
-find_bar = FindBarBlock.new(true)
+find_bar = FindBarBlock.new(false)
 
 -- show = ImshowBlock.new()
 -- bio = ObjectDetectBlock.new()
 
 -- writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
 
-mux_block = LuaMuxBlock.new("application/lua/main_block.lua")
-input_find_bar = connect(cam, cvtcolor, inrange, find_bar, mux_block:input_block("find_bar"))
+main_block = LuaMuxBlock.new("application/lua/main_block.lua")
+input_find_bar = connect(cam, cvtcolor, inrange, find_bar, main_block:input_block("find_bar"))
 
 find_bar_task = Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0)
-main_task = Scheduler.new(mux_block:as_untyped(), 1.0 / 15.0)
+main_task = Scheduler.new(main_block:as_untyped(), 1.0 / 10.0)
+
+tasks = SchedulerList.new(find_bar_task, main_task)
+
+connect(LuaBlock.new(function (x) return tasks:to_any() end), main_block:input_block("scheduler")):process(void:to_any())
 
 function start_all()
-   find_bar_task:start()
-   main_task:start()
+   tasks:start()
 end
 
 function stop_all()
-   main_task:stop()
-   find_bar_task:stop()
+   tasks:stop()
 end
