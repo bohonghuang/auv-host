@@ -2,6 +2,7 @@
 #define AUV_HOST_CAMERA_MGR_H
 
 #include <opencv2/opencv.hpp>
+#include <mutex>
 
 namespace auv::vision {
 
@@ -22,6 +23,7 @@ private:
 
 private:
   std::vector<cv::VideoCapture> m_video_captures;
+  std::mutex m_mutex;
 };
 
 }// namespace auv::vision

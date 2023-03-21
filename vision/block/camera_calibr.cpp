@@ -22,6 +22,8 @@ cv::Mat CameraCalibrateBlock::process(cv::Mat frame) noexcept {
     return {map[0], map[1]};
   }();
 
+  if(distort_map[0].empty())
+    return frame;
   cv::remap(frame, frame, distort_map[0], distort_map[1], cv::INTER_LINEAR);
   return frame;
 }
