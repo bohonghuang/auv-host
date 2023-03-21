@@ -79,6 +79,12 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBarBlock,
                    sol::constructors<auv::vision::FindBarBlock(bool)>());
 
+  AUV_NEW_SOL_TYPE(state, auv::vision::network::YoloFastV2Result, sol::no_constructor,
+		  "name", &auv::vision::network::YoloFastV2Result::name,
+		  "rect", &auv::vision::network::YoloFastV2Result::rect,
+		  "confidences", &auv::vision::network::YoloFastV2Result::confidences
+		  );
+
   AUV_NEW_SOL_TYPE(state, auv::vision::ObjectDetectResults, sol::no_constructor,
                    "frame", &auv::vision::ObjectDetectResults::frame,
                    "result", &auv::vision::ObjectDetectResults::result);

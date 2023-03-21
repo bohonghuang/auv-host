@@ -26,7 +26,9 @@ function main(input)
          end
       end
       if detect then
-         print(detect)
+	 for i=1,#detect do
+           print(detect[i].name)
+	 end
       end
    end
 end

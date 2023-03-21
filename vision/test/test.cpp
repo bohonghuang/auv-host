@@ -54,11 +54,8 @@ TEST_CASE("视觉算法集成测试") {
       auto t2 = std::chrono::steady_clock::now();
       std::cout << "time(s):" << std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count() << std::endl;
 
-      for (const auto &it: result) {
-        const auto &vec = it.second;
-        for (const auto &j: vec) {
-          auv::vision::network::YoloFastV2::YoloFastV2::draw_pred(frame, j.confidences, j.name, j.rect);
-        }
+      for (const auto &j: result) {
+        auv::vision::network::YoloFastV2::YoloFastV2::draw_pred(frame, j.confidences, j.name, j.rect);
       }
     }
     auto end = std::chrono::steady_clock::now();
@@ -88,11 +85,8 @@ TEST_CASE("神经网络水下测试") {
     auto t2 = std::chrono::steady_clock::now();
     std::cout << "time(s):" << std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count() << std::endl;
 
-    for (const auto &it: result) {
-      const auto &vec = it.second;
-      for (const auto &j: vec) {
-        auv::vision::network::YoloFastV2::YoloFastV2::draw_pred(frame, j.confidences, j.name, j.rect);
-      }
+    for (const auto &j: result) {
+      auv::vision::network::YoloFastV2::YoloFastV2::draw_pred(frame, j.confidences, j.name, j.rect);
     }
     upload.process(frame);
   }
