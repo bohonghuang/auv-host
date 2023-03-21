@@ -13,8 +13,6 @@ set(auv_application_src
 add_executable(auv-application ${auv_application_src})
 target_link_libraries(auv-application auv-runtime auv-communication auv-vision ${LUAJIT_LIBRARY})
 
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
-
 set(auv_application_test_src
         ${auv_application_src}
         test/test.cpp)
@@ -23,3 +21,6 @@ list(REMOVE_ITEM auv_application_test_src main.cpp)
 
 add_executable(auv-application-test ${auv_application_test_src})
 target_link_libraries(auv-application-test PUBLIC auv-runtime auv-communication auv-vision PRIVATE Catch2::Catch2WithMain)
+
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)

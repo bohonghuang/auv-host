@@ -9,7 +9,8 @@ set(auv_runtime_src
 add_library(auv-runtime STATIC ${auv_runtime_src})
 target_link_libraries(auv-runtime ${LUAJIT_LIBRARY} ${Readline_LIBRARY})
 
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
-
 add_executable(auv-runtime-test test/test.cpp)
 target_link_libraries(auv-runtime-test PUBLIC auv-runtime PRIVATE Catch2::Catch2WithMain)
+
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)

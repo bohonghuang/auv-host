@@ -39,28 +39,60 @@ void Scheduler::run() {
   }
 }
 
+Scheduler::~Scheduler() {
+  stop();
+}
+
 void SchedulerList::start() {
-  for(auto& scheduler : m_list) {
+  for (auto &scheduler: m_list) {
     scheduler->start();
   }
 }
 
 void SchedulerList::stop() {
-  for(auto& scheduler : m_list) {
+  for (auto &scheduler: m_list) {
     scheduler->stop();
   }
 }
 
 void SchedulerList::pause() {
-  for(auto& scheduler : m_list) {
+  for (auto &scheduler: m_list) {
     scheduler->pause();
   }
 }
 
 void SchedulerList::resume() {
-  for(auto& scheduler : m_list) {
+  for (auto &scheduler: m_list) {
     scheduler->resume();
   }
+}
+
+SharedBaseScheduler::SharedBaseScheduler(std::shared_ptr<BaseScheduler> pointer) : m_pointer(std::move(pointer)) {}
+
+void SharedBaseScheduler::start() {
+  m_pointer->start();
+}
+
+void SharedBaseScheduler::stop() {
+  m_pointer->stop();
+}
+
+void SharedBaseScheduler::pause() {
+  m_pointer->pause();
+}
+
+void SharedBaseScheduler::resume() {
+  m_pointer->resume();
+}
+
+std::shared_ptr<BaseScheduler> SharedBaseScheduler::pointer() {
+  return m_pointer;
+}
+
+SharedSchedulerList::SharedSchedulerList() : SharedBaseScheduler(std::make_shared<SchedulerList>()) {}
+
+void SharedSchedulerList::add(SharedBaseScheduler &scheduler) {
+  std::dynamic_pointer_cast<SchedulerList>(pointer())->add(scheduler.pointer());
 }
 
 }// namespace auv

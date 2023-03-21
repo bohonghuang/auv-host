@@ -11,5 +11,5 @@ set(auv_communication_src
 add_library(auv-communication STATIC ${auv_communication_src})
 target_include_directories(auv-communication PUBLIC .)
 
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
-

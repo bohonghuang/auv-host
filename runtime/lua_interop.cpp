@@ -177,10 +177,13 @@ void auv::lua::setup_env(sol::state &state) {
                                   "to_any", [](auv::unit_t in) -> std::any { return in; });
   state["void"] = unit_t{};
   register_conversion(state);
-  state.new_usertype<sol::state>(
-      "LuaState", sol::default_constructor,
-      "script", [](sol::state &state, const std::string &script) { return state.script(script); },
-      "script_file", [](sol::state &state, const std::string &filename) { return state.script_file(filename); });
+  {
+    using LuaState = sol::state &;
+    AUV_NEW_SOL_TYPE(
+        state, LuaState, sol::default_constructor,
+        "script", [](sol::state &state, const std::string &script) { return state.script(script); },
+        "script_file", [](sol::state &state, const std::string &filename) { return state.script_file(filename); });
+  }
   static constexpr auto to_any_block = [](const sol::userdata &&block) -> auv::AnyBlock {
     return block.is<auv::AnyBlock>() ? block.as<auv::AnyBlock>() : block["as_untyped"].call<auv::AnyBlock>(block);
   };
@@ -257,21 +260,28 @@ void auv::lua::setup_env(sol::state &state) {
   }
 
   {
-    using Schedulable_ = Schedulable;
-    using Schedulable = Schedulable_ &;
-    AUV_NEW_SOL_TYPE(state, Schedulable, sol::no_constructor,
-                     "start", &Schedulable_::start,
-                     "stop", &Schedulable_::stop,
-                     "pause", &Schedulable_::pause,
-                     "resume", &Schedulable_::resume);
-  }
+    using BaseScheduler = SharedBaseScheduler;
+    using Scheduler = SharedScheduler;
+    using SchedulerList = SharedSchedulerList;
 
-  {
-    using Scheduler_ = Scheduler;
-    using Scheduler = std::shared_ptr<Scheduler_>;
+    AUV_NEW_SOL_TYPE(state, BaseScheduler, sol::no_constructor,
+                     "start", &BaseScheduler::start,
+                     "stop", &BaseScheduler::stop,
+                     "pause", &BaseScheduler::pause,
+                     "resume", &BaseScheduler::resume);
     AUV_NEW_SOL_TYPE(state, Scheduler,
-                     sol::factories([](AnyBlock block, float secs) { return std::make_shared<Scheduler_>(std::move(block), std::chrono::milliseconds(static_cast<int>(secs * 1000.0f))); }),
-                     sol::base_classes, sol::bases<Schedulable>());
+                     sol::factories([](AnyBlock block, float secs) -> Scheduler { return Scheduler{std::move(block), std::chrono::milliseconds(static_cast<int>(secs * 1000.0f))}; }),
+                     sol::base_classes, sol::bases<BaseScheduler>());
+    AUV_NEW_SOL_TYPE(state, SchedulerList,
+                     sol::factories([](sol::variadic_args va) -> SchedulerList {
+                       SchedulerList list{};
+                       for (SharedBaseScheduler& scheduler : va) {
+                         list.add(scheduler);
+                       }
+                       return list;
+                     }),
+                     sol::base_classes, sol::bases<BaseScheduler>(),
+                     "add", &SchedulerList::add);
   }
 
   state.set_function("sleep", [](float sec) -> void {
