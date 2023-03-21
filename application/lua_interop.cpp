@@ -5,7 +5,6 @@ void auv::application::lua::setup_env(sol::state &state) {
   if(state["application"].is<sol::table>()) return;
   state.create_named_table("application");
   auv::lua::setup_env(state);
-  auv::communication::lua::setup_env(state);
   auv::vision::lua::setup_env(state);
   static bool initial_invocation = true;
   if (initial_invocation) {

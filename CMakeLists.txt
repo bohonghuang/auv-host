@@ -19,7 +19,6 @@ include_directories(${LUAJIT_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(runtime)
 
-add_subdirectory(communication)
 add_subdirectory(vision)
 add_subdirectory(runtime)
 add_subdirectory(application)

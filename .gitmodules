@@ -1,3 +1,0 @@
-[submodule "vendor/json-rpc-cxx"]
-	path = vendor/json-rpc-cxx
-	url = https://github.com/jsonrpcx/json-rpc-cxx.git

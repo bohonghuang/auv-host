@@ -5,7 +5,6 @@
 
 #include "runtime/lua_interop.h"
 #include "vision/lua_interop.h"
-#include "communication/lua_interop.h"
 
 namespace auv::application::lua {
 
