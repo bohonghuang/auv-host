@@ -7,7 +7,7 @@
 namespace auv::vision {
 
 struct CaptureParams {
-  int index;
+  std::string index;
   cv::Size size;
 };
 
@@ -16,13 +16,13 @@ public:
   static CameraManager &GetInstance() noexcept;
 
   void add_capture(const std::vector<CaptureParams> &indexs) noexcept;
-  cv::VideoCapture &get_capture(int index) noexcept;
 
+  cv::VideoCapture &get_capture(const std::string& file) noexcept;
 private:
   CameraManager() = default;
 
 private:
-  std::vector<cv::VideoCapture> m_video_captures;
+  std::map<std::string, cv::VideoCapture> m_video_captures;
   std::mutex m_mutex;
 };
 

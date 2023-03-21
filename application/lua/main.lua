@@ -1,4 +1,4 @@
-cam = CameraBlock.new(GetCapture(0))
+cam = CameraBlock.new(GetCapture("/home/coco24/工程/Python/auv-host/samples/record1.mp4"))
 
 calibr_params = CameraParams.new()
 calibr_params.fx = 588.4306598875787
@@ -46,4 +46,12 @@ end
 
 function stop_all()
    tasks:stop()
+end
+
+function pause_all()
+   tasks:pause()
+end
+
+function resume_all()
+   tasks:resume()
 end

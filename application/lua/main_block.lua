@@ -1,5 +1,7 @@
 time = current_time()
 rov = RovController.new("localhost", 8888)
+-- writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
+writer = UploadBlock.new("appsrc ! videoconvert ! nvh264enc ! rtph264pay ! udpsink host=192.168.31.200 port=5600", 640, 480)
 
 local function point_dist(p1, p2)
    local x1, y1 = p1.x, p1.y
@@ -57,7 +59,9 @@ local function boxes_bars(bars)
       end
       local deg = point_deg(p1, p2) - 90.0
       local cx, cy = point_center(points[1], points[2], points[3], points[4])
-      table.insert(results, { cx, cy, deg, fill_rate, area })
+      local bx = cx - math.tan(math.rad(math.min(math.max(-85.0, deg), 85))) * (cy - (-1.0))
+      bx = math.min(math.max(-1.0, bx), 1.0)
+      table.insert(results, { bx, cy, deg, fill_rate, area })
       ::continue::
    end
    table.sort(results, function(a, b) return a[4] * a[5] > b[4] * b[5] end)
@@ -71,6 +75,7 @@ function main(input)
       local bar_any = input["find_bar"]
       if bar_any then
          bars = FindBarResults.from_any(bar_any).result
+         writer:process(FindBarResults.from_any(bar_any).frame)
       end
       local detect_any = input["detect"]
       if detect_any then
@@ -87,6 +92,7 @@ function main(input)
       local bar = boxes_bars(bars)[1]
       if bar then
          local x_norm, y_norm, deg, fill_rate, area = unpack(bar)
+         rov:move(x_norm, 0.2, 0.0, deg / 90.0)
          print(x_norm, y_norm, deg, fill_rate, area)
       end
       if #detect > 0 then

@@ -15,6 +15,7 @@ public:
 public:
   explicit CameraBlock(cv::VideoCapture& cap) noexcept;
 
+
   Out process(In) noexcept override;
   AUV_BLOCK;
 

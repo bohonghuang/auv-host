@@ -13,26 +13,33 @@ CameraManager &CameraManager::GetInstance() noexcept {
 
 void CameraManager::add_capture(const std::vector<CaptureParams> &indexs) noexcept {
   for (const auto &i: indexs) {
-    if (i.index < m_video_captures.size())
-      continue;
-    m_video_captures.resize(i.index + 1);
-    std::stringstream ss;
-    ss << "v4l2src device=/dev/video"
-       << i.index
-       << " ! video/x-raw, format=(string)YUY2, width=(int)"
-       << i.size.width
-       << ", height=(int)"
-       << i.size.height
-       << " ! videoconvert ! appsink ";
-    auto cap = cv::VideoCapture(ss.str());
-    m_video_captures[i.index] = cap;
+    auto it = m_video_captures.find(i.index);
+    if (it != m_video_captures.end())
+      return;
+
+    if (i.index.size() <= 3) {
+      std::stringstream ss;
+      ss << "v4l2src device=/dev/video"
+         << i.index
+         << " ! video/x-raw, format=(string)YUY2, width=(int)"
+         << i.size.width
+         << ", height=(int)"
+         << i.size.height
+         << " ! videoconvert ! appsink ";
+      auto cap = cv::VideoCapture(ss.str());
+      m_video_captures[i.index] = cap;
+    } else {
+      auto cap = cv::VideoCapture(i.index);
+      m_video_captures[i.index] = cap;
+    }
   }
 }
 
 
-cv::VideoCapture &CameraManager::get_capture(int index) noexcept {
+cv::VideoCapture &CameraManager::get_capture(const std::string &index) noexcept {
   std::unique_lock<std::mutex> lock(m_mutex);
-  if (index >= m_video_captures.size()) {
+  auto it = m_video_captures.find(index);
+  if (it == m_video_captures.end()) {
     this->add_capture({{index, {640, 480}}});
     return m_video_captures[index];
   }
