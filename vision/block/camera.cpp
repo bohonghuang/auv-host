@@ -37,7 +37,6 @@ cv::Mat CameraBlock::process(auv::unit_t) noexcept {
   if (!m_capture.read(frame)) {
     return m_last_frame;
   }
-  lock.unlock();
 
   m_last_frame = frame;
   return frame;

@@ -108,6 +108,7 @@ FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
     cv::waitKey(1);
   }
 
+  output.frame = preview;
   return output;
 }
 
