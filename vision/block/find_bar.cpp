@@ -34,13 +34,13 @@ FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
                    cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
   std::sort(contours.begin(), contours.end(),
             [](const std::vector<cv::Point> &points1, const std::vector<cv::Point> &points2) {
-              cv::Point p1 = utils::get_point_center(points1);
-              cv::Point p2 = utils::get_point_center(points2);
+              cv::Point p1 = utils::get_point_center<int>(points1);
+              cv::Point p2 = utils::get_point_center<int>(points2);
               return p1.y < p2.y;
             });
 
   FindBarResults output;
-  auto& results = output.result;
+  auto &results = output.result;
   results.reserve(contours.size());
   for (const auto &contour: contours) {
     cv::Point2f rect_points[4];
@@ -86,12 +86,16 @@ FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
         line(preview, rect_points[i], rect_points[(i + 1) % 4],
              cv::Scalar(0, 255, 255), 2, cv::LINE_AA);
     }
-    cv::Point cent_point = utils::get_point_center(contour);
+    cv::Point2d cent_point = utils::get_point_center<double>(contour);
+    double half_width = (double) process_frame.size().width / 2;
+    double half_height = (double) process_frame.size().height / 2;
+    cent_point.x = (cent_point.x - half_width) / half_width;
+    cent_point.y = -(cent_point.y - half_height) / half_height;
     //    auto dev = static_cast<float>((double) cent_point.x / frame.size().width - 0.5);
     results.push_back({cent_point, deg});
   }
 
-  if(m_debug) {
+  if (m_debug) {
     cv::imshow("find_bar", preview);
     cv::waitKey(1);
   }

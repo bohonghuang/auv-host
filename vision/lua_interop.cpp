@@ -71,6 +71,7 @@ void auv::vision::lua::setup_env(sol::state &state) {
   ns_cv["COLOR_GRAY2BGR"] = cv::COLOR_GRAY2BGR;
   AUV_NEW_SOL_TYPE(ns_cv, cv::Mat, sol::default_constructor);
   AUV_NEW_SOL_TYPE(ns_cv, cv::Point, sol::default_constructor, "x", &cv::Point::x, "y", &cv::Point::y);
+  AUV_NEW_SOL_TYPE(ns_cv, cv::Point2d, sol::default_constructor, "x", &cv::Point2d::x, "y", &cv::Point2d::y);
   AUV_NEW_SOL_TYPE(ns_cv, cv::Size, sol::default_constructor, "width", &cv::Size::width, "height", &cv::Size::height);
   ns_cv.set_function("imshow", sol::resolve<void(const std::string&, cv::InputArray)>(&cv::imshow));
   ns_cv.set_function("waitKey", sol::resolve<int(int)>(&cv::waitKey));

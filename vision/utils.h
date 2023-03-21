@@ -30,17 +30,17 @@ auto get_point_center(const std::array<cv::Point_<T>, N> &points)
 }
 
 
-template<typename T>
+template<typename R, typename T>
 auto get_point_center(const std::vector<cv::Point_<T>> &points)
-    -> cv::Point_<T> {
+    -> cv::Point_<R> {
   double count_x = 0.0;
   double count_y = 0.0;
   for (const auto &i: points) {
     count_x += i.x;
     count_y += i.y;
   }
-  return {static_cast<T>(count_x / points.size()),
-          static_cast<T>(count_y / points.size())};
+  return {static_cast<R>(count_x / points.size()),
+          static_cast<R>(count_y / points.size())};
 }
 
 
