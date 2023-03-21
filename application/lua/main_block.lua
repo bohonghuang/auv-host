@@ -1,60 +1,113 @@
 time = current_time()
 rov = RovController.new("localhost", 8888)
 
+local function point_dist(p1, p2)
+   local x1, y1 = p1.x, p1.y
+   local x2, y2 = p2.x, p2.y
+   return ((x1 - x2) ^ 2 + (y1 - y2) ^ 2) ^ 0.5;
+end
+
+local function point_center(...)
+   local points = { ... };
+   local cx, cy = 0.0, 0.0
+   for _, point in pairs(points) do
+      cx = cx + point.x
+      cy = cy + point.y
+   end
+   return cx / #points, cy / #points
+end
+
+local function point_deg(p1, p2)
+   local x1, y1 = p1.x, p1.y
+   local x2, y2 = p2.x, p2.y
+   local dx, dy = x2 - x1, y2 - y1
+   if dx == 0.0 then
+      return 90.0
+   else
+      local deg = math.deg(math.atan(dy / dx))
+      if deg <= 0.0 then
+         return -deg
+      else
+         return 180.0 - deg
+      end
+   end
+end
+
+local function boxes_bars(bars)
+   local results = {}
+   for i = 1, #bars do
+      local points = bars[i].points
+      local area = bars[i].area
+      local dist_p12 = point_dist(points[1], points[2])
+      local dist_p23 = point_dist(points[2], points[3])
+      local length, width = math.max(dist_p12, dist_p23) / 2.0, math.min(dist_p12, dist_p23) / 2.0
+      if width < 1 / 12 then
+         goto continue
+      elseif length < 1 / 6 then
+         goto continue
+      elseif length / width > 6 then
+         goto continue
+      end
+      local fill_rate = area / (length * width)
+      local p1, p2
+      if dist_p12 > dist_p23 then
+         p1, p2 = points[1], points[2]
+      else
+         p1, p2 = points[2], points[3]
+      end
+      local deg = point_deg(p1, p2) - 90.0
+      local cx, cy = point_center(points[1], points[2], points[3], points[4])
+      table.insert(results, { cx, cy, deg, fill_rate, area })
+      ::continue::
+   end
+   table.sort(results, function(a, b) return a[4] * a[5] > b[4] * b[5] end)
+   return results
+end
+
 function main(input)
-    local bar, bars, detect
-    bars = {}
-    bar = FindBarResult.new()
-    function update()
-        input = coroutine.yield()
-        local bar_any = input["find_bar"]
-        if bar_any then
-            bars = FindBarResults.from_any(bar_any).result
-        end
-        local detect_any = input["detect"]
-        if detect_any then
-            detect = ObjectDetectResults.from_any(detect_any).result
-        end
-    end
-    function sleep(duration)
-        time = current_time() + duration
-        update()
-    end
-    while true do
-        if #bars > 0 then
-            bar = FindBarResult.new()
-            bar.points.x = 0.0
-            bar.points.y = 0.0
-            for i = 1, #bars do
-                local bar_i = bars[i]
-                print(bar_i.area)
-                print("points_x:", bar_i.points.x)
-                print("points_y:", bar_i.points.y)
-                --bar.points.x = bar.points.x + bar_i.points.x
-                --bar.points.y = bar.points.y + bar_i.points.y
-            end
-            bar.points.x = bar.points.x / #bars
-            bar.points.y = bar.points.y / #bars
-        end
-        if detect then
-            for i = 1, #detect do
-                print(detect[i].name)
-            end
-        end
-        sleep(0.5)
-    end
+   local bars, detect = {}, {}
+   local function update()
+      input = coroutine.yield()
+      local bar_any = input["find_bar"]
+      if bar_any then
+         bars = FindBarResults.from_any(bar_any).result
+      end
+      local detect_any = input["detect"]
+      if detect_any then
+         detect = ObjectDetectResults.from_any(detect_any).result
+      end
+   end
+
+   local function sleep(duration)
+      time = current_time() + duration
+      update()
+   end
+
+   while true do
+      local bar = boxes_bars(bars)[1]
+      if bar then
+         local x_norm, y_norm, deg, fill_rate, area = unpack(bar)
+         print(x_norm, y_norm, deg, fill_rate, area)
+      end
+      if #detect > 0 then
+         for i = 1, #detect do
+            print(detect[i].name)
+         end
+      end
+      sleep(0.5)
+   end
 end
 
 co = coroutine.create(main)
 
 function process(input)
-    if time <= current_time() then
-        local result, err = coroutine.resume(co, input)
-        if not result then
-            print(err)
-            tasks = SchedulerList.from_any(input["scheduler"])
-            tasks:stop()
-        end
-    end
-    return void:to_any()
+   if time <= current_time() then
+      local result, err = coroutine.resume(co, input)
+      if not result then
+         print(err)
+         local tasks = SchedulerList.from_any(input["scheduler"])
+         tasks:stop()
+      end
+   end
+   return void:to_any()
 end

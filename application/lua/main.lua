@@ -38,7 +38,7 @@ find_bar_task = Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0)
 detect_task = Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0)
 main_task = Scheduler.new(mux_block:as_untyped(), 1.0 / 15.0)
 
-tasks = SchedulerList.new(find_bar_task, main_task, detect_task)
+tasks = SchedulerList.new(find_bar_task, main_task)
 
 function start_all()
    tasks:start()
