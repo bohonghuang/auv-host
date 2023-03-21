@@ -36,10 +36,11 @@ function main(input)
          bar.point.y = bar.point.y / #bars
          bar.angle = bar.angle / #bars
       end
-      -- print(bar.angle)
-      -- if detect then
-      --    print(detect)
-      -- end
+      if detect then
+	 for i=1,#detect do
+           print(detect[i].name)
+	 end
+      end
       sleep(0.5)
    end
 end

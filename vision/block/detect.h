@@ -11,7 +11,7 @@ namespace auv::vision {
 
 struct ObjectDetectResults {
   cv::Mat frame;
-  std::map<std::string, std::vector<network::YoloFastV2Result>> result;
+  std::vector<network::YoloFastV2Result> result;
 };
 
 class ObjectDetectBlock : public Block<cv::Mat, ObjectDetectResults> {
