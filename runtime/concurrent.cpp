@@ -39,4 +39,28 @@ void Scheduler::run() {
   }
 }
 
+void SchedulerList::start() {
+  for(auto& scheduler : m_list) {
+    scheduler->start();
+  }
+}
+
+void SchedulerList::stop() {
+  for(auto& scheduler : m_list) {
+    scheduler->stop();
+  }
+}
+
+void SchedulerList::pause() {
+  for(auto& scheduler : m_list) {
+    scheduler->pause();
+  }
+}
+
+void SchedulerList::resume() {
+  for(auto& scheduler : m_list) {
+    scheduler->resume();
+  }
+}
+
 }// namespace auv

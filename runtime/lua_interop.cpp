@@ -204,72 +204,83 @@ void auv::lua::setup_env(sol::state &state) {
       state, auv::AnyBlock, sol::no_constructor,
       "connect", [](auv::AnyBlock &self, sol::variadic_args va) -> auv::AnyBlock {
         return self.connect(tee_block(va));
-      },
-      AUV_BLOCK_SOL_METHODS(auv::AnyBlock));
+      });
   state["tee"] = tee_block;
   state["chain"] = state["connect"] = chain_block;
-  using LuaBlock = UntypedLuaBlock;
-  AUV_NEW_SOL_TYPE(state, LuaBlock,
-                   sol::factories(
-                       []() -> UntypedLuaBlock {
-                         UntypedLuaBlock block{};
-                         return block;
-                       },
-                       [](const std::string &filename) -> UntypedLuaBlock {
-                         UntypedLuaBlock block{};
-                         block.lua().script_file(filename);
-                         return block;
-                       },
-                       [](sol::function fun) -> UntypedLuaBlock {
-                         UntypedLuaBlock block{};
-                         block.lua()["process"] = [=](std::any in) -> std::any {
-                           return fun.call<std::any>(in);
-                         };
-                         return block;
-                       }),
-                   "lua", &UntypedLuaBlock::lua,
-                   AUV_BLOCK_SOL_METHODS(UntypedLuaBlock));
-  AUV_NEW_SOL_TYPE(state, UntypedMuxBlock::InputBlock, sol::no_constructor,
-                   AUV_BLOCK_SOL_METHODS(UntypedMuxBlock::InputBlock));
+  {
+    using LuaBlock = UntypedLuaBlock;
+    AUV_NEW_SOL_TYPE(state, LuaBlock,
+                     sol::factories(
+                         []() -> UntypedLuaBlock {
+                           UntypedLuaBlock block{};
+                           return block;
+                         },
+                         [](const std::string &filename) -> UntypedLuaBlock {
+                           UntypedLuaBlock block{};
+                           block.lua().script_file(filename);
+                           return block;
+                         },
+                         [](sol::function fun) -> UntypedLuaBlock {
+                           UntypedLuaBlock block{};
+                           block.lua()["process"] = [=](std::any in) -> std::any {
+                             return fun.call<std::any>(in);
+                           };
+                           return block;
+                         }),
+                     "lua", &UntypedLuaBlock::lua);
+  }
 
-  using LuaMuxBlock = UntypedLuaMuxBlock;
-  AUV_NEW_SOL_TYPE(state, LuaMuxBlock,
-                   sol::factories(
-                       []() -> UntypedLuaMuxBlock {
-                         UntypedLuaMuxBlock block {};
-                         return block;
-                       },
-                       [](std::string filename) -> UntypedLuaMuxBlock {
-                         UntypedLuaMuxBlock block {};
-                         block.lua().script_file(filename);
-                         return block;
-                       },
-                       [](sol::function fun) -> UntypedLuaMuxBlock {
-                         UntypedLuaMuxBlock block {};
-                         block.lua()["process"] = [=](std::unordered_map<std::string, std::any> &in) -> std::any {
-                           return fun.call<std::any>(in);
-                         };
-                         return block;
-                       }),
-                   "lua", &UntypedLuaMuxBlock::lua,
-                   "input_block", &UntypedLuaMuxBlock::input_block,
-                   AUV_BLOCK_SOL_METHODS(UntypedLuaMuxBlock));
+  {
+    using LuaMuxBlock = UntypedLuaMuxBlock;
+    using LuaMuxInputBlock = UntypedMuxBlock::InputBlock;
+    AUV_NEW_SOL_TYPE(state, LuaMuxInputBlock, sol::no_constructor);
+    AUV_NEW_SOL_TYPE(state, LuaMuxBlock,
+                     sol::factories(
+                         []() -> UntypedLuaMuxBlock {
+                           UntypedLuaMuxBlock block{};
+                           return block;
+                         },
+                         [](std::string filename) -> UntypedLuaMuxBlock {
+                           UntypedLuaMuxBlock block{};
+                           block.lua().script_file(filename);
+                           return block;
+                         },
+                         [](sol::function fun) -> UntypedLuaMuxBlock {
+                           UntypedLuaMuxBlock block{};
+                           block.lua()["process"] = [=](std::unordered_map<std::string, std::any> &in) -> std::any {
+                             return fun.call<std::any>(in);
+                           };
+                           return block;
+                         }),
+                     "lua", &UntypedLuaMuxBlock::lua,
+                     "input_block", &UntypedLuaMuxBlock::input_block);
+  }
 
-  state.new_usertype<Scheduler>("Scheduler",
-                                sol::factories([](AnyBlock block, float secs) { return std::make_shared<Scheduler>(block, std::chrono::milliseconds(static_cast<int>(secs * 1000.0f))); }),
-                                "start", &Scheduler::start,
-                                "stop", &Scheduler::stop,
-                                "pause", &Scheduler::pause,
-                                "resume", &Scheduler::resume);
-  state["Scheduler"]["from_any"] = object_from_any_function<std::shared_ptr<Scheduler>>;
-  state["Scheduler"]["to_any"] = object_to_any_function<std::shared_ptr<Scheduler>>;
+  {
+    using Schedulable_ = Schedulable;
+    using Schedulable = Schedulable_ &;
+    AUV_NEW_SOL_TYPE(state, Schedulable, sol::no_constructor,
+                     "start", &Schedulable_::start,
+                     "stop", &Schedulable_::stop,
+                     "pause", &Schedulable_::pause,
+                     "resume", &Schedulable_::resume);
+  }
+
+  {
+    using Scheduler_ = Scheduler;
+    using Scheduler = std::shared_ptr<Scheduler_>;
+    AUV_NEW_SOL_TYPE(state, Scheduler,
+                     sol::factories([](AnyBlock block, float secs) { return std::make_shared<Scheduler_>(std::move(block), std::chrono::milliseconds(static_cast<int>(secs * 1000.0f))); }),
+                     sol::base_classes, sol::bases<Schedulable>());
+  }
 
   state.set_function("sleep", [](float sec) -> void {
     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sec * 1000)));
   });
 
-  state.set_function("current_time", []() -> float {
-    return static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) / 1000.0f;
+  auto startup_clock = std::chrono::system_clock::now();
+  state.set_function("current_time", [=]() -> double {
+    return static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startup_clock).count()) / 1000.0;
   });
 
   static bool initial_invocation = true;

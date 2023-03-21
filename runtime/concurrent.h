@@ -5,6 +5,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <functional>
+#include <list>
 #include <mutex>
 #include <thread>
 
@@ -12,7 +13,16 @@
 
 namespace auv {
 
-struct Scheduler {
+class Schedulable {
+public:
+  virtual ~Schedulable() = default;
+  virtual void start() = 0;
+  virtual void stop() = 0;
+  virtual void pause() = 0;
+  virtual void resume() = 0;
+};
+
+class Scheduler : public Schedulable {
 public:
   Scheduler(std::function<void(void)> task, std::chrono::milliseconds interval);
   template<class Block, class Block_ = wrap_ref_block<Block>, class = std::enable_if_t<std::is_same_v<typename Block_::In, std::any> || std::is_same_v<typename Block_::In, auv::unit_t>>>
@@ -20,10 +30,10 @@ public:
   ~Scheduler() {
     stop();
   }
-  void start();
-  void stop();
-  void pause();
-  void resume();
+  void start() override;
+  void stop() override;
+  void pause() override;
+  void resume() override;
 
 private:
   void run();
@@ -33,6 +43,17 @@ private:
   std::mutex m_mutex;
   std::condition_variable m_cv;
   std::atomic<bool> m_stopped = true, m_paused = false;
+};
+
+class SchedulerList : public Schedulable {
+public:
+  void start() override;
+  void stop() override;
+  void pause() override;
+  void resume() override;
+
+private:
+  std::list<std::shared_ptr<Schedulable>> m_list {};
 };
 
 }// namespace auv

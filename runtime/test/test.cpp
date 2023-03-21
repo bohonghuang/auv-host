@@ -46,10 +46,8 @@ TEST_CASE("Block 的类型擦除") {
 
 void setup_env(sol::state &state) {
   auv::lua::setup_env(state);
-  state.new_usertype<Plus1Block>("Plus1Block", sol::default_constructor,
-                                 AUV_BLOCK_SOL_METHODS(Plus1Block));
-  state.new_usertype<Times2Block>("Times2Block", sol::default_constructor,
-                                  AUV_BLOCK_SOL_METHODS(Times2Block));
+  AUV_NEW_SOL_TYPE(state, Plus1Block, sol::default_constructor);
+  AUV_NEW_SOL_TYPE(state, Times2Block, sol::default_constructor);
 }
 
 TEST_CASE("Lua 中 `std::any` 的类型转换与 Block 的动态连接") {
