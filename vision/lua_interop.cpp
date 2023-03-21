@@ -73,8 +73,7 @@ void auv::vision::lua::setup_env(sol::state &state) {
                    "result", &auv::vision::FindBarResults::result);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBarResult, sol::default_constructor,
-                   "point", &auv::vision::FindBarResult::point,
-                   "angle", &auv::vision::FindBarResult::angle);
+                   "points", &auv::vision::FindBarResult::points);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBarBlock,
                    sol::constructors<auv::vision::FindBarBlock(bool)>());

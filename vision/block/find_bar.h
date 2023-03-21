@@ -8,8 +8,7 @@
 namespace auv::vision {
 
 struct FindBarResult {
-  cv::Point2d point;
-  double angle;
+  cv::Point2d points[4];
 };
 
 struct FindBarResults {

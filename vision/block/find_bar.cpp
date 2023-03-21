@@ -86,13 +86,19 @@ FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
         line(preview, rect_points[i], rect_points[(i + 1) % 4],
              cv::Scalar(0, 255, 255), 2, cv::LINE_AA);
     }
-    cv::Point2d cent_point = utils::get_point_center<double>(contour);
-    double half_width = (double) process_frame.size().width / 2;
-    double half_height = (double) process_frame.size().height / 2;
-    cent_point.x = (cent_point.x - half_width) / half_width;
-    cent_point.y = -(cent_point.y - half_height) / half_height;
+
+    static const int frame_width = process_frame.size().width;
+    static const int frame_height = process_frame.size().height;
+    static const int half_width = frame_width / 2;
+    static const int half_height = frame_width / 2;
+
+    FindBarResult result;
+    for (size_t i = 0; i < 4; ++i) {
+      result.points[i] = {(rect_points[i].x - (float) half_width) / (float) frame_width,
+                         -(rect_points[i].y - (float) half_height) / (float) frame_height};
+    }
     //    auto dev = static_cast<float>((double) cent_point.x / frame.size().width - 0.5);
-    results.push_back({cent_point, deg});
+    results.push_back(result);
   }
 
   if (m_debug) {
