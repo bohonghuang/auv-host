@@ -19,9 +19,9 @@ void auv::vision::lua::setup_env(sol::state &state) {
     return auv::vision::CameraManager::GetInstance();
   });
 
-  state.set_function("GetCapture", [](int index) -> cv::VideoCapture & {
+  state.set_function("GetCapture", sol::overload([](const std::string& index) -> cv::VideoCapture & {
     return auv::vision::CameraManager::GetInstance().get_capture(index);
-  });
+  }));
 
   AUV_NEW_SOL_TYPE(state, auv::vision::UploadBlock, sol::constructors<auv::vision::UploadBlock(const std::string &, int, int)>());
 

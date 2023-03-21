@@ -21,21 +21,21 @@ function main(input)
         update()
     end
     while true do
-        if #bars > 0 then
-            bar = FindBarResult.new()
-            bar.points.x = 0.0
-            bar.points.y = 0.0
-            for i = 1, #bars do
-                local bar_i = bars[i]
-                print(bar_i.area)
-                print("points_x:", bar_i.points.x)
-                print("points_y:", bar_i.points.y)
-                --bar.points.x = bar.points.x + bar_i.points.x
-                --bar.points.y = bar.points.y + bar_i.points.y
-            end
-            bar.points.x = bar.points.x / #bars
-            bar.points.y = bar.points.y / #bars
-        end
+        --if #bars > 0 then
+        --    bar = FindBarResult.new()
+        --    bar.points.x = 0.0
+        --    bar.points.y = 0.0
+        --    for i = 1, #bars do
+        --        local bar_i = bars[i]
+        --        print(bar_i.area)
+        --        print("points_x:", bar_i.points.x)
+        --        print("points_y:", bar_i.points.y)
+        --        --bar.points.x = bar.points.x + bar_i.points.x
+        --        --bar.points.y = bar.points.y + bar_i.points.y
+        --    end
+        --    bar.points.x = bar.points.x / #bars
+        --    bar.points.y = bar.points.y / #bars
+        --end
         if detect then
             for i = 1, #detect do
                 print(detect[i].name)

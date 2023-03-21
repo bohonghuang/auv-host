@@ -1,4 +1,4 @@
-cam = CameraBlock.new(GetCapture(0))
+cam = CameraBlock.new(GetCapture("0"))
 
 calibr_params = CameraParams.new()
 calibr_params.fx = 588.4306598875787
