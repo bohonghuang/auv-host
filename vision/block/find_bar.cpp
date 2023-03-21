@@ -46,40 +46,40 @@ FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
     cv::Point2f rect_points[4];
     auto rect = cv::minAreaRect(contour);
     rect.points(rect_points);
-    auto dist01 = utils::get_point_dist<double>(rect_points[0], rect_points[1]);
-    auto dist12 = utils::get_point_dist<double>(rect_points[1], rect_points[2]);
-    auto [width, length] = std::minmax({dist01, dist12});
-
-    // std::cout << "length:" << length << "   width:" << width << std::endl;
-    if (width < (double) height / 12) {
-      // std::cout << "width" << std::endl;
-      continue;
-    }
-    if (length < (float) height / 8) {
-      // std::cout << "length < (float) high" << std::endl;
-      continue;
-    }
-    if (length / width > 6) {
-      // std::cout << "length / width > 6" << std::endl;
-      continue;
-    }
+    //auto dist01 = utils::get_point_dist<double>(rect_points[0], rect_points[1]);
+    //auto dist12 = utils::get_point_dist<double>(rect_points[1], rect_points[2]);
+    //    auto [width, length] = std::minmax({dist01, dist12});
+    //    // std::cout << "length:" << length << "   width:" << width << std::endl;
+    //    if (width < (double) height / 12) {
+    //      // std::cout << "width" << std::endl;
+    //      continue;
+    //    }
+    //    if (length < (float) height / 8) {
+    //      // std::cout << "length < (float) high" << std::endl;
+    //      continue;
+    //    }
+    //    if (length / width > 6) {
+    //      // std::cout << "length / width > 6" << std::endl;
+    //      continue;
+    //    }
 
     cv::Mat mask = cv::Mat::zeros(frame.size(), CV_8UC1);
     cv::fillPoly(mask, utils::transform_points(rect_points), cv::Scalar(255, 255, 255));
     cv::Mat mask_result;
     cv::bitwise_and(process_frame, mask, mask_result);
-    auto fill_percent = (double) cv::countNonZero(mask_result) / cv::countNonZero(mask);
-    if (fill_percent < 0.6f)
-      continue;
+    double non_zero_count = cv::countNonZero(mask_result);
+//    auto fill_percent = non_zero_count / cv::countNonZero(mask);
+//    if (fill_percent < 0.6f)
+//      continue;
 
-    float deg;
-    if (dist01 > dist12)
-      deg = utils::get_point_deg_in_bottom_axis(rect_points[0], rect_points[1]);
-    else
-      deg = utils::get_point_deg_in_bottom_axis(rect_points[1], rect_points[2]);
-    deg = 90.0f - deg;
-    if (std::abs(deg) > 60)
-      continue;
+//    float deg;
+//    if (dist01 > dist12)
+//      deg = utils::get_point_deg_in_bottom_axis(rect_points[0], rect_points[1]);
+//    else
+//      deg = utils::get_point_deg_in_bottom_axis(rect_points[1], rect_points[2]);
+//    deg = 90.0f - deg;
+//    if (std::abs(deg) > 60)
+//      continue;
 
     if (m_debug) {
       for (size_t i = 0; i < 4; i++)
@@ -90,12 +90,14 @@ FindBarBlock::Out FindBarBlock::process(cv::Mat frame) {
     static const int frame_width = process_frame.size().width;
     static const int frame_height = process_frame.size().height;
     static const int half_width = frame_width / 2;
-    static const int half_height = frame_width / 2;
+    static const int half_height = frame_height / 2;
 
     FindBarResult result;
+    static const auto all_img_area = frame_width * frame_height;
+    result.area = non_zero_count / all_img_area;
     for (size_t i = 0; i < 4; ++i) {
-      result.points[i] = {(rect_points[i].x - (float) half_width) / (float) frame_width,
-                         -(rect_points[i].y - (float) half_height) / (float) frame_height};
+      result.points[i] = {(rect_points[i].x - (float) half_width) / (float) half_width,
+                          -(rect_points[i].y - (float) half_height) / (float) half_height};
     }
     //    auto dev = static_cast<float>((double) cent_point.x / frame.size().width - 0.5);
     results.push_back(result);

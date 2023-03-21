@@ -31,10 +31,9 @@ void CameraManager::add_capture(const std::vector<CaptureParams> &indexs) noexce
 
 
 cv::VideoCapture &CameraManager::get_capture(int index) noexcept {
+  std::unique_lock<std::mutex> lock(m_mutex);
   if (index >= m_video_captures.size()) {
-    m_mutex.lock();
     this->add_capture({{index, {640, 480}}});
-    m_mutex.unlock();
     return m_video_captures[index];
   }
 

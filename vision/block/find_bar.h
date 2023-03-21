@@ -8,7 +8,8 @@
 namespace auv::vision {
 
 struct FindBarResult {
-  cv::Point2d points[4];
+  double area;
+  std::array<cv::Point2d, 4> points;
 };
 
 struct FindBarResults {

@@ -23,7 +23,7 @@ inrange_params.low_3 = 65
 inrange_params.high_3 = 130
 inrange = InRangeBlock.new(inrange_params)
 
-find_bar = FindBarBlock.new(false)
+find_bar = FindBarBlock.new(true)
 
 -- show = ImshowBlock.new()
 bio = ObjectDetectBlock.new()
