@@ -59,7 +59,7 @@ function main(input)
         local bar_any = input["find_bar"]
         if bar_any then
             boxes = FindBarResults.from_any(bar_any).result
-            -- writer:process(FindBarResults.from_any(bar_any).frame)
+            writer:process(FindBarResults.from_any(bar_any).frame)
         else
             boxes = {}
         end
@@ -188,7 +188,7 @@ function main(input)
                 print(detect[i].name)
             end
         end
-        --sleep(0.1)
+        sleep(0.1)
     end
 end
 

@@ -33,7 +33,7 @@ local function ball_filter(bars)
         local deg = point_deg(p1, p2) - 90.0
 
         table.insert(results, { cx = cx, cy = cy, deg = deg, area = area })
-        ::continue::
+        :: continue ::
     end
     table.sort(results, function(a, b)
         return a.area > b.area
@@ -59,9 +59,10 @@ function main(input)
         update()
     end
 
-    --server.move({x = 0.0, y = 0.0, z = -0.5, rot = 0.0 })
-    --sleep(3)
-    server.catch{1.0}
+    -- server.move({x = 0.0, y = 0.0, z = -0.5, rot = 0.0 })
+    -- sleep(3)
+    server.catch { 1.0 }
+    local sink_acc = -0.45
     while true do
         local function find_left_right(update_function)
             local function try_motion(motion, duration)
@@ -83,12 +84,12 @@ function main(input)
                     end
                 end
             end
-            try_motion({ x = 0.0, y = 0.5, z = 0.0, rot = 0.0 }, 3.0)
+            try_motion({ x = 0.0, y = 0.5, z = sink_acc, rot = 0.0 }, 3.0)
             local rotation = 0.5
             for duration = 1, 3 do
-                if try_motion({ x = 0.0, y = 0.0, z = 0.0, rot = rotation }, duration / 2.0) or
-                        try_motion({ x = 0.0, y = 0.0, z = 0.0, rot = -rotation }, duration) or
-                        try_motion({ x = 0.0, y = 0.0, z = 0.0, rot = rotation }, duration / 2.0) then
+                if try_motion({ x = 0.0, y = 0.0, z = sink_acc, rot = rotation }, duration / 2.0) or
+                        try_motion({ x = 0.0, y = 0.0, z = sink_acc, rot = -rotation }, duration) or
+                        try_motion({ x = 0.0, y = 0.0, z = sink_acc, rot = rotation }, duration / 2.0) then
                     return true
                 end
             end
@@ -99,7 +100,7 @@ function main(input)
             --if #bottom_balls > 0 then
             --    if bottom_balls[1].cy < 0.6 then
             --        print("下摄像头：直行......")
-            --        server.move{ x = 0.0, y = 1.0, z = -0.45, rot = 0.0 }
+            --        server.move{ x = 0.0, y = 1.0, z = sink_acc, rot = 0.0 }
             --        sleep(1.5)
             --        server.catch{-1.0}
             --        server.move{ x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
@@ -112,14 +113,15 @@ function main(input)
                     if front_balls[1].deg < 85 then
                         print("正在直行 微调")
                         print(front_balls[1].deg)
-                        return { x = 0.0, y = 0.36, z = -0.45, rot = front_balls[1].deg }
+                        return { x = 0.0, y = 0.36, z = sink_acc, rot = front_balls[1].deg / 90.0 / 2.0 }
                     else
                         print("偏离角度过大，减小速度")
-                        return { x = 0.0, y = 0.15, z = -0.45, rot = front_balls[1].deg }
+                        print(front_balls[1].deg)
+                        return { x = 0.0, y = 0.15, z = sink_acc, rot = front_balls[1].deg / 90.0 / 2.0 }
                     end
                 else
                     print("前摄像头：直行......")
-                    return { x = 0.0, y = 0.36, z = -0.45, rot = 0.0 }
+                    return { x = 0.0, y = 0.36, z = sink_acc, rot = 0.0 }
                 end
             end
             return {}
