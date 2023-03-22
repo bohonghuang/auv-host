@@ -37,6 +37,12 @@ local function point_deg(p1, p2)
    end
 end
 
+local function bottom_x(cx, cy, deg)
+   local bx = cx - math.tan(math.rad(math.min(math.max(-85.0, deg), 85))) * (cy - (-1.0))
+   bx = math.min(math.max(-1.0, bx), 1.0)
+   return bx
+end
+
 local function boxes_bars(bars)
    local results = {}
    for i = 1, #bars do
@@ -63,13 +69,11 @@ local function boxes_bars(bars)
          p1, p2 = points[2], points[3]
       end
       local deg = point_deg(p1, p2) - 90.0
-      if math.abs(deg) > 80.0 then
+      if math.abs(deg) > 89.0 then
          goto continue
       end
       local cx, cy = point_center(points[1], points[2], points[3], points[4])
-      local bx = cx - math.tan(math.rad(math.min(math.max(-85.0, deg), 85))) * (cy - (-1.0))
-      bx = math.min(math.max(-1.0, bx), 1.0)
-      table.insert(results, { bx, cy, deg, fill_rate, area })
+      table.insert(results, { cx, cy, deg, fill_rate, area })
       ::continue::
    end
    table.sort(results, function(a, b) return a[4] * a[5] > b[4] * b[5] end)
@@ -99,15 +103,96 @@ function main(input)
    end
 
    while true do
-      local bars = boxes_bars(boxes)
-      local bar = bars[1]
-      if bar then
-         local x_norm, y_norm, deg, fill_rate, area = unpack(bar)
-         print(x_norm, deg)
-         server.move{x=x_norm, y=0.2, z=0.0, rot=(deg / 90.0) / 2.0}
-      else
-         server.move{x=0.0, y=0.0, z=0.0, rot=0.0}
+      local bars
+      local function update_results()
+         bars = boxes_bars(boxes)
+         return #bars > 0
       end
+      update_results()
+      ::find_bar_start::
+      ::find_bar_2::
+      if #bars >= 2 then
+         if bars[1][2] > bars[2][2] then
+            bars[1], bars[2] = bars[2], bars[1]
+         end
+         local p1, p2 = cv.Point2d.new(), cv.Point2d.new()
+         local deg2
+         p1.x, p1.y = unpack(bars[1])
+         p2.x, p2.y, deg2 = unpack(bars[2])
+         if p1.y > 0.25 then
+            -- +-----------+
+            -- |       --- |
+            -- |     |     |
+            -- |     |     |
+            -- +-----------+
+            goto find_bar_1
+         end
+         -- +-----------+
+         -- |           |
+         -- |       --- |
+         -- |     |     |
+         -- +-----------+
+         local deg = point_deg(p1, p2) - 90.0
+         local bx = p1.x
+         print(2, bx, deg)
+         server.move{x=bx, y=0.2, z=0.0, rot=(deg / 90.0) / 2.0}
+         goto find_bar_finish
+      end
+      ::find_bar_1::
+      if #bars >= 1 then
+         local cx, cy, deg = unpack(bars[1])
+         local bx = bottom_x(cx, cy, deg)
+         local by = 0.2
+         if math.abs(deg) > 75.0 then
+            -- +-----------+
+            -- |           |
+            -- |      ,_.-^|
+            -- |     `     |
+            -- +-----------+
+            deg = 90.0 * cx
+         elseif math.abs(cx) > 0.5 and math.abs(deg) > 30.0 and cx * deg < 0.0 then
+            -- +-----------+
+            -- |       \   |
+            -- |        \  |
+            -- |         \ |
+            -- +-----------+
+            deg = deg / (math.abs(cx) * 4.0)
+            by = by / (math.abs(cx) * 4.0)
+         end
+         print(1, bx, deg)
+         server.move{x=bx, y=by, z=0.0, rot=(deg / 90.0) / 2.0}
+         goto find_bar_finish
+      end
+      ::find_bar_0::
+      if #bars >= 0 then
+         print(0)
+         local function try_motion(motion, duration)
+            local delta = 0.1
+            while true do
+               server.move(motion)
+               sleep(delta)
+               if update_results() then
+                  return true
+               end
+               duration = duration - delta
+               if duration <= 0.0 then
+                  return false
+               end
+            end
+         end
+         try_motion({x=0.0, y=0.5, z=0.0, rot=0.0}, 3.0)
+         local rotation = 0.5
+         for duration=1,3 do
+            if try_motion({x=0.0, y=0.0, z=0.0, rot=rotation}, duration / 2.0) or
+               try_motion({x=0.0, y=0.0, z=0.0, rot=-rotation}, duration) or
+               try_motion({x=0.0, y=0.0, z=0.0, rot=rotation}, duration / 2.0) then
+               print("重新巡线")
+               goto find_bar_start
+            end
+         end
+         goto find_bar_finish
+      end
+      ::find_bar_finish::
       if #detect > 0 then
          for i = 1, #detect do
             print(detect[i].name)

@@ -45,7 +45,7 @@ main_task = Scheduler.new(mux_block:as_untyped(), 1.0 / 15.0)
 tasks = SchedulerList.new(find_bar_task, main_task)
 
 server.move{x=0.0, y=0.0, z=0.0, rot=0.0}
-server.set_depth_locked(false)
+server.set_depth_locked{false}
 
 function start_all()
    server.move{x=0.0, y=0.0, z=0.0, rot=0.0}
@@ -57,22 +57,24 @@ function start_all()
    -- sleep(1.0)
    -- print("深度锁定 1")
    -- sleep(1.0)
-   server.set_depth_locked(true)
+   server.set_depth_locked{true}
    tasks:start()
 end
 
 function stop_all()
    server.move{x=0.0, y=0.0, z=0.0, rot=0.0}
-   server.set_depth_locked(false)
+   server.set_depth_locked{false}
    tasks:stop()
 end
 
 function pause_all()
    server.move{x=0.0, y=0.0, z=0.0, rot=0.0}
+   server.set_depth_locked{false}
    tasks:pause()
 end
 
 function resume_all()
    server.move{x=0.0, y=0.0, z=0.0, rot=0.0}
+   server.set_depth_locked{true}
    tasks:resume()
 end
