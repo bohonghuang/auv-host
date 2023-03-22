@@ -30,7 +30,8 @@ CameraBlock::CameraBlock(cv::VideoCapture &cap) noexcept
 
 static std::mutex s_mutex;
 
-cv::Mat CameraBlock::process(auv::unit_t) noexcept {
+cv::Mat
+CameraBlock::process(auv::unit_t) noexcept {
   cv::Mat frame;
 
   std::unique_lock<std::mutex> lock(s_mutex);

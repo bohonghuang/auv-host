@@ -2,7 +2,7 @@
 #include "lua_block.h"
 
 void auv::application::lua::setup_env(sol::state &state) {
-  if(state["application"].is<sol::table>()) return;
+  if (state["application"].is<sol::table>()) return;
   state.create_named_table("application");
   auv::lua::setup_env(state);
   auv::vision::lua::setup_env(state);

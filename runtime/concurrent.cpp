@@ -85,7 +85,8 @@ void SharedBaseScheduler::resume() {
   m_pointer->resume();
 }
 
-std::shared_ptr<BaseScheduler> SharedBaseScheduler::pointer() {
+std::shared_ptr<BaseScheduler>
+SharedBaseScheduler::pointer() {
   return m_pointer;
 }
 

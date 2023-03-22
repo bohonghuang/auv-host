@@ -37,8 +37,8 @@ TEST_CASE("视觉算法集成测试") {
     for (int i = 0; i < 10; ++i) {
       auto t1 = std::chrono::steady_clock::now();
       auto results = pipe.process({});
-      auto& result = results.result;
-      auto& frame = results.frame;
+      auto &result = results.result;
+      auto &frame = results.frame;
       auto t2 = std::chrono::steady_clock::now();
       std::cout << "time(s):" << std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count() << std::endl;
     }

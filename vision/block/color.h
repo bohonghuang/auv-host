@@ -12,6 +12,7 @@ public:
   explicit ConvertColorBlock(int code);
   Out process(In in) override;
   AUV_BLOCK;
+
 private:
   int m_code;
 };
@@ -28,11 +29,12 @@ struct InRangeParams {
 class InRangeBlock : public auv::Block<cv::Mat, cv::Mat> {
 public:
   InRangeBlock() = default;
-  explicit InRangeBlock(const InRangeParams& params);
-  void set_params(const InRangeParams& params);
+  explicit InRangeBlock(const InRangeParams &params);
+  void set_params(const InRangeParams &params);
   void set_range(int param1_low, int param2_low, int param3_low, int param1_high, int param2_high, int param3_high);
   Out process(In) override;
   AUV_BLOCK;
+
 private:
   InRangeParams m_params{};
 };

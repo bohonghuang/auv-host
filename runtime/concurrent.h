@@ -49,7 +49,8 @@ public:
   void stop() override;
   void pause() override;
   void resume() override;
-  void add(std::shared_ptr<BaseScheduler> scheduler) {
+  void
+  add(std::shared_ptr<BaseScheduler> scheduler) {
     m_list.push_back(std::move(scheduler));
   }
 
@@ -82,7 +83,7 @@ SharedScheduler::SharedScheduler(Block block, std::chrono::milliseconds interval
 class SharedSchedulerList : public SharedBaseScheduler {
 public:
   SharedSchedulerList();
-  void add(SharedBaseScheduler& scheduler);
+  void add(SharedBaseScheduler &scheduler);
 };
 
 }// namespace auv

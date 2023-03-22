@@ -5,7 +5,8 @@
 namespace auv::vision {
 
 
-cv::Mat ImshowBlock::process(cv::Mat frame) noexcept {
+cv::Mat
+ImshowBlock::process(cv::Mat frame) noexcept {
   cv::imshow("preview", frame);
   cv::waitKey(1);
   return frame;
@@ -17,7 +18,8 @@ UploadBlock::UploadBlock(std::string address, int width, int height)
 }
 
 
-cv::Mat UploadBlock::process(cv::Mat frame) noexcept {
+cv::Mat
+UploadBlock::process(cv::Mat frame) noexcept {
   static cv::VideoWriter writer = [this]() -> cv::VideoWriter {
     std::cout << m_address << std::endl;
     cv::VideoWriter writer(m_address, 0, 30.0, cv::Size(width, height));

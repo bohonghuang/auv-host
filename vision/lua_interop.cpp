@@ -5,6 +5,7 @@
 #include "block/camera_calibr.h"
 #include "block/color.h"
 #include "block/detect.h"
+#include "block/find_ball.h"
 #include "block/find_bar.h"
 #include "block/imshow.h"
 
@@ -19,9 +20,9 @@ void auv::vision::lua::setup_env(sol::state &state) {
     return auv::vision::CameraManager::GetInstance();
   });
 
-  state.set_function("GetCapture", sol::overload([](const std::string& index) -> cv::VideoCapture & {
-    return auv::vision::CameraManager::GetInstance().get_capture(index);
-  }));
+  state.set_function("GetCapture", sol::overload([](const std::string &index) -> cv::VideoCapture & {
+                       return auv::vision::CameraManager::GetInstance().get_capture(index);
+                     }));
 
   AUV_NEW_SOL_TYPE(state, auv::vision::UploadBlock, sol::constructors<auv::vision::UploadBlock(const std::string &, int, int)>());
 
@@ -65,7 +66,7 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(ns_cv, cv::Point, sol::default_constructor, "x", &cv::Point::x, "y", &cv::Point::y);
   AUV_NEW_SOL_TYPE(ns_cv, cv::Point2d, sol::default_constructor, "x", &cv::Point2d::x, "y", &cv::Point2d::y);
   AUV_NEW_SOL_TYPE(ns_cv, cv::Size, sol::default_constructor, "width", &cv::Size::width, "height", &cv::Size::height);
-  ns_cv.set_function("imshow", sol::resolve<void(const std::string&, cv::InputArray)>(&cv::imshow));
+  ns_cv.set_function("imshow", sol::resolve<void(const std::string &, cv::InputArray)>(&cv::imshow));
   ns_cv.set_function("waitKey", sol::resolve<int(int)>(&cv::waitKey));
   ns_cv.set_function("destroyAllWindows", &cv::destroyAllWindows);
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBarResults, sol::no_constructor,
@@ -79,10 +80,20 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBarBlock,
                    sol::constructors<auv::vision::FindBarBlock(bool)>());
 
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindBallResults, sol::no_constructor,
+                   "frame", &auv::vision::FindBallResults::frame,
+                   "result", &auv::vision::FindBallResults::result);
+
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindBallResult, sol::default_constructor,
+                   "points", &auv::vision::FindBallResult::points);
+
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindBallBlock,
+                   sol::constructors<auv::vision::FindBarBlock(bool)>());
+
   AUV_NEW_SOL_TYPE(state, auv::vision::network::YoloFastV2Result, sol::no_constructor,
-		  "name", &auv::vision::network::YoloFastV2Result::name,
-		  "rect", &auv::vision::network::YoloFastV2Result::rect,
-		  "confidences", &auv::vision::network::YoloFastV2Result::confidences);
+                   "name", &auv::vision::network::YoloFastV2Result::name,
+                   "rect", &auv::vision::network::YoloFastV2Result::rect,
+                   "confidences", &auv::vision::network::YoloFastV2Result::confidences);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::ObjectDetectResults, sol::no_constructor,
                    "frame", &auv::vision::ObjectDetectResults::frame,

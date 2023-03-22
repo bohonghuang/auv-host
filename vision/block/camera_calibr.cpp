@@ -6,7 +6,8 @@ CameraCalibrateBlock::CameraCalibrateBlock(const CameraParams &camera_params) no
     : m_camera_params(camera_params) {}
 
 
-cv::Mat CameraCalibrateBlock::process(cv::Mat frame) noexcept {
+cv::Mat
+CameraCalibrateBlock::process(cv::Mat frame) noexcept {
   static const auto distort_map = [this, &frame]() -> std::array<cv::Mat, 2> {
     cv::Mat map[2];
     cv::Mat camera_matrix = (cv::Mat_<double>(3, 3) << m_camera_params.fx,
@@ -22,7 +23,7 @@ cv::Mat CameraCalibrateBlock::process(cv::Mat frame) noexcept {
     return {map[0], map[1]};
   }();
 
-  if(distort_map[0].empty())
+  if (distort_map[0].empty())
     return frame;
   cv::remap(frame, frame, distort_map[0], distort_map[1], cv::INTER_LINEAR);
   return frame;

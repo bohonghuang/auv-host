@@ -23,10 +23,12 @@ struct Reader {
 
 template<typename T, typename U>
 struct Writer {
-  friend auto adl_GetSelfType(Reader<T>) { return U{}; }
+  friend auto
+  adl_GetSelfType(Reader<T>) { return U{}; }
 };
 
-inline void adl_GetSelfType() {}
+inline void
+adl_GetSelfType() {}
 
 template<typename T>
 using Read = std::remove_pointer_t<decltype(adl_GetSelfType(Reader<T>{}))>;
@@ -162,9 +164,12 @@ class ChainBlock : public Block<typename std::remove_reference_t<Block1_>::In,
 
 public:
   ChainBlock(Block1 block1, Block2 block2) : m_block_1(std::move(block1)), m_block_2(std::move(block2)) {}
-  typename Block2::Out process(typename Block1::In in) override {
+
+  typename Block2::Out
+  process(typename Block1::In in) override {
     return m_block_2.process(m_block_1.process(in));
   }
+
   AUV_BASIC_BLOCK;
 
 private:
@@ -184,7 +189,8 @@ public:
 template<class I>
 class IntoAnyBlock : public Block<I, std::any> {
 public:
-  std::any process(I in) override {
+  std::any
+  process(I in) override {
     return in;
   }
   AUV_BASIC_BLOCK;
@@ -207,11 +213,13 @@ class AnyBlock : public Block<std::any, std::any> {
 public:
   template<class B>
   AnyBlock(B block) : m_block(std::make_shared<B>(block)) {}
-  std::any process(std::any in) override {
+  std::any
+  process(std::any in) override {
     return m_block->process(in);
   }
   AUV_BASIC_BLOCK;
-  AnyBlock connect(AnyBlock block) {
+  AnyBlock
+  connect(AnyBlock block) {
     return (*this | std::move(block)).as_untyped();
   }
 
@@ -252,7 +260,8 @@ class SharedBlock : public Block<typename B::In, typename B::Out> {
 public:
   explicit SharedBlock(std::shared_ptr<B> ptr) : m_ptr(ptr) {}
   explicit SharedBlock(B &&b) : m_ptr(std::make_shared<B>(std::move(b))) {}
-  typename B::Out process(typename B::In in) override {
+  typename B::Out
+  process(typename B::In in) override {
     return m_ptr->process(in);
   }
 
@@ -267,7 +276,9 @@ public:
   class InputBlock : public Block<std::any, unit_t> {
   public:
     InputBlock(std::weak_ptr<UntypedMuxBlock> parent, Key key) : m_ref_parent(std::move(parent)), m_key(std::move(key)) {}
-    unit_t process(std::any in) override {
+
+    unit_t
+    process(std::any in) override {
       if (auto parent = m_ref_parent.lock()) {
         auto lock_guard = parent->buffer_lock_guard();
         parent->m_buffer[m_key] = in;
@@ -280,11 +291,14 @@ public:
     std::weak_ptr<UntypedMuxBlock> m_ref_parent;
     Key m_key;
   };
-  std::lock_guard<std::mutex> buffer_lock_guard() {
+
+  std::lock_guard<std::mutex>
+  buffer_lock_guard() {
     return std::lock_guard<std::mutex>{m_buffer_mutex};
   }
 
-  const std::unordered_map<Key, std::any> &buffer() const {
+  const std::unordered_map<Key, std::any> &
+  buffer() const {
     return m_buffer;
   }
 
@@ -296,12 +310,15 @@ private:
 class SharedUntypedMuxBlock : public SharedBlock<UntypedMuxBlock> {
 public:
   using SharedBlock<UntypedMuxBlock>::SharedBlock;
-  UntypedMuxBlock::InputBlock input_block(UntypedMuxBlock::Key key) {
+
+  UntypedMuxBlock::InputBlock
+  input_block(UntypedMuxBlock::Key key) {
     return {m_ptr, key};
   }
 
 protected:
-  std::lock_guard<std::mutex> buffer_lock_guard() {
+  std::lock_guard<std::mutex>
+  buffer_lock_guard() {
     return m_ptr->buffer_lock_guard();
   }
   const std::unordered_map<UntypedMuxBlock::Key, std::any> &m_buffer = m_ptr->buffer();
@@ -311,7 +328,9 @@ template<class Block1, class Block2, class In = std::common_type_t<typename Bloc
 class TeeBlock : public Block<In, unit_t> {
 public:
   TeeBlock(Block1 block1, Block2 block2) : m_block_1(block1), m_block_2(block2) {}
-  unit_t process(In in) override {
+
+  unit_t
+  process(In in) override {
     m_block_1.process(in);
     m_block_2.process(in);
     return {};

@@ -1,14 +1,15 @@
-#include "find_bar.h"
+//
+// Created by qff233 on 23-3-22.
+//
+#include "find_ball.h"
 
-#include "utils.h"
+auv::vision::FindBallBlock::FindBallBlock(bool debug)
+    : m_debug(debug) {
+}
 
-namespace auv::vision {
 
-FindBarBlock::FindBarBlock(bool debug)
-    : m_debug(debug) {}
-
-FindBarBlock::Out
-FindBarBlock::process(cv::Mat frame) {
+auv::vision::FindBallResults
+auv::vision::FindBallBlock::process(cv::Mat frame) {
   cv::Mat preview;
   if (m_debug) {
     preview = frame.clone();
@@ -29,7 +30,7 @@ FindBarBlock::process(cv::Mat frame) {
   cv::findContours(frame, contours, cv::noArray(),
                    cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-  FindBarResults output;
+  FindBallResults output;
   auto &point_results = output.result;
   point_results.reserve(contours.size());
   for (const auto &contour: contours) {
@@ -37,16 +38,11 @@ FindBarBlock::process(cv::Mat frame) {
     auto rect = cv::minAreaRect(contour);
     rect.points(rect_points);
 
-    cv::Mat mask = cv::Mat::zeros(frame.size(), CV_8UC1);
-    cv::fillPoly(mask, utils::transform_points_from_array_to_vector(rect_points), cv::Scalar(255, 255, 255));
-    cv::Mat mask_result;
-    cv::bitwise_and(frame, mask, mask_result);
-    double non_zero_count = cv::countNonZero(mask_result);
-
     if (m_debug) {
-      for (size_t i = 0; i < 4; i++)
+      for (size_t i = 0; i < 4; ++i) {
         cv::line(preview, rect_points[i], rect_points[(i + 1) % 4],
                  cv::Scalar(0, 255, 255), 2, cv::LINE_AA);
+      }
       output.frame = preview;
     }
 
@@ -55,16 +51,13 @@ FindBarBlock::process(cv::Mat frame) {
     static const int half_width = frame_width / 2;
     static const int half_height = frame_height / 2;
 
-    FindBarResult result;
-    static const auto all_img_area = frame_width * frame_height;
-    result.area = non_zero_count / all_img_area;
+    FindBallResult result;
     for (size_t i = 0; i < 4; ++i) {
-      result.points[i] = {(rect_points[i].x - (float) half_width) / (float) half_width,
-                          -(rect_points[i].y - (float) half_height) / (float) half_height};
+      result.points[i] = {
+          (rect_points[i].x - (float) half_width) / (float) half_width,
+          -(rect_points[i].y - (float) half_height) / (float) half_height};
     }
     point_results.push_back(result);
   }
   return output;
 }
-
-}// namespace auv::vision

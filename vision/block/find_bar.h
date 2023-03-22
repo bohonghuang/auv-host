@@ -23,10 +23,11 @@ public:
 
   Out process(In frame) override;
   AUV_BLOCK;
+
 private:
   bool m_debug = false;
 };
 
-}
+}// namespace auv::vision
 
 #endif//AUV_HOST_FIND_BAR_H

@@ -5,7 +5,8 @@
 
 void (*auv::lua::setup_env_all)(sol::state &);
 
-const char *sol_type_name(sol::type tpe) {
+const char *
+sol_type_name(sol::type tpe) {
   switch (tpe) {
     case sol::type::none:
       return "sol::type::none";
@@ -56,7 +57,8 @@ template<class tpe>
 static constexpr sol::type cpp_type_sol_type = cpp_type_sol_type_impl<tpe>::type;
 
 template<class cpp_result_type, sol::type sol_type = cpp_type_sol_type<cpp_result_type>, class cpp_receive_type = sol_type_cpp_type<sol_type>>
-std::any sol_object_any(sol::object obj) {
+std::any
+sol_object_any(sol::object obj) {
   if (obj.get_type() == sol_type) {
     return static_cast<cpp_result_type>(obj.as<cpp_receive_type>());
   } else {
@@ -67,7 +69,8 @@ std::any sol_object_any(sol::object obj) {
 };
 
 template<class cpp_type, sol::type sol_type = cpp_type_sol_type<cpp_type>>
-cpp_type any_sol_object(sol::object obj) {
+cpp_type
+any_sol_object(sol::object obj) {
   if (obj.is<std::any>()) {
     return std::any_cast<cpp_type>(obj.as<std::any>());
   } else {
@@ -275,7 +278,7 @@ void auv::lua::setup_env(sol::state &state) {
     AUV_NEW_SOL_TYPE(state, SchedulerList,
                      sol::factories([](sol::variadic_args va) -> SchedulerList {
                        SchedulerList list{};
-                       for (SharedBaseScheduler& scheduler : va) {
+                       for (SharedBaseScheduler &scheduler: va) {
                          list.add(scheduler);
                        }
                        return list;

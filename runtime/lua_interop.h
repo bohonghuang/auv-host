@@ -11,21 +11,24 @@ namespace auv::lua {
 
 template<class T, class = decltype(&T::process), class = void>
 struct block_process_overload_impl {
-  static auto get() {
+  static auto
+  get() {
     return &T::process;
   }
 };
 
 template<class T, class R, class A, class N>
 struct block_process_overload_impl<T, R (N::*)(A), std::enable_if_t<std::is_same_v<A, std::any> || std::is_same_v<A, auv::unit_t>>> {
-  static auto get() {
+  static auto
+  get() {
     return sol::overload([](T &self) -> R { return self.process(unit_t{}); }, &T::process);
   }
 };
 
 template<class T, class R, class A, class N>
 struct block_process_overload_impl<T, R (N::*)(A) noexcept, std::enable_if_t<std::is_same_v<A, std::any> || std::is_same_v<A, auv::unit_t>>> {
-  static auto get() {
+  static auto
+  get() {
     return block_process_overload_impl<T, R (N::*)(A)>::get();
   }
 };
@@ -36,7 +39,8 @@ auto block_process_overload() {
 }
 
 template<class T>
-std::any object_to_any(T obj) {
+std::any
+object_to_any(T obj) {
   return obj;
 }
 
@@ -79,7 +83,8 @@ static_assert(is_block_type<AnyBlock>());
 static_assert(!is_block_type<int>());
 
 template<class T, class Table, class... Arg>
-inline void new_sol_type_impl(Table&& table, const char *name, Arg&&... arg) {
+inline void
+new_sol_type_impl(Table &&table, const char *name, Arg &&...arg) {
   using Type = remove_smart_ptr<std::decay_t<T>>;
   if constexpr (is_block_type<Type>())
     table.template new_usertype<Type>(name, std::forward<Arg>(arg)..., "process", auv::lua::block_process_overload<Type>(), "as_untyped", &Type::as_untyped);
@@ -92,7 +97,8 @@ inline void new_sol_type_impl(Table&& table, const char *name, Arg&&... arg) {
 }
 
 
-constexpr const char *type_name_without_namespace(const char *name) {
+constexpr const char *
+type_name_without_namespace(const char *name) {
   const char *result = name;
   char prev_char = '\0';
   while (*name != '\0') {

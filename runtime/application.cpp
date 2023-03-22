@@ -1,13 +1,13 @@
 #include "application.h"
-#include <readline/readline.h>
 #include <readline/history.h>
+#include <readline/readline.h>
 
 #include <iostream>
 
 namespace auv {
 
 void Application::run() noexcept {
-  static std::string history_file = std::string { getenv("HOME") } + "/.auv-host.history";
+  static std::string history_file = std::string{getenv("HOME")} + "/.auv-host.history";
   char *line;
   std::string prompt;
   read_history(history_file.c_str());
@@ -23,14 +23,15 @@ void Application::run() noexcept {
     try {
       m_lua.script(line);
     } catch (std::exception &e) {
-       std::cout << "Evaluation error: " << e.what() << std::endl;
+      std::cout << "Evaluation error: " << e.what() << std::endl;
     }
   }
   write_history(history_file.c_str());
 }
 
 
-sol::state &Application::lua() {
+sol::state &
+Application::lua() {
   return m_lua;
 }
 

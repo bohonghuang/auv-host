@@ -17,8 +17,8 @@ V get_point_dist(const cv::Point_<T> &p1, const cv::Point_<T> &p2) {
 
 
 template<typename T, size_t N>
-auto get_point_center(const std::array<cv::Point_<T>, N> &points)
-    -> cv::Point_<T> {
+cv::Point_<T>
+get_point_center(const std::array<cv::Point_<T>, N> &points) {
   double count_x = 0.0;
   double count_y = 0.0;
   for (const auto &i: points) {
@@ -31,8 +31,8 @@ auto get_point_center(const std::array<cv::Point_<T>, N> &points)
 
 
 template<typename R, typename T>
-auto get_point_center(const std::vector<cv::Point_<T>> &points)
-    -> cv::Point_<R> {
+cv::Point_<R>
+get_point_center(const std::vector<cv::Point_<T>> &points) {
   double count_x = 0.0;
   double count_y = 0.0;
   for (const auto &i: points) {
@@ -62,8 +62,8 @@ float get_point_deg_in_bottom_axis(const cv::Point_<T> &p1, const cv::Point_<T> 
 
 
 template<typename T, size_t N>
-auto transform_points(cv::Point_<T> (&src)[N])
-    -> std::vector<cv::Point> {
+std::vector<cv::Point>
+transform_points_from_array_to_vector(cv::Point_<T> (&src)[N]) {
   std::vector<cv::Point> results;
   results.resize(4);
   for (size_t i = 0; i < N; ++i)
@@ -73,25 +73,54 @@ auto transform_points(cv::Point_<T> (&src)[N])
 
 
 template<typename T>
-auto get_top_left_right_bottom_left_right_point(const cv::Point_<T> (&four_point)[4])
-    -> std::array<cv::Point_<T>, 4> {
+std::array<cv::Point_<T>, 4>
+get_top_left_right_bottom_left_right_point(const cv::Point_<T> (&four_point)[4]) {
   std::array<cv::Point_<T>, 4> result;
   std::copy(std::begin(four_point), std::end(four_point), result.begin());
   std::sort(result.begin(), result.end(), [](const cv::Point_<T> &p1, const cv::Point_<T> &p2) {
     return p1.y < p2.y;
   });
-  if(result[0].x > result[1].x)
+  if (result[0].x > result[1].x)
     std::swap(result[0], result[1]);
-  if(result[2].x > result[3].x)
+  if (result[2].x > result[3].x)
     std::swap(result[2], result[3]);
   return result;
 }
 
 
+template<typename T>
+std::vector<cv::Point2d>
+normalize_points(const std::vector<cv::Point_<T>> &points, int x_count, int y_count) {
+  std::vector<cv::Point2d> results;
+  results.reserve(points.size());
+  for (const auto &point: points) {
+    double half_x = (double) x_count / 2;
+    double half_y = (double) y_count / 2;
+    results.emplace_back((double) (point.x - half_x) / half_x,
+                         -(double) (point.y - half_y) / half_y);
+  }
+  return results;
+}
+
+template<typename T, size_t N>
+std::vector<cv::Point2d>
+normalize_points(const std::array<cv::Point_<T>, N> &points, int x_count, int y_count) {
+  std::vector<cv::Point2d> results;
+  results.reserve(points.size());
+  for (const auto &point: points) {
+    double half_x = (double) x_count / 2;
+    double half_y = (double) y_count / 2;
+    results.emplace_back((double) (point.x - half_x) / half_x,
+                         -(double) (point.y - half_y) / half_y);
+  }
+  return results;
+}
+
 //void regulate_threshold_params(std::string_view file_name, ThresholdBlock<int> &block);
 
-std::vector<std::string> split(std::string_view str, std::string_view delim = " ");
+std::vector<std::string>
+split(std::string_view str, std::string_view delim = " ");
 
-}// namespace auv::vision
+}// namespace auv::vision::utils
 
 #endif//UTILS_H
