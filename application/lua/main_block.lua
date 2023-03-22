@@ -110,7 +110,12 @@ function main(input)
             while true do
                server.move(motion)
                sleep(delta)
-               if update_function() then
+               local update_result = update_function()
+               if type(update_result) == 'table' then
+                  if #update_result > 0 then
+                     return true
+                  end
+               elseif update_result then
                   return true
                end
                duration = duration - delta
@@ -131,11 +136,6 @@ function main(input)
          return false
       end
       local function find_bar()
-         local function update_results()
-            bars = boxes_bars(boxes)
-            return #bars > 0
-         end
-         update_results()
          ::find_bar_start::
          ::find_bar_2::
          if #bars >= 2 then
@@ -163,7 +163,7 @@ function main(input)
             local bx = p1.x
             print(2, bx, deg)
             server.move { x = bx, y = 0.2, z = 0.0, rot = (deg / 90.0) / 2.0 }
-            goto find_bar_finish
+            return true
          end
          ::find_bar_1::
          if #bars >= 1 then
@@ -188,17 +188,27 @@ function main(input)
             end
             print(1, bx, deg)
             server.move { x = bx, y = by, z = 0.0, rot = (deg / 90.0) / 2.0 }
-            goto find_bar_finish
+            return true
          end
          ::find_bar_0::
-         if #bars >= 0 then
-            print(0)
-            find_left_right(update_results)
-            goto find_bar_finish
-         end
-         ::find_bar_finish::
+         return false
       end
-      find_bar()
+      local function update_results()
+         local results = {}
+         bars = boxes_bars(boxes)
+         if #bars > 0 then
+            table.insert(results, find_bar)
+         end
+         return results
+      end
+      local results = update_results()
+      if #results == 0 then
+         find_left_right(update_results)
+      else
+         for _, result in pairs(results) do
+            result()
+         end
+      end
       if #detect > 0 then
          for i = 1, #detect do
             print(detect[i].name)
