@@ -1,9 +1,11 @@
-time = current_time()
-json = require('json')
+local json = require('json')
 require("json.rpc")
-server = json.rpc.proxy("http://localhost:8888")
-writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.200 port=5600", 640, 480)
--- writer = UploadBlock.new("appsrc ! videoconvert ! nvh264enc ! rtph264pay ! udpsink host=192.168.31.200 port=5600", 640, 480)
+require("application.lua.utils")
+
+local time = current_time()
+local server = json.rpc.proxy("http://localhost:8888")
+local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
+-- local writer = UploadBlock.new("appsrc ! videoconvert ! nvh264enc ! rtph264pay ! udpsink host=192.168.31.200 port=5600", 640, 480)
 
 local function bottom_x(cx, cy, deg)
     local bx = cx - math.tan(math.rad(limit_value(deg, -85, 85))) * (cy - (-1.0))
@@ -57,7 +59,7 @@ function main(input)
         local bar_any = input["find_bar"]
         if bar_any then
             boxes = FindBarResults.from_any(bar_any).result
-            writer:process(FindBarResults.from_any(bar_any).frame)
+            -- writer:process(FindBarResults.from_any(bar_any).frame)
         else
             boxes = {}
         end
@@ -179,12 +181,14 @@ function main(input)
                 result()
             end
         end
+
+
         if #detect > 0 then
             for i = 1, #detect do
                 print(detect[i].name)
             end
         end
-        sleep(0.1)
+        --sleep(0.1)
     end
 end
 

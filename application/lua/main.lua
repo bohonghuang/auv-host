@@ -3,7 +3,7 @@ require("json.rpc")
 server = json.rpc.proxy("http://localhost:8888")
 
 cam_front = CameraBlock.new(GetCapture("0"))
-cam_bottom = CameraBlock.new(GetCapture("2"))
+cam_bottom = CameraBlock.new(GetCapture("0"))
 
 --calibr_params = CameraParams.new()
 --calibr_params.fx = 588.4306598875787
@@ -17,50 +17,59 @@ cam_bottom = CameraBlock.new(GetCapture("2"))
 --calibr_params.k5 = -2.402839834767997
 --calibr = CameraCalibrateBlock.new(calibr_params)
 
-cvtcolor = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
-
-inrange_params = InRangeParams.new()
-inrange_params.low_1 = 33
-inrange_params.high_1 = 177
-inrange_params.low_2 = 146
-inrange_params.high_2 = 255
-inrange_params.low_3 = 65
-inrange_params.high_3 = 130
-inrange = InRangeBlock.new(inrange_params)
-
+cvtcolor_ycrcb = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
+find_bar_inrange_params = InRangeParams.new()
+find_bar_inrange_params.low_1 = 33
+find_bar_inrange_params.high_1 = 177
+find_bar_inrange_params.low_2 = 146
+find_bar_inrange_params.high_2 = 255
+find_bar_inrange_params.low_3 = 65
+find_bar_inrange_params.high_3 = 130
+find_bar_inrange = InRangeBlock.new(find_bar_inrange_params)
 find_bar = FindBarBlock.new(false)
-find_ball = FindBallBlock.new(false)
+find_bar_block = LuaMuxBlock.new("application/lua/main_block.lua")
 
--- show = ImshowBlock.new()
+input_find_bar = connect(cam_bottom, cvtcolor_ycrcb, find_bar_inrange, find_bar, find_bar_block:input_block("find_bar"))
+find_bar_task = SchedulerList.new(
+        Scheduler.new(find_bar_block:as_untyped(), 1.0 / 15.0),
+        Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0)
+)
+
 bio = ObjectDetectBlock.new()
+input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
+--find_bar_task:add(Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0))
 
--- writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
+find_ball_inrange_params = InRangeParams.new()
+find_ball_inrange_params.low_1 = 20
+find_ball_inrange_params.low_2 = 20
+find_ball_inrange_params.low_3 = 20
+find_ball_inrange_params.high_1 = 199
+find_ball_inrange_params.high_2 = 166
+find_ball_inrange_params.high_3 = 178
 
-mux_block = LuaMuxBlock.new("application/lua/main_block.lua")
-input_find_bar = connect(cam_bottom, cvtcolor, inrange, find_bar, mux_block:input_block("find_bar"))
-input_find_ball = connect(cam_bottom, cvtcolor, inrange, find_ball, mux_block:input_block("find_ball"))
-input_detect = connect(cam_front, bio, mux_block:input_block("detect"))
+cvtcolor_hsv   = ConvertColorBlock.new(cv.COLOR_BGR2HSV)
+find_ball_inrange = InRangeBlock.new(find_ball_inrange_params)
+find_ball = FindBallBlock.new(true)
+find_ball_block = LuaMuxBlock.new("application/lua/ball_block.lua")
 
-find_bar_task = Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0)
-find_ball_task = Scheduler.new(input_find_ball:as_untyped(), 1.0 / 15.0)
-detect_task = Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0)
-main_task = Scheduler.new(mux_block:as_untyped(), 1.0 / 15.0)
+show = ImshowBlock.new()
 
-tasks = SchedulerList.new(find_bar_task, find_ball_task, detect_task, main_task)
+input_find_ball_front  = connect(cam_bottom, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("front"))
+input_find_ball_bottom = connect(cam_front, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("bottom"))
+
+find_ball_task = SchedulerList.new(
+        Scheduler.new(find_ball_block:as_untyped(), 1.0 / 15.0),
+        Scheduler.new(input_find_ball_front:as_untyped(), 1.0 / 15.0),
+        Scheduler.new(input_find_ball_bottom:as_untyped(), 1.0 / 15.0)
+)
+
+tasks = find_ball_task
 
 server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
 server.set_depth_locked { false }
 
 function start_all()
     server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
-    -- server.set_depth_locked(false)
-    -- sleep(1.0)
-    -- print("深度锁定 3")
-    -- sleep(1.0)
-    -- print("深度锁定 2")
-    -- sleep(1.0)
-    -- print("深度锁定 1")
-    -- sleep(1.0)
     server.set_depth_locked { true }
     tasks:start()
 end

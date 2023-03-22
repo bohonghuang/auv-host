@@ -47,7 +47,6 @@ FindBarBlock::process(cv::Mat frame) {
       for (size_t i = 0; i < 4; i++)
         cv::line(preview, rect_points[i], rect_points[(i + 1) % 4],
                  cv::Scalar(0, 255, 255), 2, cv::LINE_AA);
-      output.frame = preview;
     }
 
     static const int frame_width = frame.size().width;
@@ -64,6 +63,11 @@ FindBarBlock::process(cv::Mat frame) {
     }
     point_results.push_back(result);
   }
+
+  if (m_debug) {
+    output.frame = preview;
+  }
+
   return output;
 }
 

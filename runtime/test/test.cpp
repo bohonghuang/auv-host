@@ -113,7 +113,7 @@ block_i = LuaBlock.new(function (x) return int.to_any(3) end)
 block_j = LuaBlock.new(function (x) return int.to_any(2) end)
 block_k = LuaBlock.new(function (x) assert(int.from_any(x) == 3) return void:to_any() end)
 block_l = LuaBlock.new(function (x) assert(int.from_any(x) == 2) return void:to_any() end)
-chain(block_i, tee(mux_block:input_block("i")), block_k):process()
+chain(block_i, tee(mux_block:input_block("i"), block_k)):process()
 block_j:as_untyped():connect(mux_block:input_block("j"), block_l):process()
 result = int.from_any(mux_block:process())
     )?");

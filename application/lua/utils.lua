@@ -1,7 +1,6 @@
-
-function point_dist(p1, p2)
-    local x1, y1 = p1.x, p1.y
-    local x2, y2 = p2.x, p2.y
+function point_dist(point_1, point_2)
+    local x1, y1 = point_1.x, point_1.y
+    local x2, y2 = point_2.x, point_2.y
     return ((x1 - x2) ^ 2 + (y1 - y2) ^ 2) ^ 0.5;
 end
 
@@ -15,9 +14,9 @@ function point_center(...)
     return cx / #points, cy / #points
 end
 
-function point_deg(p1, p2)
-    local x1, y1 = p1.x, p1.y
-    local x2, y2 = p2.x, p2.y
+function point_deg(point_1, point_2)
+    local x1, y1 = point_1.x, point_1.y
+    local x2, y2 = point_2.x, point_2.y
     local dx, dy = x2 - x1, y2 - y1
     if dx == 0.0 then
         return 90.0
@@ -33,4 +32,20 @@ end
 
 function limit_value(value, min, max)
     return math.min(math.max(min, value), max)
+end
+
+function is_in_range(value, min, max)
+    if value > min and value < max then
+        return true
+    else
+        return false
+    end
+end
+
+function table_size(tbl)
+    local cnt = 0
+    for _, _ in pairs(tbl) do
+        cnt = cnt + 1
+    end
+    return cnt
 end

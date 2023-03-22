@@ -14,7 +14,8 @@ set(auv_vision_srcs
         nn/model_lib.cpp
         nn/yolo_fast_v2.cpp
         lua_interop.cpp
-        camera_mgr.cpp block/find_ball.h block/find_ball.cpp)
+        camera_mgr.cpp
+        block/find_ball.cpp)
 
 add_library(auv-vision STATIC ${auv_vision_srcs})
 target_link_libraries(auv-vision ${OpenCV_LIBS})
