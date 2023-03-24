@@ -2,6 +2,7 @@
 #define AUV_HOST_COLOR_H
 
 #include <opencv2/opencv.hpp>
+#include <sol/sol.hpp>
 
 #include "block.h"
 
@@ -28,7 +29,7 @@ struct InRangeParams {
 
 class InRangeBlock : public auv::Block<cv::Mat, cv::Mat> {
 public:
-  InRangeBlock() = default;
+  explicit InRangeBlock(const sol::table& lua_table);
   explicit InRangeBlock(const InRangeParams &params);
   void set_params(const InRangeParams &params);
   void set_range(int param1_low, int param2_low, int param3_low, int param1_high, int param2_high, int param3_high);

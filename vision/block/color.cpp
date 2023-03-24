@@ -11,6 +11,26 @@ ConvertColorBlock::process(cv::Mat input) {
   return output;
 }
 
+
+InRangeBlock::InRangeBlock(const sol::table &lua_table) {
+#define XX(name)                                             \
+  auto name = lua_table[#name];                              \
+  if (!name.valid()) {                                       \
+    std::cout << "InRangeParam need " << #name << std::endl; \
+    return;                                                  \
+  }
+
+  XX(low_1)
+  XX(low_2)
+  XX(low_3)
+  XX(high_1)
+  XX(high_2)
+  XX(high_3)
+#undef XX
+  m_params = {low_1, low_2, low_3, high_1, high_2, high_3};
+}
+
+
 InRangeBlock::InRangeBlock(const InRangeParams &params)
     : m_params(params) {}
 

@@ -53,7 +53,8 @@ void auv::vision::lua::setup_env(sol::state &state) {
                    "low_3", &auv::vision::InRangeParams::low_3,
                    "high_3", &auv::vision::InRangeParams::high_3);
 
-  AUV_NEW_SOL_TYPE(state, auv::vision::InRangeBlock, sol::constructors<auv::vision::InRangeBlock(), auv::vision::InRangeBlock(auv::vision::InRangeParams)>());
+  AUV_NEW_SOL_TYPE(state, auv::vision::InRangeBlock,
+                   sol::constructors<auv::vision::InRangeBlock(const sol::table &)>());
 
   AUV_NEW_SOL_TYPE(state, auv::vision::ConvertColorBlock,
                    sol::constructors<auv::vision::ConvertColorBlock(int)>());
