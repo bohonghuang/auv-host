@@ -4,8 +4,8 @@ require("application.lua.utils")
 
 local time = current_time()
 local server = json.rpc.proxy("http://localhost:8888")
-local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
--- local writer = UploadBlock.new("appsrc ! videoconvert ! nvh264enc ! rtph264pay ! udpsink host=192.168.31.200 port=5600", 640, 480)
+--local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
+local writer = LuaBlock.new(function (x) return void:to_any() end)
 
 local function bottom_x(cx, cy, deg)
     local bx = cx - math.tan(math.rad(limit_value(deg, -85, 85))) * (cy - (-1.0))
@@ -96,7 +96,7 @@ function main(input)
                     end
                 end
             end
-            try_motion({ x = 0.0, y = 0.5, z = 0.0, rot = 0.0 }, 3.0)
+            try_motion({ x = 0.0, y = 0.5, z = 0.0, rot = 0.0 }, 10.0)
             local rotation = 0.5
             for duration = 1, 3 do
                 if try_motion({ x = 0.0, y = 0.0, z = 0.0, rot = rotation }, duration / 2.0) or

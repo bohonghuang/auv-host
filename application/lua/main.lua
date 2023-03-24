@@ -22,7 +22,7 @@ find_bar_block = LuaMuxBlock.new("application/lua/main_block.lua")
 show = ImshowBlock.new()
 bio = ObjectDetectBlock.new()
 
-input_find_bar = connect(cam_bottom, cvtcolor_ycrcb, find_bar_inrange, show, find_bar, find_bar_block:input_block("find_bar"))
+input_find_bar = connect(cam_bottom, cvtcolor_ycrcb, find_bar_inrange, find_bar, find_bar_block:input_block("find_bar"))
 input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
 
 find_bar_task = SchedulerList.new(
@@ -61,27 +61,32 @@ tasks = find_bar_task
 
 server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
 server.set_depth_locked { false }
+server.set_direction_locked { false }
 
 function start_all()
     server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
     server.set_depth_locked { true }
+    server.set_direction_locked { true }
     tasks:start()
 end
 
 function stop_all()
     server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
     server.set_depth_locked { false }
+    server.set_direction_locked { false }
     tasks:stop()
 end
 
 function pause_all()
     server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
     server.set_depth_locked { false }
+    server.set_direction_locked { false }
     tasks:pause()
 end
 
 function resume_all()
     server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
     server.set_depth_locked { true }
+    server.set_direction_locked { true }
     tasks:resume()
 end
