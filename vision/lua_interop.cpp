@@ -67,6 +67,7 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(ns_cv, cv::Point, sol::default_constructor, "x", &cv::Point::x, "y", &cv::Point::y);
   AUV_NEW_SOL_TYPE(ns_cv, cv::Point2d, sol::default_constructor, "x", &cv::Point2d::x, "y", &cv::Point2d::y);
   AUV_NEW_SOL_TYPE(ns_cv, cv::Size, sol::default_constructor, "width", &cv::Size::width, "height", &cv::Size::height);
+  AUV_NEW_SOL_TYPE(ns_cv, cv::Rect, sol::default_constructor, "width", &cv::Rect::width, "height", &cv::Rect::height, "x", &cv::Rect::x, "y", &cv::Rect::y);
   ns_cv.set_function("imshow", sol::resolve<void(const std::string &, cv::InputArray)>(&cv::imshow));
   ns_cv.set_function("waitKey", sol::resolve<int(int)>(&cv::waitKey));
   ns_cv.set_function("destroyAllWindows", &cv::destroyAllWindows);
@@ -94,7 +95,15 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(state, auv::vision::network::YoloFastV2Result, sol::no_constructor,
                    "name", &auv::vision::network::YoloFastV2Result::name,
                    "rect", &auv::vision::network::YoloFastV2Result::rect,
-                   "confidences", &auv::vision::network::YoloFastV2Result::confidences);
+                   "confidence", &auv::vision::network::YoloFastV2Result::confidence);
+
+  AUV_NEW_SOL_TYPE(state, auv::vision::ObjectDetectResult, sol::no_constructor,
+                   "name", &auv::vision::ObjectDetectResult::name,
+                   "x", &auv::vision::ObjectDetectResult::x,
+                   "y", &auv::vision::ObjectDetectResult::y,
+                   "width", &auv::vision::ObjectDetectResult::width,
+                   "height", &auv::vision::ObjectDetectResult::height,
+                   "confidence", &auv::vision::ObjectDetectResult::confidence);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::ObjectDetectResults, sol::no_constructor,
                    "frame", &auv::vision::ObjectDetectResults::frame,

@@ -9,9 +9,18 @@
 
 namespace auv::vision {
 
+struct ObjectDetectResult{
+  std::string name;
+  double confidence;
+  double x;
+  double y;
+  double width;
+  double height;
+};
+
 struct ObjectDetectResults {
   cv::Mat frame;
-  std::vector<network::YoloFastV2Result> result;
+  std::vector<ObjectDetectResult> result;
 };
 
 class ObjectDetectBlock : public Block<cv::Mat, ObjectDetectResults> {

@@ -222,11 +222,11 @@ YoloFastV2::process(const cv::Mat &img, const cv::Mat &detect_result) {
     YoloFastV2Result result;
     cv::Rect rect = boxes[i];
     result.rect = rect;
-    result.confidences = confidences[i];
+    result.confidence = confidences[i];
     result.name = m_classes[class_ids[i]];
 
     results[result.name].push_back(result);
-    // this->draw_pred(img, result.confidences, class_ids[i], rect);
+    // this->draw_pred(img, result.confidence, class_ids[i], rect);
   }
 
 end_up:

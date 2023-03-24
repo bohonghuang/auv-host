@@ -1,22 +1,26 @@
 json = require('json')
 require("json.rpc")
+require("application.lua.utils")
 server = json.rpc.proxy("http://localhost:8888")
 
+--cam_front = CameraBlock.new(GetCapture("0"))
+--cam_bottom = CameraBlock.new(GetCapture("0"))
+
 cam_front = CameraBlock.new(GetCapture("0"))
-cam_bottom = CameraBlock.new(GetCapture("0"))
+cam_bottom = CameraBlock.new(GetCapture("2"))
 
 cvtcolor_ycrcb = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
 
 find_bar_inrange_params = {
-    low_1 = 33,
-    high_1 = 177,
-    low_2 = 146,
-    high_2 = 255,
-    low_3 = 65,
-    high_3 = 130
+    low_1  = 35,
+    low_2  = 155,
+    low_3  = 100,
+    high_1 = 180,
+    high_2 = 220,
+    high_3 = 160
 }
 find_bar_inrange = InRangeBlock.new(find_bar_inrange_params)
-find_bar = FindBarBlock.new(false)
+find_bar = FindBarBlock.new(true)
 find_bar_block = LuaMuxBlock.new("application/lua/main_block.lua")
 
 show = ImshowBlock.new()
@@ -27,12 +31,10 @@ input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
 
 find_bar_task = SchedulerList.new(
         Scheduler.new(find_bar_block:as_untyped(), 1.0 / 15.0),
-        Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0),
-        Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0)
+        Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0)
 )
 
-
---find_bar_task:add(Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0))
+find_bar_task:add(Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0))
 
 find_ball_inrange_params = {
     low_1 = 33,

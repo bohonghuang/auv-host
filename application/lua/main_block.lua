@@ -4,8 +4,9 @@ require("application.lua.utils")
 
 local time = current_time()
 local server = json.rpc.proxy("http://localhost:8888")
---local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
-local writer = LuaBlock.new(function (x) return void:to_any() end)
+local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.143 port=5600", 640, 480)
+--local server = make_fake_server()
+--local writer = ImshowBlock.new()
 
 local function bottom_x(cx, cy, deg)
     local bx = cx - math.tan(math.rad(limit_value(deg, -85, 85))) * (cy - (-1.0))
@@ -66,6 +67,7 @@ function main(input)
         local detect_any = input["detect"]
         if detect_any then
             detect = ObjectDetectResults.from_any(detect_any).result
+            --writer:process(ObjectDetectResults.from_any(detect_any).frame)
         end
     end
 
@@ -74,9 +76,15 @@ function main(input)
         update()
     end
 
+    local detectables = { shark = false,
+                          squid = false,
+                          coralreef = true,
+                          turtle = true,
+                          dolphin = true, }
+    local tracks = {}
     while true do
         local bars
-        local function find_left_right(update_function)
+        local function find_left_right(update_function, backward)
             local function try_motion(motion, duration)
                 local delta = 0.1
                 while true do
@@ -96,7 +104,7 @@ function main(input)
                     end
                 end
             end
-            try_motion({ x = 0.0, y = 0.5, z = 0.0, rot = 0.0 }, 10.0)
+            try_motion({ x = 0.0, y = backward and -0.5 or 0.5, z = 0.0, rot = 0.0 }, 10.0)
             local rotation = 0.5
             for duration = 1, 3 do
                 if try_motion({ x = 0.0, y = 0.0, z = 0.0, rot = rotation }, duration / 2.0) or
@@ -165,9 +173,71 @@ function main(input)
             :: find_bar_0 ::
             return false
         end
-        local function update_results()
-            local results = {}
+        local update_results
+        local function update_tracks()
+            tracks = {}
+            for i = 1, #detect do
+                if detectables[detect[i].name] then
+                    table.insert(tracks, detect[i])
+                end
+            end
+        end
+        local function update_bars()
             bars = boxes_bars(boxes)
+        end
+        local function track_object()
+            local prev_track_name = tracks[1].name
+            local really_detected = false
+            local really_hit = false
+            local timer = 0
+            while really_detected and not really_hit or tracks[1] and tracks[1].name == prev_track_name do
+                if really_detected then
+                    if tracks[1] and tracks[1].name == prev_track_name then
+                        print("正在撞向生物" .. prev_track_name)
+                        timer = 0.0
+                        local track = tracks[1]
+                        local rect = track
+                        local x, y, w, h = rect.x, rect.y, rect.width, rect.height
+                        cx, cy = point_center({ x = x, y = y }, { x = x + w, y = y + h })
+                        server.move { x = 0.0, y = 0.2, z = 0.0, rot = cx / 2.0 }
+                    else
+                        print("疑似撞到生物 " .. prev_track_name .. " ，已等待 " .. timer .. " 秒")
+                        timer = timer + 0.1
+                        if timer > 5.0 then
+                            print("已撞到生物 " .. prev_track_name)
+                            really_hit = true
+                            timer = 0.0
+                            detectables[prev_track_name] = false
+                            find_left_right(update_results, true)
+                            return
+                        end
+                        server.move { x = 0.0, y = 0.2, z = 0.0, rot = 0.0 }
+                    end
+                else
+                    print("疑似检测到生物 " .. prev_track_name .. " ，已等待 " .. timer .. " 秒")
+                    server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
+                    timer = timer + 0.1
+                    if timer > 0.5 then
+                        print("开始撞向生物" .. prev_track_name)
+                        really_detected = true
+                        timer = 0.0
+                    end
+                end
+                update_tracks()
+                sleep(0.1)
+            end
+        end
+        update_results = function()
+            local results = {}
+            update_tracks()
+            if table_size(tracks) > 0 then
+                table.insert(results, track_object) -- 检测优先
+            end
+            table.sort(tracks, function(a, b)
+                return a.confidence > b.confidence
+            end)
+
+            update_bars()
             if #bars > 0 then
                 table.insert(results, find_bar)
             end
@@ -179,13 +249,7 @@ function main(input)
         else
             for _, result in pairs(results) do
                 result()
-            end
-        end
-
-
-        if #detect > 0 then
-            for i = 1, #detect do
-                print(detect[i].name)
+                break
             end
         end
         sleep(0.1)

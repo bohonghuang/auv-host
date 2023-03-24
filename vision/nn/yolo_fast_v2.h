@@ -11,7 +11,7 @@ namespace auv::vision::network {
 struct YoloFastV2Result {
   std::string name;
   cv::Rect rect;
-  float confidences;
+  float confidence;
 };
 
 struct YoloFastV2ModelConfig {
@@ -37,7 +37,7 @@ public:
   static void draw_pred(cv::Mat &img, float confidence, const std::string &name, const cv::Rect &rect_range);
 
   explicit YoloFastV2(const std::string &module_config_file_path, float obj_threshold = 0.3,
-                      float conf_threshold = 0.3, float nms_threshold = 0.4);
+                      float conf_threshold = 0.6, float nms_threshold = 0.4);
 
   cv::Mat forward(const cv::Mat &src_img);
   std::map<std::string, std::vector<YoloFastV2Result>> process(const cv::Mat &img, const cv::Mat &detect_result);
