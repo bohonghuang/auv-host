@@ -108,7 +108,7 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(state, auv::vision::ObjectDetectResults, sol::no_constructor,
                    "frame", &auv::vision::ObjectDetectResults::frame,
                    "result", &auv::vision::ObjectDetectResults::result);
-
+  
   AUV_NEW_SOL_TYPE(state, auv::vision::ObjectDetectBlock,
                    sol::default_constructor);
 
