@@ -7,7 +7,7 @@ server = json.rpc.proxy("http://localhost:8888")
 --cam_bottom = CameraBlock.new(GetCapture("0"))
 
 cam_front = CameraBlock.new(GetCapture("0"))
-cam_bottom = CameraBlock.new(GetCapture("2"))
+cam_bottom = CameraBlock.new(GetCapture("0"))
 
 cvtcolor_ycrcb = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
 
