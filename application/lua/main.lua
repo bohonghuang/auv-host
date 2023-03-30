@@ -1,42 +1,42 @@
-json = require('json')
+local json = require('json')
 require("json.rpc")
 require("application.lua.utils")
-server = json.rpc.proxy("http://localhost:8888")
+local server = json.rpc.proxy("http://localhost:8888")
 
 --cam_front = CameraBlock.new(GetCapture("0"))
 --cam_bottom = CameraBlock.new(GetCapture("0"))
 
-cam_front = CameraBlock.new(GetCapture("0"))
-cam_bottom = CameraBlock.new(GetCapture("0"))
+local cam_front = CameraBlock.new(GetCapture("0"))
+local cam_bottom = CameraBlock.new(GetCapture("0"))
 
-cvtcolor_ycrcb = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
+local cvtcolor_ycrcb = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
 
-find_bar_inrange_params = {
-    low_1  = 35,
-    low_2  = 155,
-    low_3  = 100,
+local find_bar_inrange_params = {
+    low_1 = 35,
+    low_2 = 155,
+    low_3 = 100,
     high_1 = 180,
     high_2 = 220,
     high_3 = 160
 }
-find_bar_inrange = InRangeBlock.new(find_bar_inrange_params)
-find_bar = FindBarBlock.new(true)
-find_bar_block = LuaMuxBlock.new("application/lua/main_block.lua")
+local find_bar_inrange = InRangeBlock.new(find_bar_inrange_params)
+local find_bar = FindBarBlock.new(true)
+local find_bar_block = LuaMuxBlock.new("application/lua/main_block.lua")
 
-show = ImshowBlock.new()
-bio = ObjectDetectBlock.new()
+local show = ImshowBlock.new()
+local bio = ObjectDetectBlock.new()
 
-input_find_bar = connect(cam_bottom, cvtcolor_ycrcb, find_bar_inrange, find_bar, find_bar_block:input_block("find_bar"))
-input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
+local input_find_bar = connect(cam_bottom, cvtcolor_ycrcb, find_bar_inrange, find_bar, find_bar_block:input_block("find_bar"))
+local input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
 
-find_bar_task = SchedulerList.new(
+local find_bar_task = SchedulerList.new(
         Scheduler.new(find_bar_block:as_untyped(), 1.0 / 15.0),
         Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0)
 )
 
 find_bar_task:add(Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0))
 
-find_ball_inrange_params = {
+local find_ball_inrange_params = {
     low_1 = 33,
     high_1 = 177,
     low_2 = 146,
@@ -45,21 +45,21 @@ find_ball_inrange_params = {
     high_3 = 130
 }
 
-cvtcolor_hsv = ConvertColorBlock.new(cv.COLOR_BGR2HSV)
-find_ball_inrange = InRangeBlock.new(find_ball_inrange_params)
-find_ball = FindBallBlock.new(true)
-find_ball_block = LuaMuxBlock.new("application/lua/ball_block.lua")
+local cvtcolor_hsv = ConvertColorBlock.new(cv.COLOR_BGR2HSV)
+local find_ball_inrange = InRangeBlock.new(find_ball_inrange_params)
+local find_ball = FindBallBlock.new(true)
+local find_ball_block = LuaMuxBlock.new("application/lua/ball_block.lua")
 
-input_find_ball_front = connect(cam_bottom, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("front"))
-input_find_ball_bottom = connect(cam_front, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("bottom"))
+local input_find_ball_front = connect(cam_bottom, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("front"))
+local input_find_ball_bottom = connect(cam_front, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("bottom"))
 
-find_ball_task = SchedulerList.new(
+local find_ball_task = SchedulerList.new(
         Scheduler.new(find_ball_block:as_untyped(), 1.0 / 15.0),
         Scheduler.new(input_find_ball_front:as_untyped(), 1.0 / 15.0),
         Scheduler.new(input_find_ball_bottom:as_untyped(), 1.0 / 15.0)
 )
 
-tasks = find_bar_task
+local tasks = find_bar_task
 
 server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
 server.set_depth_locked { false }

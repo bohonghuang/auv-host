@@ -1,23 +1,51 @@
-require "utils"
+require "application.lua.utils"
 require "math"
+
+local find_count = 1
+
+local function bottom_x(cx, cy, deg)
+    local bx = cx - math.tan(math.rad(limit_value(deg, -85, 85))) * (cy - (-1.0))
+    bx = limit_value(bx, -1.0, 1.0)
+    return bx
+end
 
 BarBlock = {
     bars = {}, --{{cx, cy, deg, fill_rate, area}, ... }
+
     motions = {
-        FindLeft = function(this)
-            return { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
+        FindMid = function(self)
+            return function(server)
+                server.move {x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
+                sleep(3.0)
+            end
         end,
-        FindLeftBack = function(this)
-            return { x = 0.0, y = 0.0, z = 0.0, rot = 0.5 }
+        FindLeft = function(self)
+            return function(server)
+                server.move { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
+                sleep(1.5 * find_count)
+            end
         end,
-        FindRight = function(this)
-            return { x = 0.0, y = 0.0, z = 0.0, rot = 0.5 }
+        FindLeftBack = function(self)
+            return function(server)
+                server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.5 }
+                sleep(1.5 * find_count)
+            end
         end,
-        FindRightBack = function(this)
-            return { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
+        FindRight = function(self)
+            return function(server)
+                server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.5 }
+                sleep(1.5 * find_count)
+            end
         end,
-        Found = function(this)
-            if #this.bars >= 2 then
+        FindRightBack = function(self)
+            return function(server)
+                server.move { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
+                sleep(1.5 * find_count)
+            end
+        end,
+        Found = function(self)
+        local bars = self.bars
+            if #bars >= 2 then
                 if bars[1][2] > bars[2][2] then
                     bars[1], bars[2] = bars[2], bars[1]
                 end
@@ -44,6 +72,7 @@ BarBlock = {
                 return { x = bx, y = 0.2, z = 0.0, rot = (deg / 90.0) / 2.0 }
             end
 
+            ::find_bar_1::
             local cx, cy, deg = unpack(bars[1])
             local bx = bottom_x(cx, cy, deg)
             local by = 0.2
@@ -64,46 +93,52 @@ BarBlock = {
                 by = by / (math.abs(cx) * 4.0)
             end
             print(1, bx, deg)
-            return { x = bx, y = by, z = 0.0, rot = (deg / 90.0) / 2.0 }
+            return function(server)
+                server.move { x = bx, y = by, z = 0.0, rot = (deg / 90.0) / 2.0 }
+            end
         end,
     }
 }
 
---- 返回当前执行的运动类型和运动参数
-function BarBlock:process(this)
-    local status = "None"
-
-    if #this.bars > 0 then
-        return "Found", BarBlock.motions.Found(this)
+--- 调用这个函数前先调用 update
+--- @return function, number
+local index = nil
+function BarBlock.process(self)
+    if #self.bars > 0 then
+        index = nil
+        find_count = 1
+        return BarBlock.motions.Found(self), 0.1
     end
 
+    if index == BarBlock.motions.Found then
+        find_count = 1
+        index = next(BarBlock.motions)
+    end
 
+    local motion
+    index, motion = next(BarBlock.motions, index)
+    return motion, 1.0
 end
 
-function BarBlock:new(this)
-    temp_table = this or {}
-    this.bars = {}
-    this.status = BarBlock.status
+BarBlock.__index = BarBlock
+function BarBlock.new()
+    local temp_table = {}
+    temp_table.bars = {}
+    setmetatable(temp_table, BarBlock)
     return temp_table
 end
 
-function BarBlock:has_result(this)
-    if next(this.bars) then
+function BarBlock.has_result(self)
+    if next(self.bars) then
         return true
     else
         return false
     end
 end
 
-local function bottom_x(cx, cy, deg)
-    local bx = cx - math.tan(math.rad(limit_value(deg, -85, 85))) * (cy - (-1.0))
-    bx = limit_value(bx, -1.0, 1.0)
-    return bx
-end
-
 --- 更新表中bars的结果  有结果返回true  没有结果返回false
-function BarBlock:update(this, raw_vision_bar_results)
-    this.bars = {}
+function BarBlock.update(self, raw_vision_bar_results)
+    self.bars = {}
     for i = 1, #raw_vision_bar_results do
         local points = raw_vision_bar_results[i].points
         local area = raw_vision_bar_results[i].area
@@ -132,15 +167,15 @@ function BarBlock:update(this, raw_vision_bar_results)
             goto continue
         end
         local cx, cy = point_center(points[1], points[2], points[3], points[4])
-        table.insert(this.bars, { cx, cy, deg, fill_rate, area })
+        table.insert(self.bars, { cx, cy, deg, fill_rate, area })
         :: continue ::
     end
 
-    table.sort(this.bars, function(a, b)
+    table.sort(self.bars, function(a, b)
         return a[4] * a[5] > b[4] * b[5]
     end)
 
-    if next(this.bars) then
+    if next(self.bars) then
         return true
     else
         return false
