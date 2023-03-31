@@ -36,8 +36,8 @@ DetectBlock = {
 local prev_track_name
 local timer = 0
 local really_detected = false
-function DetectBlock.process(self)
-    if not next(self.detects) then
+function DetectBlock.process()
+    if not next(DetectBlock.detects) then
         if really_detected then
             print("疑似撞到生物 " .. prev_track_name .. " ，已等待 " .. timer .. " 秒")
             timer = timer + 0.1
@@ -85,22 +85,14 @@ function DetectBlock.process(self)
     end
 end
 
-function DetectBlock.update(self, raw_vision_detect_results)
-    self.detects = {}
+function DetectBlock.update(raw_vision_detect_results)
+    DetectBlock.detects = {}
     for i = 1, #raw_vision_detect_results do
         if DetectBlock.detect_tables[raw_vision_detect_results[i].name] then
-            table.insert(self.detects, raw_vision_detect_results[i])
+            table.insert(DetectBlock.detects, raw_vision_detect_results[i])
         end
     end
-    table.sort(self.detects, function(a, b)
+    table.sort(DetectBlock.detects, function(a, b)
         return a.confidence > b.confidence
     end)
-end
-
-DetectBlock.__index = DetectBlock
-function DetectBlock.new()
-    local temp_table = {}
-    temp_table.detects = {}
-    setmetatable(temp_table, DetectBlock)
-    return temp_table
 end

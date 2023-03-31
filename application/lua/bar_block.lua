@@ -13,38 +13,32 @@ BarBlock = {
     bars = {}, --{{cx, cy, deg, fill_rate, area}, ... }
 
     motions = {
-        FindMid = function(self)
-            return function(server)
-                server.move {x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
-                sleep(3.0)
-            end
+        function(server) --FindMid 1
+            print("往前走")
+            server.move { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
+            sleep(3.0)
         end,
-        FindLeft = function(self)
-            return function(server)
-                server.move { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
-                sleep(1.5 * find_count)
-            end
+        function(server) --FindLeft 2
+            print("向左寻找")
+            server.move { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
+            sleep(1.5 * find_count)
         end,
-        FindLeftBack = function(self)
-            return function(server)
-                server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.5 }
-                sleep(1.5 * find_count)
-            end
+        function(server) --FindLeftBack 3
+            print("归位")
+            server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.5 }
+            sleep(1.5 * find_count)
         end,
-        FindRight = function(self)
-            return function(server)
-                server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.5 }
-                sleep(1.5 * find_count)
-            end
+        function(server) --FindRight 4
+            print("向右寻找")
+            server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.5 }
+            sleep(1.5 * find_count)
         end,
-        FindRightBack = function(self)
-            return function(server)
-                server.move { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
-                sleep(1.5 * find_count)
-            end
+        function(server) --FindRightBack 5
+            print("归位")
+            server.move { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
+            sleep(1.5 * find_count)
         end,
-        Found = function(self)
-        local bars = self.bars
+        function(bars) --Found 6
             if #bars >= 2 then
                 if bars[1][2] > bars[2][2] then
                     bars[1], bars[2] = bars[2], bars[1]
@@ -69,10 +63,12 @@ BarBlock = {
                 local deg = point_deg(p1, p2) - 90.0
                 local bx = p1.x
                 print(2, bx, deg)
-                return { x = bx, y = 0.2, z = 0.0, rot = (deg / 90.0) / 2.0 }
+                return function(server)
+                    server.move { x = bx, y = 0.2, z = 0.0, rot = (deg / 90.0) / 2.0 }
+                end
             end
 
-            ::find_bar_1::
+            :: find_bar_1 ::
             local cx, cy, deg = unpack(bars[1])
             local bx = bottom_x(cx, cy, deg)
             local by = 0.2
@@ -102,17 +98,17 @@ BarBlock = {
 
 --- 调用这个函数前先调用 update
 --- @return function, number
-local index = nil
-function BarBlock.process(self)
-    if #self.bars > 0 then
-        index = nil
+local index = 0
+function BarBlock.process()
+    if #BarBlock.bars > 0 then
+        index = 0
         find_count = 1
-        return BarBlock.motions.Found(self), 0.1
+        return BarBlock.motions[6](BarBlock.bars), 0.1
     end
 
-    if index == BarBlock.motions.Found then
+    if index >= 5 then
         find_count = 1
-        index = next(BarBlock.motions)
+        index = 0
     end
 
     local motion
@@ -120,16 +116,8 @@ function BarBlock.process(self)
     return motion, 1.0
 end
 
-BarBlock.__index = BarBlock
-function BarBlock.new()
-    local temp_table = {}
-    temp_table.bars = {}
-    setmetatable(temp_table, BarBlock)
-    return temp_table
-end
-
-function BarBlock.has_result(self)
-    if next(self.bars) then
+function BarBlock.has_result()
+    if next(BarBlock.bars) then
         return true
     else
         return false
@@ -137,8 +125,8 @@ function BarBlock.has_result(self)
 end
 
 --- 更新表中bars的结果  有结果返回true  没有结果返回false
-function BarBlock.update(self, raw_vision_bar_results)
-    self.bars = {}
+function BarBlock.update(raw_vision_bar_results)
+    BarBlock.bars = {}
     for i = 1, #raw_vision_bar_results do
         local points = raw_vision_bar_results[i].points
         local area = raw_vision_bar_results[i].area
@@ -167,15 +155,15 @@ function BarBlock.update(self, raw_vision_bar_results)
             goto continue
         end
         local cx, cy = point_center(points[1], points[2], points[3], points[4])
-        table.insert(self.bars, { cx, cy, deg, fill_rate, area })
+        table.insert(BarBlock.bars, { cx, cy, deg, fill_rate, area })
         :: continue ::
     end
 
-    table.sort(self.bars, function(a, b)
+    table.sort(BarBlock.bars, function(a, b)
         return a[4] * a[5] > b[4] * b[5]
     end)
 
-    if next(self.bars) then
+    if next(BarBlock.bars) then
         return true
     else
         return false

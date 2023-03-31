@@ -9,23 +9,20 @@ local server = json.rpc.proxy("http://localhost:8888")
 --local server = make_fake_server()
 local writer = ImshowBlock.new()
 
-local bar_block = BarBlock.new()
-local detect_block = DetectBlock.new()
-
 local function update()
     local input = coroutine.yield()
 
     local bar_any = input["find_bar"]
     if bar_any then
         local find_bar = FindBarResults.from_any(bar_any)
-        bar_block:update(find_bar.result)
+        BarBlock.update(find_bar.result)
         writer:process(find_bar.frame)
     end
 
     local detect_any = input["detect"]
     if detect_any then
         object_detect = ObjectDetectResults.from_any(detect_any)
-        detect_block:update(object_detect.result)
+        --DetectBlock.update(object_detect.result)
         --writer:process(object_detect.frame)
     end
 end
@@ -47,8 +44,10 @@ function main(input)
         --    goto while_begin
         --end
 
-        bar_motion_fun = bar_block:process()
-        -- bar_motion_fun(server)
+        bar_motion_fun = BarBlock.process()
+        if bar_motion_fun then
+            bar_motion_fun(server)
+        end
 
         sleep(0.1)
     end
