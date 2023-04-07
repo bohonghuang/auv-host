@@ -7,6 +7,7 @@
 #include "block/detect.h"
 #include "block/find_ball.h"
 #include "block/find_bar.h"
+#include "block/find_line.h"
 #include "block/imshow.h"
 
 #include "camera_mgr.h"
@@ -91,6 +92,17 @@ void auv::vision::lua::setup_env(sol::state &state) {
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBallBlock,
                    sol::constructors<auv::vision::FindBarBlock(bool)>());
+
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindLineResults, sol::no_constructor,
+                   "frame", &auv::vision::FindLineResults::frame,
+                   "result", &auv::vision::FindLineResults::result);
+
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindLineResult, sol::default_constructor,
+                   "theta", &auv::vision::FindLineResult::theta,
+                   "point", &auv::vision::FindLineResult::point);
+
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindLineBlock,
+                   sol::constructors<auv::vision::FindLineBlock(double, double, int)>());
 
   AUV_NEW_SOL_TYPE(state, auv::vision::network::YoloFastV2Result, sol::no_constructor,
                    "name", &auv::vision::network::YoloFastV2Result::name,

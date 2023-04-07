@@ -2,6 +2,7 @@ local json = require('json')
 require("json.rpc")
 require("application.lua.utils")
 require("application.lua.bar_block")
+require("application.lua.door_block")
 require("application.lua.detect_block")
 
 local server = json.rpc.proxy("http://localhost:8888")
@@ -16,7 +17,14 @@ local function update()
     if bar_any then
         local find_bar = FindBarResults.from_any(bar_any)
         BarBlock.update(find_bar.result)
-        writer:process(find_bar.frame)
+        --writer:process(find_bar.frame)
+    end
+
+    local line_any = input["find_line"]
+    if line_any then
+        local find_line = FindLineResults.from_any(line_any)
+        DoorBlock.update(find_line.result)
+        writer:process(find_line.frame)
     end
 
     local detect_any = input["detect"]
@@ -44,10 +52,10 @@ function main(input)
         --    goto while_begin
         --end
 
-        bar_motion_fun = BarBlock.process()
-        if bar_motion_fun then
-            bar_motion_fun(server)
-        end
+        --bar_motion_fun = BarBlock.process()
+        --if bar_motion_fun then
+        --    bar_motion_fun(server)
+        --end
 
         sleep(0.1)
     end

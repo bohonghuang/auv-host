@@ -23,15 +23,19 @@ local find_bar_inrange = InRangeBlock.new(find_bar_inrange_params)
 local find_bar = FindBarBlock.new(true)
 local find_bar_block = LuaMuxBlock.new("application/lua/main_block.lua")
 
+local find_line = FindLineBlock.new(1, math.pi/180, 200)
+
 local show = ImshowBlock.new()
 local bio = ObjectDetectBlock.new()
 
 local input_find_bar = connect(cam_bottom, cvtcolor_ycrcb, find_bar_inrange, find_bar, find_bar_block:input_block("find_bar"))
+local input_find_line = connect(cam_front, cvtcolor_ycrcb, find_bar_inrange, find_line, find_bar_block:input_block("find_line"))
 local input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
 
 local find_bar_task = SchedulerList.new(
         Scheduler.new(find_bar_block:as_untyped(), 1.0 / 15.0),
-        Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0)
+        Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0),
+        Scheduler.new(input_find_line:as_untyped(), 1.0 / 15.0)
 )
 
 find_bar_task:add(Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0))

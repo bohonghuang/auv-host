@@ -134,13 +134,13 @@ function BarBlock.update(raw_vision_bar_results)
         local dist_p23 = point_dist(points[2], points[3])
         local length, width = math.max(dist_p12, dist_p23) / 2.0, math.min(dist_p12, dist_p23) / 2.0
         if width < 1 / 15 then
-            print("跳过过小的宽度")
+            -- print("跳过过小的宽度")
             goto continue
         elseif length < 1 / 6 then
-            print("跳过过小的长度")
+            -- print("跳过过小的长度")
             goto continue
         elseif length / width > 6 then
-            print("跳过错误的长宽比")
+            -- print("跳过错误的长宽比")
             goto continue
         end
         local fill_rate = area / (length * width)
