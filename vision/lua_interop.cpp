@@ -7,7 +7,7 @@
 #include "block/detect.h"
 #include "block/find_ball.h"
 #include "block/find_bar.h"
-#include "block/find_line.h"
+#include "block/find_door.h"
 #include "block/imshow.h"
 
 #include "camera_mgr.h"
@@ -29,30 +29,11 @@ void auv::vision::lua::setup_env(sol::state &state) {
 
   AUV_NEW_SOL_TYPE(state, auv::vision::ImshowBlock, sol::default_constructor);
 
-  AUV_NEW_SOL_TYPE(state, auv::vision::CameraParams, sol::default_constructor,
-                   "fx", &auv::vision::CameraParams::fx,
-                   "cx", &auv::vision::CameraParams::cx,
-                   "fy", &auv::vision::CameraParams::fy,
-                   "cy", &auv::vision::CameraParams::cy,
-                   "k1", &auv::vision::CameraParams::k1,
-                   "k2", &auv::vision::CameraParams::k2,
-                   "k3", &auv::vision::CameraParams::k3,
-                   "k4", &auv::vision::CameraParams::k4,
-                   "k5", &auv::vision::CameraParams::k5);
-
   AUV_NEW_SOL_TYPE(state, auv::vision::CameraBlock,
                    sol::constructors<auv::vision::CameraBlock(cv::VideoCapture &)>());
 
   AUV_NEW_SOL_TYPE(state, auv::vision::CameraCalibrateBlock,
                    sol::constructors<auv::vision::CameraCalibrateBlock(const auv::vision::CameraParams &)>());
-
-  AUV_NEW_SOL_TYPE(state, auv::vision::InRangeParams, sol::default_constructor,
-                   "low_1", &auv::vision::InRangeParams::low_1,
-                   "high_1", &auv::vision::InRangeParams::high_1,
-                   "low_2", &auv::vision::InRangeParams::low_2,
-                   "high_2", &auv::vision::InRangeParams::high_2,
-                   "low_3", &auv::vision::InRangeParams::low_3,
-                   "high_3", &auv::vision::InRangeParams::high_3);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::InRangeBlock,
                    sol::constructors<auv::vision::InRangeBlock(const sol::table &)>());
@@ -68,6 +49,7 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(ns_cv, cv::Point, sol::default_constructor, "x", &cv::Point::x, "y", &cv::Point::y);
   AUV_NEW_SOL_TYPE(ns_cv, cv::Point2d, sol::default_constructor, "x", &cv::Point2d::x, "y", &cv::Point2d::y);
   AUV_NEW_SOL_TYPE(ns_cv, cv::Size, sol::default_constructor, "width", &cv::Size::width, "height", &cv::Size::height);
+  AUV_NEW_SOL_TYPE(ns_cv, cv::Rect2f, sol::default_constructor, "width", &cv::Rect2f::width, "height", &cv::Rect2f::height, "x", &cv::Rect2f::x, "y", &cv::Rect2f::y);
   AUV_NEW_SOL_TYPE(ns_cv, cv::Rect, sol::default_constructor, "width", &cv::Rect::width, "height", &cv::Rect::height, "x", &cv::Rect::x, "y", &cv::Rect::y);
   ns_cv.set_function("imshow", sol::resolve<void(const std::string &, cv::InputArray)>(&cv::imshow));
   ns_cv.set_function("waitKey", sol::resolve<int(int)>(&cv::waitKey));
@@ -93,13 +75,9 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBallBlock,
                    sol::constructors<auv::vision::FindBarBlock(bool)>());
 
-  AUV_NEW_SOL_TYPE(state, auv::vision::FindLineResults, sol::no_constructor,
-                   "frame", &auv::vision::FindLineResults::frame,
-                   "result", &auv::vision::FindLineResults::result);
-
-  AUV_NEW_SOL_TYPE(state, auv::vision::FindLineResult, sol::default_constructor,
-                   "theta", &auv::vision::FindLineResult::theta,
-                   "point", &auv::vision::FindLineResult::point);
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorResults, sol::no_constructor,
+                   "frame", &auv::vision::FindDoorResults::frame,
+                   "result", &auv::vision::FindDoorResults::result);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindLineBlock,
                    sol::constructors<auv::vision::FindLineBlock(double, double, int)>());

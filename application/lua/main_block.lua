@@ -20,9 +20,9 @@ local function update()
         --writer:process(find_bar.frame)
     end
 
-    local line_any = input["find_line"]
-    if line_any then
-        local find_line = FindLineResults.from_any(line_any)
+    local door_any = input["find_door"]
+    if door_any then
+        local find_line = FindDoorResults.from_any(door_any)
         DoorBlock.update(find_line.result)
         writer:process(find_line.frame)
     end

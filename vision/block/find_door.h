@@ -1,5 +1,5 @@
-#ifndef AUV_HOST_FIND_LINE_H
-#define AUV_HOST_FIND_LINE_H
+#ifndef AUV_HOST_FIND_DOOR_H
+#define AUV_HOST_FIND_DOOR_H
 
 #include "block.h"
 
@@ -7,17 +7,12 @@
 
 namespace auv::vision {
 
-struct FindLineResult {
-  double theta;
-  cv::Point2d point;
-};
-
-struct FindLineResults {
+struct FindDoorResults {
   cv::Mat frame;
-  std::vector<FindLineResult> result;
+  std::vector<cv::Rect2f> result;
 };
 
-class FindLineBlock : public auv::Block<cv::Mat, FindLineResults> {
+class FindLineBlock : public auv::Block<cv::Mat, FindDoorResults> {
 public:
   FindLineBlock(double rho, double theta, int threshold);
   Out process(In frame) override;
@@ -31,4 +26,4 @@ private:
 
 }// namespace auv::vision
 
-#endif//AUV_HOST_FIND_LINE_H
+#endif//AUV_HOST_FIND_DOOR_H

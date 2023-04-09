@@ -6,7 +6,8 @@ local server = json.rpc.proxy("http://localhost:8888")
 --cam_front = CameraBlock.new(GetCapture("0"))
 --cam_bottom = CameraBlock.new(GetCapture("0"))
 
-local cam_front = CameraBlock.new(GetCapture("0"))
+local cam_front = CameraBlock.new(GetCapture("door6.tmp"))
+-- local cam_front = CameraBlock.new(GetCapture("0"))
 local cam_bottom = CameraBlock.new(GetCapture("0"))
 
 local cvtcolor_ycrcb = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
@@ -23,19 +24,19 @@ local find_bar_inrange = InRangeBlock.new(find_bar_inrange_params)
 local find_bar = FindBarBlock.new(true)
 local find_bar_block = LuaMuxBlock.new("application/lua/main_block.lua")
 
-local find_line = FindLineBlock.new(1, math.pi/180, 200)
+local find_door = FindLineBlock.new(1, math.pi/180, 200)
 
 local show = ImshowBlock.new()
 local bio = ObjectDetectBlock.new()
 
 local input_find_bar = connect(cam_bottom, cvtcolor_ycrcb, find_bar_inrange, find_bar, find_bar_block:input_block("find_bar"))
-local input_find_line = connect(cam_front, cvtcolor_ycrcb, find_bar_inrange, find_line, find_bar_block:input_block("find_line"))
+local input_find_door = connect(cam_front, cvtcolor_ycrcb, find_bar_inrange, find_door, find_bar_block:input_block("find_door"))
 local input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
 
 local find_bar_task = SchedulerList.new(
         Scheduler.new(find_bar_block:as_untyped(), 1.0 / 15.0),
         Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0),
-        Scheduler.new(input_find_line:as_untyped(), 1.0 / 15.0)
+        Scheduler.new(input_find_door:as_untyped(), 1.0 / 15.0)
 )
 
 find_bar_task:add(Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0))

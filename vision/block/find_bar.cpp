@@ -38,7 +38,7 @@ FindBarBlock::process(cv::Mat frame) {
     rect.points(rect_points);
 
     cv::Mat mask = cv::Mat::zeros(frame.size(), CV_8UC1);
-    cv::fillPoly(mask, utils::transform_points_from_array_to_vector(rect_points), cv::Scalar(255, 255, 255));
+    cv::fillPoly(mask, std::vector<cv::Point> { rect_points, rect_points + 4 }, cv::Scalar(255, 255, 255));
     cv::Mat mask_result;
     cv::bitwise_and(frame, mask, mask_result);
     double non_zero_count = cv::countNonZero(mask_result);
