@@ -9,7 +9,7 @@ namespace auv::vision {
 
 struct FindDoorResults {
   cv::Mat frame;
-  std::vector<cv::Rect2f> result;
+  std::vector<std::array<cv::Point2f, 4>> result;
 };
 
 class FindLineBlock : public auv::Block<cv::Mat, FindDoorResults> {

@@ -27,7 +27,7 @@ static void lines_process(HoughResult &result) {
   result.theta /= result.count;
 }
 
-static std::vector<cv::Rect2f> lines_get_bar(const cv::Mat &frame, cv::Mat &preview_frame, const HoughResult &line_params) {
+static std::vector<std::array<cv::Point2f, 4>> lines_get_bar(const cv::Mat &frame, cv::Mat &preview_frame, const HoughResult &line_params) {
   cv::Mat mask = cv::Mat::zeros(frame.size(), CV_8UC1);
   double cos_theta = cos(line_params.theta), sin_theta = sin(line_params.theta);
   double x0 = cos_theta * line_params.distance, y0 = sin_theta * line_params.distance;
@@ -43,7 +43,7 @@ static std::vector<cv::Rect2f> lines_get_bar(const cv::Mat &frame, cv::Mat &prev
   cv::findContours(mask, contours, cv::noArray(),
                    cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-  std::vector<cv::Rect2f> results;
+  std::vector<std::array<cv::Point2f, 4>> results;
   for (const auto &contour: contours) {
     cv::Point2f rect_points[4];
     auto rect = cv::minAreaRect(contour);
@@ -51,7 +51,7 @@ static std::vector<cv::Rect2f> lines_get_bar(const cv::Mat &frame, cv::Mat &prev
     for (size_t i = 0; i < 4; i++)
       cv::line(preview_frame, rect_points[i], rect_points[(i + 1) % 4],
                cv::Scalar(0, 255, 255), 2, cv::LINE_AA);
-    results.emplace_back(rect_points[0], rect_points[2]);
+    results.push_back({rect_points[0], rect_points[1], rect_points[2], rect_points[3]});
   }
   return results;
 }
@@ -96,18 +96,18 @@ FindDoorResults FindLineBlock::process(cv::Mat frame) {
   auto right_result = lines_get_bar(frame, preview_frame, right);
   auto bottom_result = lines_get_bar(frame, preview_frame, bottom);
 
-  std::vector<cv::Rect2f> results;
+  std::vector<std::array<cv::Point2f, 4>> results;
   results.insert(results.end(), left_result.begin(), left_result.end());
   results.insert(results.end(), right_result.begin(), right_result.end());
   results.insert(results.end(), bottom_result.begin(), bottom_result.end());
 
-  for (auto &i: results) {
-    static const int half_width = width / 2;
-    static const int half_height = height / 2;
-    i.x = (i.x - (float) half_width) / (float) half_width;
-    i.y = -(i.y - (float) half_height) / (float) half_height;
-    i.width *= (float) 2.0 / (float) width;
-    i.height *= (float) 2.0 / (float) height;
+  for (auto &it: results) {
+    for(auto &i : it) {
+      static const int half_width = width / 2;
+      static const int half_height = height / 2;
+      i.x = (i.x - (float) half_width) / (float) half_width;
+      i.y = -(i.y - (float) half_height) / (float) half_height;
+    }
   }
   return {preview_frame, std::move(results)};
 }
