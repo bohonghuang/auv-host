@@ -6,10 +6,23 @@ local server = json.rpc.proxy("http://localhost:8888")
 --cam_front = CameraBlock.new(GetCapture("0"))
 --cam_bottom = CameraBlock.new(GetCapture("0"))
 
-local cam_front = CameraBlock.new(GetCapture("door6.tmp"))
--- local cam_front = CameraBlock.new(GetCapture("0"))
+-- local cam_front = CameraBlock.new(GetCapture("door6.tmp"))
+local cam_front = CameraBlock.new(GetCapture("0"))
 local cam_bottom = CameraBlock.new(GetCapture("0"))
 
+local camera_calibr_params = {
+    fx = 359.4494022780337,
+    cx = 309.1400563601385,
+    fy = 359.0557471727833,
+    cy = 244.4134037153996,
+    k1 = -0.3468316403956397,
+    k2 =  0.1885874111627161,
+    k3 = -0.001198301786596316,
+    k4 = 0.00239637007482126,
+    k5 = -0.06373795517103995,
+}
+
+local cam_front_calibr = CameraCalibrateBlock.new(camera_calibr_params)
 local cvtcolor_ycrcb = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
 
 local find_bar_inrange_params = {
@@ -30,7 +43,7 @@ local show = ImshowBlock.new()
 local bio = ObjectDetectBlock.new()
 
 local input_find_bar = connect(cam_bottom, cvtcolor_ycrcb, find_bar_inrange, find_bar, find_bar_block:input_block("find_bar"))
-local input_find_door = connect(cam_front, cvtcolor_ycrcb, find_bar_inrange, find_door, find_bar_block:input_block("find_door"))
+local input_find_door = connect(cam_front, cam_front_calibr, cvtcolor_ycrcb, find_bar_inrange, find_door, find_bar_block:input_block("find_door"))
 local input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
 
 local find_bar_task = SchedulerList.new(

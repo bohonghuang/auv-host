@@ -32,8 +32,11 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(state, auv::vision::CameraBlock,
                    sol::constructors<auv::vision::CameraBlock(cv::VideoCapture &)>());
 
+//  AUV_NEW_SOL_TYPE(state, auv::vision::CameraCalibrateBlock,
+//                   sol::constructors<auv::vision::CameraCalibrateBlock(const auv::vision::CameraParams &)>());
+
   AUV_NEW_SOL_TYPE(state, auv::vision::CameraCalibrateBlock,
-                   sol::constructors<auv::vision::CameraCalibrateBlock(const auv::vision::CameraParams &)>());
+                   sol::constructors<auv::vision::CameraCalibrateBlock(const sol::table &)>());
 
   AUV_NEW_SOL_TYPE(state, auv::vision::InRangeBlock,
                    sol::constructors<auv::vision::InRangeBlock(const sol::table &)>());

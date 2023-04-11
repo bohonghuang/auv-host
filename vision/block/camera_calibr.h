@@ -2,6 +2,7 @@
 #define AUV_HOST_CAMERA_CALIBR_H
 
 #include <opencv2/opencv.hpp>
+#include <sol/sol.hpp>
 
 #include "block.h"
 
@@ -23,6 +24,7 @@ class CameraCalibrateBlock : public auv::Block<cv::Mat, cv::Mat> {
 public:
   CameraCalibrateBlock() = default;
   explicit CameraCalibrateBlock(const CameraParams &camera_params) noexcept;
+  explicit CameraCalibrateBlock(const sol::table &camera_params) noexcept;
   Out process(In) noexcept override;
   AUV_BLOCK;
 

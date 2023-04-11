@@ -29,5 +29,26 @@ CameraCalibrateBlock::process(cv::Mat frame) noexcept {
   return frame;
 }
 
+CameraCalibrateBlock::CameraCalibrateBlock(const sol::table &lua_table) noexcept {
+#define XX(name)                                              \
+  auto name = lua_table[#name];                               \
+  if (!name.valid()) {                                        \
+    std::cout << "camera_params need " << #name << std::endl; \
+    return;                                                   \
+  }
+
+  XX(fx)
+  XX(cx)
+  XX(fy)
+  XX(cy)
+  XX(k1)
+  XX(k2)
+  XX(k3)
+  XX(k4)
+  XX(k5)
+#undef XX
+  m_camera_params = CameraParams{fx, cx, fy, cy, k1, k2, k3, k4, k5};
+}
+
 
 }// namespace auv::vision

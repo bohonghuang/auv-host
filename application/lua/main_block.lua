@@ -6,9 +6,9 @@ require("application.lua.door_block")
 require("application.lua.detect_block")
 
 local server = json.rpc.proxy("http://localhost:8888")
---local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.143 port=5600", 640, 480)
+local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
 --local server = make_fake_server()
-local writer = ImshowBlock.new()
+-- local writer = ImshowBlock.new()
 
 local function update()
     local input = coroutine.yield()
@@ -46,6 +46,8 @@ function main(input)
         ::while_begin::
         update()
 
+        local door_block_fun = DoorBlock.process()
+        door_block_fun(server)
         --detect_motion_fun = detect_block:process()
         --if detect_motion_fun then
         --    detect_motion_fun(server)

@@ -28,6 +28,8 @@ static void lines_process(HoughResult &result) {
 }
 
 static std::vector<std::array<cv::Point2f, 4>> lines_get_bar(const cv::Mat &frame, cv::Mat &preview_frame, const HoughResult &line_params) {
+  if(line_params.count == 0)
+    return {};
   cv::Mat mask = cv::Mat::zeros(frame.size(), CV_8UC1);
   double cos_theta = cos(line_params.theta), sin_theta = sin(line_params.theta);
   double x0 = cos_theta * line_params.distance, y0 = sin_theta * line_params.distance;
