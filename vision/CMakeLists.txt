@@ -15,7 +15,9 @@ set(auv_vision_srcs
         nn/yolo_fast_v2.cpp
         lua_interop.cpp
         camera_mgr.cpp
-        block/find_ball.cpp block/find_door.cpp)
+        block/find_ball.cpp
+        block/find_door.cpp
+        block/find_door_grid.cpp)
 
 add_library(auv-vision STATIC ${auv_vision_srcs})
 target_link_libraries(auv-vision ${OpenCV_LIBS})
