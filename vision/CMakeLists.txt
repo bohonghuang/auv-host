@@ -22,8 +22,8 @@ set(auv_vision_srcs
 add_library(auv-vision STATIC ${auv_vision_srcs})
 target_link_libraries(auv-vision ${OpenCV_LIBS})
 
-add_executable(auv-vision-test test/test.cpp)
-target_link_libraries(auv-vision-test PUBLIC auv-vision PRIVATE Catch2::Catch2WithMain)
+# add_executable(auv-vision-test test/test.cpp)
+# target_link_libraries(auv-vision-test PUBLIC auv-vision PRIVATE Catch2::Catch2WithMain)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)

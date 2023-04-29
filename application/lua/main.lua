@@ -38,44 +38,47 @@ local find_bar = FindBarBlock.new(true)
 local find_bar_block = LuaMuxBlock.new("application/lua/main_block.lua")
 
 local find_door = FindLineBlock.new(1, math.pi/180, 200)
+local find_door_grid = FindDoorGrid.new(6, 8)
 
 local show = ImshowBlock.new()
 local bio = ObjectDetectBlock.new()
 
 local input_find_bar = connect(cam_bottom, cvtcolor_ycrcb, find_bar_inrange, find_bar, find_bar_block:input_block("find_bar"))
 local input_find_door = connect(cam_front, cam_front_calibr, cvtcolor_ycrcb, find_bar_inrange, find_door, find_bar_block:input_block("find_door"))
-local input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
+local input_find_door_grid = connect(cam_front, cam_front_calibr, cvtcolor_ycrcb, find_bar_inrange, find_door_grid, find_bar_block:input_block("find_door_grid"))
+-- local input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
 
 local find_bar_task = SchedulerList.new(
         Scheduler.new(find_bar_block:as_untyped(), 1.0 / 15.0),
         Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0),
-        Scheduler.new(input_find_door:as_untyped(), 1.0 / 15.0)
+        Scheduler.new(input_find_door:as_untyped(), 1.0 / 15.0),
+        Scheduler.new(input_find_door_grid:as_untyped(), 1.0/15.0)
 )
 
-find_bar_task:add(Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0))
+-- find_bar_task:add(Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0))
 
-local find_ball_inrange_params = {
-    low_1 = 33,
-    high_1 = 177,
-    low_2 = 146,
-    high_2 = 255,
-    low_3 = 65,
-    high_3 = 130
-}
+-- local find_ball_inrange_params = {
+--     low_1 = 33,
+--     high_1 = 177,
+--     low_2 = 146,
+--     high_2 = 255,
+--     low_3 = 65,
+--     high_3 = 130
+-- }
 
-local cvtcolor_hsv = ConvertColorBlock.new(cv.COLOR_BGR2HSV)
-local find_ball_inrange = InRangeBlock.new(find_ball_inrange_params)
-local find_ball = FindBallBlock.new(true)
-local find_ball_block = LuaMuxBlock.new("application/lua/ball_block.lua")
+-- local cvtcolor_hsv = ConvertColorBlock.new(cv.COLOR_BGR2HSV)
+-- local find_ball_inrange = InRangeBlock.new(find_ball_inrange_params)
+-- local find_ball = FindBallBlock.new(true)
+-- local find_ball_block = LuaMuxBlock.new("application/lua/ball_block.lua")
 
-local input_find_ball_front = connect(cam_bottom, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("front"))
-local input_find_ball_bottom = connect(cam_front, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("bottom"))
+-- local input_find_ball_front = connect(cam_bottom, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("front"))
+-- local input_find_ball_bottom = connect(cam_front, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("bottom"))
 
-local find_ball_task = SchedulerList.new(
-        Scheduler.new(find_ball_block:as_untyped(), 1.0 / 15.0),
-        Scheduler.new(input_find_ball_front:as_untyped(), 1.0 / 15.0),
-        Scheduler.new(input_find_ball_bottom:as_untyped(), 1.0 / 15.0)
-)
+-- local find_ball_task = SchedulerList.new(
+--         Scheduler.new(find_ball_block:as_untyped(), 1.0 / 15.0),
+--         Scheduler.new(input_find_ball_front:as_untyped(), 1.0 / 15.0),
+--         Scheduler.new(input_find_ball_bottom:as_untyped(), 1.0 / 15.0)
+-- )
 
 local tasks = find_bar_task
 

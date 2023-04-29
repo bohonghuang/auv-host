@@ -6,9 +6,9 @@ require("application.lua.door_block")
 require("application.lua.detect_block")
 
 local server = json.rpc.proxy("http://localhost:8888")
-local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
+-- local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
 --local server = make_fake_server()
--- local writer = ImshowBlock.new()
+local writer = ImshowBlock.new()
 
 local function update()
     local input = coroutine.yield()
@@ -27,11 +27,18 @@ local function update()
         writer:process(find_line.frame)
     end
 
-    local detect_any = input["detect"]
-    if detect_any then
-        object_detect = ObjectDetectResults.from_any(detect_any)
-        --DetectBlock.update(object_detect.result)
-        --writer:process(object_detect.frame)
+    -- local detect_any = input["detect"]
+    -- if detect_any then
+    --     object_detect = ObjectDetectResults.from_any(detect_any)
+    --     --DetectBlock.update(object_detect.result)
+    --     --writer:process(object_detect.frame)
+    -- end
+
+    local door_grid_any = input["find_door_grid"]
+    if door_grid_any then
+        find_bar_grid = FindDoorGridResults.from_any(door_grid_any)
+        print(find_bar_grid.dev, find_bar_grid.deg, find_bar_grid.confidence)
+        writer:process(find_bar_grid.frame)
     end
 end
 

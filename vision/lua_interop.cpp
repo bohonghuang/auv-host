@@ -8,9 +8,11 @@
 #include "block/find_ball.h"
 #include "block/find_bar.h"
 #include "block/find_door.h"
+#include "block/find_door_grid.h"
 #include "block/imshow.h"
 
 #include "camera_mgr.h"
+#include <sol/raii.hpp>
 
 void auv::vision::lua::setup_env(sol::state &state) {
   if (state["vision"].is<sol::table>()) return;
@@ -82,6 +84,15 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorResults, sol::no_constructor,
                    "frame", &auv::vision::FindDoorResults::frame,
                    "result", &auv::vision::FindDoorResults::result);
+
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorGridResults, sol::no_constructor,
+                  "frame", &auv::vision::FindDoorGridResults::frame,
+                  "confidence", &auv::vision::FindDoorGridResults::confidence,
+                  "deg", &auv::vision::FindDoorGridResults::deg,
+                  "dev", &auv::vision::FindDoorGridResults::dev);
+
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorGrid,
+                   sol::constructors<auv::vision::FindDoorGrid(int, int)>());
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindLineBlock,
                    sol::constructors<auv::vision::FindLineBlock(double, double, int)>());

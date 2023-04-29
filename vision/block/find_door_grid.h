@@ -8,7 +8,10 @@
 namespace auv::vision {
 
 struct FindDoorGridResults {
-
+  cv::Mat frame;
+  float confidence;
+  float deg;
+  float dev;
 };
 
 class FindDoorGrid : public auv::Block<cv::Mat, FindDoorGridResults> {
