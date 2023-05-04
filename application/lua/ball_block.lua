@@ -4,7 +4,8 @@ require("application.lua.utils")
 
 local time = current_time()
 local server = json.rpc.proxy("http://localhost:8888")
-local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
+local writer = UploadBlock.new(
+    "appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
 -- local writer = UploadBlock.new("appsrc ! videoconvert ! nvh264enc ! rtph264pay ! udpsink host=192.168.31.200 port=5600", 640, 480)
 
 --local function cpp_sequence_table(seq)
@@ -88,15 +89,16 @@ function main(input)
             local rotation = 0.5
             for duration = 1, 3 do
                 if try_motion({ x = 0.0, y = 0.0, z = sink_acc, rot = rotation }, duration / 2.0) or
-                        try_motion({ x = 0.0, y = 0.0, z = sink_acc, rot = -rotation }, duration) or
-                        try_motion({ x = 0.0, y = 0.0, z = sink_acc, rot = rotation }, duration / 2.0) then
+                    try_motion({ x = 0.0, y = 0.0, z = sink_acc, rot = -rotation }, duration) or
+                    try_motion({ x = 0.0, y = 0.0, z = sink_acc, rot = rotation }, duration / 2.0) then
                     return true
                 end
             end
             return false
         end
         local function find_ball()
-            local front_balls, bottom_balls = ball_filter(front_vision_result.result), ball_filter(bottom_vision_result.result)
+            local front_balls, bottom_balls = ball_filter(front_vision_result.result),
+                ball_filter(bottom_vision_result.result)
             --if #bottom_balls > 0 then
             --    if bottom_balls[1].cy < 0.6 then
             --        print("下摄像头：直行......")
@@ -150,7 +152,7 @@ function main(input)
     sleep(999999)
 end
 
-co = coroutine.create(main)
+local co = coroutine.create(main)
 
 function process(input)
     if time <= current_time() then

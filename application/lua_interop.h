@@ -3,9 +3,6 @@
 
 #include <sol/state.hpp>
 
-#include "runtime/lua_interop.h"
-#include "vision/lua_interop.h"
-
 namespace auv::application::lua {
 
 void setup_env(sol::state &state);

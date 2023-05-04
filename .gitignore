@@ -1,5 +1,12 @@
+*.tmp
+*.mkv
+
 .idea
+.cache
+.vscode
+
+compile_commands.json
+
+build
 cmake-build-debug
 cmake-build-debug-mingw
-compile_commands.json
-.cache

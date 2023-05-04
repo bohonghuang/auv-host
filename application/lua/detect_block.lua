@@ -19,13 +19,13 @@ DetectBlock = {
             end
         end,
 
-        WillHit = function(self)
+        WillHit = function()
             return function(server)
                 server.move { x = 0.0, y = 0.2, z = 0.0, rot = 0.0 }
             end
         end,
 
-        Stop = function(self)
+        Stop = function()
             return function(server)
                 server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
             end
@@ -49,13 +49,13 @@ function DetectBlock.process()
                 DetectBlock.detect_tables[prev_track_name] = false
                 return
             end
-            return DetectBlock.motions.WillHit(self)
+            return DetectBlock.motions.WillHit()
         end
 
         return
     end
 
-    local track = self.detects[1]
+    local track = DetectBlock.detects[1]
 
     if not prev_track_name then
         prev_track_name = track.name
@@ -70,7 +70,7 @@ function DetectBlock.process()
         if timer <= 0.5 then
             print("疑似检测到生物 " .. prev_track_name .. " ，已等待 " .. timer .. " 秒")
             timer = timer + 0.1
-            return DetectBlock.motions.Stop(self)
+            return DetectBlock.motions.Stop()
         else
             print("开始撞向生物" .. prev_track_name)
             really_detected = true
@@ -81,7 +81,7 @@ function DetectBlock.process()
     if really_detected then
         print("正在撞向生物" .. prev_track_name)
         timer = 0.0
-        return DetectBlock.motions.Hit(self)
+        return DetectBlock.motions.Hit()
     end
 end
 

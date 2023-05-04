@@ -3,9 +3,10 @@ require("json.rpc")
 require("application.lua.utils")
 require("application.lua.bar_block")
 require("application.lua.door_block")
+require("application.lua.door_grid_block")
 require("application.lua.detect_block")
 
-local server = json.rpc.proxy("http://localhost:8888")
+server = json.rpc.proxy("http://localhost:8888")
 -- local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
 --local server = make_fake_server()
 local writer = ImshowBlock.new()
@@ -17,28 +18,29 @@ local function update()
     if bar_any then
         local find_bar = FindBarResults.from_any(bar_any)
         BarBlock.update(find_bar.result)
-        --writer:process(find_bar.frame)
+        writer:process(find_bar.frame)
     end
 
-    local door_any = input["find_door"]
-    if door_any then
-        local find_line = FindDoorResults.from_any(door_any)
-        DoorBlock.update(find_line.result)
-        writer:process(find_line.frame)
-    end
+    -- local door_any = input["find_door"]
+    -- if door_any then
+    --     local find_line = FindDoorResults.from_any(door_any)
+    --     DoorBlock.update(find_line.result)
+    --     -- writer:process(find_line.frame)
+    -- end
 
     -- local detect_any = input["detect"]
     -- if detect_any then
     --     object_detect = ObjectDetectResults.from_any(detect_any)
-    --     --DetectBlock.update(object_detect.result)
+    --     --DetectBlock.update(object_detect.rkesult)
     --     --writer:process(object_detect.frame)
     -- end
 
     local door_grid_any = input["find_door_grid"]
     if door_grid_any then
-        find_bar_grid = FindDoorGridResults.from_any(door_grid_any)
-        print(find_bar_grid.dev, find_bar_grid.deg, find_bar_grid.confidence)
-        writer:process(find_bar_grid.frame)
+        local find_bar_grid = FindDoorGridResults.from_any(door_grid_any)
+        DoorGridBlock.update(find_bar_grid.mat)
+        --print_mat(find_bar_grid.mat)
+        -- writer:process(find_bar_grid.frame)
     end
 end
 
@@ -53,8 +55,9 @@ function main(input)
         ::while_begin::
         update()
 
+        -- DoorGridBlock.process()
         local door_block_fun = DoorBlock.process()
-        door_block_fun(server)
+        -- door_block_fun(server)
         --detect_motion_fun = detect_block:process()
         --if detect_motion_fun then
         --    detect_motion_fun(server)
@@ -70,7 +73,7 @@ function main(input)
     end
 end
 
-co = coroutine.create(main)
+local co = coroutine.create(main)
 function process(input)
     if time <= current_time() then
         local result, err = coroutine.resume(co, input)

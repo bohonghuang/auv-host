@@ -1,8 +1,13 @@
 #include "find_door_grid.h"
 
 #include <array>
-
-#include "utils.h"
+#include <cstddef>
+#include <functional>
+#include <opencv2/core/types.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/opencv.hpp>
+#include <tuple>
 
 namespace auv::vision {
 
@@ -41,156 +46,45 @@ FindDoorGridResults FindDoorGrid::process(cv::Mat frame) {
   int cell_height = height / m_row_count;
   int cell_area = cell_width * cell_height;
 
-  std::vector<std::vector<cv::Mat>> cells = [&]() {
+  std::vector<std::vector<cv::Mat>> cells = std::invoke([&]() {
     std::vector<std::vector<cv::Mat>> result(m_row_count);
     for (int i = 0; i < m_row_count; ++i) {
       std::vector<cv::Mat> cell_per_row(m_col_count);
       auto row_range = cv::Range(i * cell_height, (i + 1) * cell_height);
-      for (int j = 0; j < m_col_count; ++j)
+      for (int j = 0; j < m_col_count; ++j) {
         cell_per_row[j] = frame(row_range, cv::Range(j * cell_width, (j + 1) * cell_width));
-
+      }
       result[i] = std::move(cell_per_row);
     }
     return result;
-  }();
+  });
 
-  cv::Mat cell_mat(m_row_count, m_col_count, CV_8UC1);
+  std::vector<std::vector<float>> cell_mat = std::invoke([this] {
+    std::vector<float> tmp(m_col_count, 0);
+    return std::vector<std::vector<float>>(m_row_count, tmp);
+  });
+
   for (int i = 0; i < m_row_count; ++i) {
     for (int j = 0; j < m_col_count; ++j) {
       const auto &cell = cells[i][j];
-      if (cv::countNonZero(cell) > cell_area / 20)
-        cell_mat.at<uint8_t>(i, j) = 255;
+      cell_mat[i][j] = (float) cv::countNonZero(cell) / cell_area;
     }
   }
 
-  std::vector<std::pair<int, int>> edge_heights;// (index, height)
-  for (int i = 0; i < m_col_count; ++i) {
-    cv::Mat col = cell_mat.col(i);
-    size_t edge_height = count_max_continuous(col.begin<uint8_t>(), col.end<uint8_t>());
-    if (edge_height >= (m_row_count + 1) / 2)
-      edge_heights.emplace_back(i, edge_height);
+  for (size_t i = 1; i < m_row_count; ++i) {
+    int line_hegin = i * cell_height;
+    cv::line(frame, cv::Point(0, line_hegin), cv::Point(width, line_hegin),
+             cv::Scalar(255, 255, 255), 1, cv::LINE_AA);
   }
 
-  float roi_dev = 0.0;
-  float roi_deg = 0.0;
-  float confidence = 1.0;
-  if (edge_heights.size() == 2) {// 大于2怎么办？
-    // +---+---+---+---+---+---+---+---+
-    // | # |   |   |   | # |   |   |   |
-    // +-#-+---+---+---+-#-+---+---+---+
-    // | # |   |   |   | # |   |   |   |
-    // +-#-+---+---+---+-#-+---+---+---+
-    // | # |   |   |   | # |   |   |   |
-    // +-#-+---+---+---+-#-+---+---+---+
-    // | ################# |   |   |   |
-    // +---+---+---+---+---+---+---+---+
-    // |   |   |   |   |   |   |   |   |
-    // +---+---+---+---+---+---+---+---+
-    auto col_left = edge_heights[0];// heights={(index,height),...}
-    auto col_right = edge_heights[1];
-    int door_width = col_right.first - col_left.first;
-    if (door_width > 1) {
-      auto center_std = (1 + m_col_count) / 2 + 1;
-      auto center_lr = (col_left.first + col_right.first) / 2 + 1;
-      roi_dev = (float) (center_lr - center_std) / (float) (center_std - 1);
-
-      auto min_height = std::min(col_left.second, col_right.second);
-      if (door_width < min_height && col_left.second != col_right.second) {
-        roi_deg = 1.0f - (float) door_width / (float) min_height;
-        roi_deg *= 45.0;
-        if (col_right.second - col_left.second < 0)
-          roi_deg *= -1;
-      }
-    } else {
-      if (col_left.second < col_right.second)
-        edge_heights.erase(edge_heights.begin());
-      else
-        edge_heights.erase(edge_heights.begin() + 1);
-    }
+  for (size_t i = 1; i < m_col_count; ++i) {
+    int line_width = i * cell_width;
+    cv::line(frame, cv::Point(line_width, 0), cv::Point(line_width, height),
+             cv::Scalar(255, 255, 255), 1, cv::LINE_AA);
   }
 
-  if (edge_heights.size() == 1) {
-    auto [col_index, col_height] = edge_heights[0];
-    auto index_limit = [this](int index) {
-      if (index > m_col_count - 1) {
-        index = m_col_count - 1;
-      }
-      if (index < 0) {
-        index = 0;
-      }
-      return index;
-    };
-
-    uint8_t hoffset_left = index_limit(cell_mat.at<uint8_t>(col_height - 1, col_index - 1));
-    uint8_t hoffset_right = index_limit(cell_mat.at<uint8_t>(col_height - 1, col_index + 1));
-    uint8_t hoffset_bottom_left = index_limit(cell_mat.at<uint8_t>(col_height, col_index - 1));
-    uint8_t hoffset_bottom_right = index_limit(cell_mat.at<uint8_t>(col_height, col_index + 1));
-    uint8_t hoffset_top_left = index_limit(cell_mat.at<uint8_t>(col_height - 2, col_index - 1));
-    uint8_t hoffset_top_right = index_limit(cell_mat.at<uint8_t>(col_height - 2, col_index + 1));
-    if (hoffset_right || hoffset_bottom_right || hoffset_top_right) {
-      // |   |   |   |
-      // +---+---+---+
-      // |   | # |   |
-      // +---+-#-+---+
-      // |   | ######|
-      confidence /= 2;
-      roi_dev = (float) col_index / m_col_count;
-    }
-    if (hoffset_left || hoffset_bottom_left || hoffset_top_left) {
-      // |   |   |   |
-      // +---+---+---+
-      // |   | # |   |
-      // +---+-#-+---+
-      // | ##### |   |
-      confidence /= 2;
-      roi_dev = -(float) (m_col_count - col_index) / m_col_count;
-    }
-
-    if (hoffset_top_left || hoffset_bottom_right) {
-      // +---+-#-+---+
-      // |   | # |   |
-      // +---+-#-+---+
-      // |   | ##|   |
-      // +---+---##--+
-      // |   |   | # |
-      // +---+---+---+
-      roi_deg = 0.5;
-      goto finish_detect;
-    }
-    if (hoffset_top_right || hoffset_bottom_left) {
-      // +-#-+---+---+
-      // | # |   |   |
-      // +-#-+--#+---+
-      // | # | # |   |
-      // +-#-##--+---+
-      // | ##|   |   |
-      // +---+---+---+
-      roi_deg = -0.5;
-      goto finish_detect;
-    }
-
-    // +---+-#-+---+
-    // |   | # |   |
-    // +---+-#-+---+
-    // |   | # |   |
-    // +---+-#-+---+
-    // |   | # |   |
-    // +---+---+---+
-    confidence /= 2;
-    int mid_index = (m_col_count + 1) / 2;
-    if (col_index < mid_index) {
-      roi_dev = (float) col_index / m_col_count;
-    }
-    if (col_index > mid_index) {
-      roi_dev = -(float) (m_col_count - col_index) / m_col_count;
-    }
-  }
-finish_detect:
-  std::cout << cell_mat << std::endl;
   FindDoorGridResults results{frame,
-                              confidence,
-                              roi_deg,
-                              roi_dev};
+                              cell_mat};
   return results;
 }
 

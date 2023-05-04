@@ -2,16 +2,13 @@
 #define AUV_HOST_VISION_BLOCK_FIND_DOOR_GRID_H_
 
 #include "block.h"
-#include "find_door.h"
 #include <opencv2/opencv.hpp>
 
 namespace auv::vision {
 
 struct FindDoorGridResults {
   cv::Mat frame;
-  float confidence;
-  float deg;
-  float dev;
+  std::vector<std::vector<float>> mat;
 };
 
 class FindDoorGrid : public auv::Block<cv::Mat, FindDoorGridResults> {
@@ -20,6 +17,7 @@ public:
   Out process(In frame) override;
 
   AUV_BLOCK;
+
 private:
   const int m_row_count;
   const int m_col_count;

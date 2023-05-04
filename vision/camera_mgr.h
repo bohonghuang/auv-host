@@ -2,6 +2,7 @@
 #define AUV_HOST_CAMERA_MGR_H
 
 #include <mutex>
+#include <opencv2/core/types.hpp>
 #include <opencv2/opencv.hpp>
 
 namespace auv::vision {
@@ -17,7 +18,7 @@ public:
 
   void add_capture(const std::vector<CaptureParams> &indexs) noexcept;
 
-  cv::VideoCapture &get_capture(const std::string &file) noexcept;
+  cv::VideoCapture &get_capture(const std::string &file, int width = 640, int height = 480) noexcept;
 private:
   CameraManager() = default;
 

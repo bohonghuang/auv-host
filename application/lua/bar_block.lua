@@ -169,4 +169,3 @@ function BarBlock.update(raw_vision_bar_results)
         return false
     end
 end
-

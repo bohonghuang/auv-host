@@ -3,12 +3,9 @@ require("json.rpc")
 require("application.lua.utils")
 local server = json.rpc.proxy("http://localhost:8888")
 
---cam_front = CameraBlock.new(GetCapture("0"))
---cam_bottom = CameraBlock.new(GetCapture("0"))
-
 -- local cam_front = CameraBlock.new(GetCapture("door6.tmp"))
-local cam_front = CameraBlock.new(GetCapture("0"))
-local cam_bottom = CameraBlock.new(GetCapture("0"))
+local cam_front = CameraBlock.new(GetCapture("0", 640, 360))
+local cam_bottom = CameraBlock.new(GetCapture("0", 640, 360))
 
 local camera_calibr_params = {
     fx = 359.4494022780337,
@@ -16,7 +13,7 @@ local camera_calibr_params = {
     fy = 359.0557471727833,
     cy = 244.4134037153996,
     k1 = -0.3468316403956397,
-    k2 =  0.1885874111627161,
+    k2 = 0.1885874111627161,
     k3 = -0.001198301786596316,
     k4 = 0.00239637007482126,
     k5 = -0.06373795517103995,
@@ -37,24 +34,26 @@ local find_bar_inrange = InRangeBlock.new(find_bar_inrange_params)
 local find_bar = FindBarBlock.new(true)
 local find_bar_block = LuaMuxBlock.new("application/lua/main_block.lua")
 
-local find_door = FindLineBlock.new(1, math.pi/180, 200)
+local find_door = FindLineBlock.new(1, math.pi / 180, 200)
 local find_door_grid = FindDoorGrid.new(6, 8)
 
 local show = ImshowBlock.new()
-local bio = ObjectDetectBlock.new()
+-- local bio = ObjectDetectBlock.new()
 
-local input_find_bar = connect(cam_bottom, cvtcolor_ycrcb, find_bar_inrange, find_bar, find_bar_block:input_block("find_bar"))
-local input_find_door = connect(cam_front, cam_front_calibr, cvtcolor_ycrcb, find_bar_inrange, find_door, find_bar_block:input_block("find_door"))
-local input_find_door_grid = connect(cam_front, cam_front_calibr, cvtcolor_ycrcb, find_bar_inrange, find_door_grid, find_bar_block:input_block("find_door_grid"))
+local input_find_bar = connect(cam_bottom, cvtcolor_ycrcb, find_bar_inrange, find_bar,
+    find_bar_block:input_block("find_bar"))
+local input_find_door = connect(cam_front, cam_front_calibr, cvtcolor_ycrcb, find_bar_inrange, find_door,
+    find_bar_block:input_block("find_door"))
+local input_find_door_grid = connect(cam_front, cam_front_calibr, cvtcolor_ycrcb, find_bar_inrange, find_door_grid,
+    find_bar_block:input_block("find_door_grid"))
 -- local input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
 
 local find_bar_task = SchedulerList.new(
-        Scheduler.new(find_bar_block:as_untyped(), 1.0 / 15.0),
-        Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0),
-        Scheduler.new(input_find_door:as_untyped(), 1.0 / 15.0),
-        Scheduler.new(input_find_door_grid:as_untyped(), 1.0/15.0)
+    Scheduler.new(find_bar_block:as_untyped(), 1.0 / 15.0),
+    Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0),
+    Scheduler.new(input_find_door:as_untyped(), 1.0 / 15.0),
+    Scheduler.new(input_find_door_grid:as_untyped(), 1.0 / 15.0)
 )
-
 -- find_bar_task:add(Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0))
 
 -- local find_ball_inrange_params = {

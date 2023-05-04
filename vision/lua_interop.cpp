@@ -23,8 +23,8 @@ void auv::vision::lua::setup_env(sol::state &state) {
     return auv::vision::CameraManager::GetInstance();
   });
 
-  state.set_function("GetCapture", sol::overload([](const std::string &index) -> cv::VideoCapture & {
-                       return auv::vision::CameraManager::GetInstance().get_capture(index);
+  state.set_function("GetCapture", sol::overload([](const std::string &index, int width, int height) -> cv::VideoCapture & {
+                       return auv::vision::CameraManager::GetInstance().get_capture(index, width, height);
                      }));
 
   AUV_NEW_SOL_TYPE(state, auv::vision::UploadBlock, sol::constructors<auv::vision::UploadBlock(const std::string &, int, int)>());
@@ -87,9 +87,7 @@ void auv::vision::lua::setup_env(sol::state &state) {
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorGridResults, sol::no_constructor,
                   "frame", &auv::vision::FindDoorGridResults::frame,
-                  "confidence", &auv::vision::FindDoorGridResults::confidence,
-                  "deg", &auv::vision::FindDoorGridResults::deg,
-                  "dev", &auv::vision::FindDoorGridResults::dev);
+                  "mat", &auv::vision::FindDoorGridResults::mat);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorGrid,
                    sol::constructors<auv::vision::FindDoorGrid(int, int)>());

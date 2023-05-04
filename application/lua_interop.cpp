@@ -1,5 +1,6 @@
 #include "lua_interop.h"
-#include "lua_block.h"
+#include "runtime/lua_interop.h"
+#include "vision/lua_interop.h"
 
 void auv::application::lua::setup_env(sol::state &state) {
   if (state["application"].is<sol::table>()) return;

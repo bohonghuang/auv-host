@@ -1,35 +1,35 @@
 require("math")
 
 local function find_left_right(update_function, backward)
-local function try_motion(motion, duration)
-    local delta = 0.1
-    while true do
-        server.move(motion)
-        sleep(delta)
-        local update_result = update_function()
-        if type(update_result) == 'table' then
-            if #update_result > 0 then
+    local function try_motion(motion, duration)
+        local delta = 0.1
+        while true do
+            server.move(motion)
+            sleep(delta)
+            local update_result = update_function()
+            if type(update_result) == 'table' then
+                if #update_result > 0 then
+                    return true
+                end
+            elseif update_result then
                 return true
             end
-        elseif update_result then
-            return true
-        end
-        duration = duration - delta
-        if duration <= 0.0 then
-            return false
+            duration = duration - delta
+            if duration <= 0.0 then
+                return false
+            end
         end
     end
-end
-try_motion({ x = 0.0, y = backward and -0.5 or 0.5, z = 0.0, rot = 0.0 }, 10.0)
-local rotation = 0.5
-for duration = 1, 3 do
-    if try_motion({ x = 0.0, y = 0.0, z = 0.0, rot = rotation }, duration / 2.0) or
+    try_motion({ x = 0.0, y = backward and -0.5 or 0.5, z = 0.0, rot = 0.0 }, 10.0)
+    local rotation = 0.5
+    for duration = 1, 3 do
+        if try_motion({ x = 0.0, y = 0.0, z = 0.0, rot = rotation }, duration / 2.0) or
             try_motion({ x = 0.0, y = 0.0, z = 0.0, rot = -rotation }, duration) or
             try_motion({ x = 0.0, y = 0.0, z = 0.0, rot = rotation }, duration / 2.0) then
-        return true
+            return true
+        end
     end
-end
-return false
+    return false
 end
 
 function point_dist(point_1, point_2)
@@ -108,4 +108,47 @@ function make_fake_server()
     }
     setmetatable(tbl, meta)
     return tbl
+end
+
+function print_mat(mat)
+    local str = ""
+    for i = 1, #mat do
+        local row = mat[i]
+        for j = 1, #row do
+            local value = row[j]
+            str = str .. (value - value % 0.01) .. ","
+        end
+        str = str .. "\n"
+    end
+    print(str)
+end
+
+function print_table(mat, rows, cols)
+    local str = ""
+    for i = 1, rows do
+        local row = mat[i]
+        for j = 1, cols do
+            local value = row[j]
+            str = str .. value .. ","
+        end
+        str = str .. "\n"
+    end
+    print(str)
+end
+
+function print_bool_table(mat, rows, cols)
+    local str = ""
+    for i = 1, rows do
+        local row = mat[i]
+        for j = 1, cols do
+            local value = row[j]
+            if value then
+                str = str .. 1 .. ","
+            else
+                str = str .. 0 .. ","
+            end
+        end
+        str = str .. "\n"
+    end
+    print(str)
 end

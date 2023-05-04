@@ -1,5 +1,5 @@
-require "application.lua.utils"
-require "math"
+require("application.lua.utils")
+require("math")
 
 DoorBlock = {
     bars = {
@@ -66,13 +66,13 @@ function DoorBlock.update(raw_vision_line_results)
         -- print(points[1], points[2], points[3], points[4])
         if cent_y < -0.35 then
             -- 水平的bar
-            DoorBlock.bars.bottom = {cent_x, cent_y, points}
+            DoorBlock.bars.bottom = { cent_x, cent_y, points }
         else
             -- 垂直的bar
             if cent_x > 0 then --右边垂直
-                DoorBlock.bars.left = {cent_x, cent_y, points}
-            else --左边垂直
-                DoorBlock.bars.right = {cent_x, cent_y, points}
+                DoorBlock.bars.left = { cent_x, cent_y, points }
+            else               --左边垂直
+                DoorBlock.bars.right = { cent_x, cent_y, points }
             end
             goto continue
         end
