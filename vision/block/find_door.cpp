@@ -1,5 +1,6 @@
 #include "find_door.h"
 #include "utils.h"
+#include <opencv2/imgproc.hpp>
 
 namespace auv::vision {
 
@@ -28,7 +29,7 @@ static void lines_process(HoughResult &result) {
 }
 
 static std::vector<std::array<cv::Point2f, 4>> lines_get_bar(const cv::Mat &frame, cv::Mat &preview_frame, const HoughResult &line_params) {
-  if(line_params.count == 0)
+  if (line_params.count == 0)
     return {};
   cv::Mat mask = cv::Mat::zeros(frame.size(), CV_8UC1);
   double cos_theta = cos(line_params.theta), sin_theta = sin(line_params.theta);
@@ -73,44 +74,48 @@ FindDoorResults FindLineBlock::process(cv::Mat frame) {
   cv::Mat preview_frame = frame.clone();
   cv::cvtColor(preview_frame, preview_frame, cv::COLOR_GRAY2BGR);
 
-  std::vector<cv::Vec2f> lines;
-  cv::HoughLines(frame, lines, m_rho, m_theta, m_threshold);
+  //std::vector<cv::Vec2f> lines;
+  // cv::HoughLines(frame, lines, m_rho, m_theta, m_threshold);
+  std::vector<cv::Vec4i> lines;
+  cv::HoughLinesP(frame, lines, m_rho, m_theta, m_threshold, 50, 5);
 
   HoughResult bottom, left, right;
   for (const auto &i: lines) {
-    float distance = i[0], deg = i[1];
-    if (std::fabs(deg) > utils::deg2rad(50.0)) {// 门的两侧直线
-      if (std::abs(distance) < (float) width / 2) {
-        lines_update(left, distance, deg);
-      } else {
-        lines_update(right, distance, deg);
-      }
-    } else {// 门的底部直线
-      lines_update(bottom, distance, deg);
-    }
+    cv::line(preview_frame, cv::Point(i[0], i[1]),
+             cv::Point(i[2], i[3]), cv::Scalar(0, 0, 255), 3, 8);
+    // float distance = i[0], deg = i[1];
+    // if (std::fabs(deg) > utils::deg2rad(50.0)) {// 门的两侧直线
+    //   if (std::abs(distance) < (float) width / 2) {
+    //     lines_update(left, distance, deg);
+    //   } else {
+    //     lines_update(right, distance, deg);
+    //   }
+    // } else {// 门的底部直线
+    //   lines_update(bottom, distance, deg);
+    // }
   }
 
-  lines_process(left);
-  lines_process(right);
-  lines_process(bottom);
+  // lines_process(left);
+  // lines_process(right);
+  // lines_process(bottom);
 
-  auto left_result = lines_get_bar(frame, preview_frame, left);
-  auto right_result = lines_get_bar(frame, preview_frame, right);
-  auto bottom_result = lines_get_bar(frame, preview_frame, bottom);
+  // auto left_result = lines_get_bar(frame, preview_frame, left);
+  // auto right_result = lines_get_bar(frame, preview_frame, right);
+  // auto bottom_result = lines_get_bar(frame, preview_frame, bottom);
 
   std::vector<std::array<cv::Point2f, 4>> results;
-  results.insert(results.end(), left_result.begin(), left_result.end());
-  results.insert(results.end(), right_result.begin(), right_result.end());
-  results.insert(results.end(), bottom_result.begin(), bottom_result.end());
+  // results.insert(results.end(), left_result.begin(), left_result.end());
+  // results.insert(results.end(), right_result.begin(), right_result.end());
+  // results.insert(results.end(), bottom_result.begin(), bottom_result.end());
 
-  for (auto &it: results) {
-    for(auto &i : it) {
-      static const int half_width = width / 2;
-      static const int half_height = height / 2;
-      i.x = (i.x - (float) half_width) / (float) half_width;
-      i.y = -(i.y - (float) half_height) / (float) half_height;
-    }
-  }
+  // for (auto &it: results) {
+  //   for(auto &i : it) {
+  //     static const int half_width = width / 2;
+  //     static const int half_height = height / 2;
+  //     i.x = (i.x - (float) half_width) / (float) half_width;
+  //     i.y = -(i.y - (float) half_height) / (float) half_height;
+  //   }
+  // }
   return {preview_frame, std::move(results)};
 }
 

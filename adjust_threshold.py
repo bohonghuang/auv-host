@@ -31,7 +31,8 @@ v_upper = 160
 
 def main():
     init_window()
-    cap = cv2.VideoCapture('/home/qff233/.local/share/rovhost/Videos/2023-03-24T17-07-23.199254+08.mkv')
+    # cap = cv2.VideoCapture('/home/qff233/.local/share/rovhost/Videos/2023-03-24T17-07-23.199254+08.mkv')
+    cap = cv2.VideoCapture('v4l2src device=/dev/video0 ! video/x-raw, format=(string)YUY2, width=(int)640, height=(int)360 ! videoconvert ! appsink ')
     global current_img
     n = 1
     while cap.isOpened():

@@ -14,19 +14,19 @@ local writer = ImshowBlock.new()
 local function update()
     local input = coroutine.yield()
 
-    local bar_any = input["find_bar"]
-    if bar_any then
-        local find_bar = FindBarResults.from_any(bar_any)
-        BarBlock.update(find_bar.result)
-        writer:process(find_bar.frame)
-    end
-
-    -- local door_any = input["find_door"]
-    -- if door_any then
-    --     local find_line = FindDoorResults.from_any(door_any)
-    --     DoorBlock.update(find_line.result)
-    --     -- writer:process(find_line.frame)
+    -- local bar_any = input["find_bar"]
+    -- if bar_any then
+    --     local find_bar = FindBarResults.from_any(bar_any)
+    --     BarBlock.update(find_bar.result)
+    --     writer:process(find_bar.frame)
     -- end
+
+    local door_any = input["find_door"]
+    if door_any then
+        local find_line = FindDoorResults.from_any(door_any)
+        DoorBlock.update(find_line.result)
+        writer:process(find_line.frame)
+    end
 
     -- local detect_any = input["detect"]
     -- if detect_any then
@@ -35,13 +35,13 @@ local function update()
     --     --writer:process(object_detect.frame)
     -- end
 
-    local door_grid_any = input["find_door_grid"]
-    if door_grid_any then
-        local find_bar_grid = FindDoorGridResults.from_any(door_grid_any)
-        DoorGridBlock.update(find_bar_grid.mat)
-        --print_mat(find_bar_grid.mat)
-        -- writer:process(find_bar_grid.frame)
-    end
+    -- local door_grid_any = input["find_door_grid"]
+    -- if door_grid_any then
+    --     local find_bar_grid = FindDoorGridResults.from_any(door_grid_any)
+    --     DoorGridBlock.update(find_bar_grid.mat)
+    --     --print_mat(find_bar_grid.mat)
+    --     -- writer:process(find_bar_grid.frame)
+    -- end
 end
 
 local time = current_time()

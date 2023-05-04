@@ -8,27 +8,28 @@ local cam_front = CameraBlock.new(GetCapture("0", 640, 360))
 local cam_bottom = CameraBlock.new(GetCapture("0", 640, 360))
 
 local camera_calibr_params = {
-    fx = 359.4494022780337,
-    cx = 309.1400563601385,
-    fy = 359.0557471727833,
-    cy = 244.4134037153996,
-    k1 = -0.3468316403956397,
-    k2 = 0.1885874111627161,
-    k3 = -0.001198301786596316,
-    k4 = 0.00239637007482126,
-    k5 = -0.06373795517103995,
+    fx = 354.9862468599325,
+    cx = 324.5669837164503,
+    fy = 354.8966706449905,
+    cy = 192.7918851368834,
+    k1 = -0.4797210886746362,
+    k2 = 0.2124696026438813,
+    k3 = 0.001906119577026161,
+    k4 = 0.001051512267817575,
+    k5 = -0.03890132615729874,
 }
 
 local cam_front_calibr = CameraCalibrateBlock.new(camera_calibr_params)
 local cvtcolor_ycrcb = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
 
 local find_bar_inrange_params = {
-    low_1 = 35,
-    low_2 = 155,
-    low_3 = 100,
-    high_1 = 180,
-    high_2 = 220,
-    high_3 = 160
+    low_1 = 17,
+    low_2 = 145,
+    low_3 = 92,
+    high_1 = 107,
+    high_2 = 188,
+    high_3 = 134
+
 }
 local find_bar_inrange = InRangeBlock.new(find_bar_inrange_params)
 local find_bar = FindBarBlock.new(true)
