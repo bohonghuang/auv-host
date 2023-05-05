@@ -24,7 +24,7 @@ local function update()
     local door_any = input["find_door"]
     if door_any then
         local find_line = FindDoorResults.from_any(door_any)
-        DoorBlock.update(find_line.result)
+        -- DoorBlock.update(find_line.result)
         writer:process(find_line.frame)
     end
 

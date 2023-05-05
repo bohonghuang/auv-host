@@ -83,7 +83,9 @@ void auv::vision::lua::setup_env(sol::state &state) {
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorResults, sol::no_constructor,
                    "frame", &auv::vision::FindDoorResults::frame,
-                   "result", &auv::vision::FindDoorResults::result);
+                   "left", &auv::vision::FindDoorResults::left,
+                   "right", &auv::vision::FindDoorResults::right,
+                   "bottom", &auv::vision::FindDoorResults::bottom);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorGridResults, sol::no_constructor,
                   "frame", &auv::vision::FindDoorGridResults::frame,

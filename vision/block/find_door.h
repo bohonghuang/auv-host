@@ -3,13 +3,16 @@
 
 #include "block.h"
 
+#include <opencv2/core/matx.hpp>
 #include <opencv2/opencv.hpp>
 
 namespace auv::vision {
 
 struct FindDoorResults {
   cv::Mat frame;
-  std::vector<std::array<cv::Point2f, 4>> result;
+  std::array<float, 4> left;
+  std::array<float, 4> right;
+  std::array<float, 4> bottom;
 };
 
 class FindLineBlock : public auv::Block<cv::Mat, FindDoorResults> {
