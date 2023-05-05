@@ -106,10 +106,23 @@ FindDoorResults FindLineBlock::process(cv::Mat frame) {
   cv::line(preview_frame, cv::Point(bottom[0], bottom[1]),
            cv::Point(bottom[2], bottom[3]), cv::Scalar(0, 0, 255), 3, cv::LINE_AA);
 
-  return {preview_frame,
-          left,
-          right,
-          bottom};
+  auto normalize = [](std::array<float, 4> &val) {
+    auto half_x = (float) width / 2;
+    auto half_y = (float) height / 2;
+    val[0] = (val[0] - half_x) / half_x;
+    val[2] = (val[2] - half_x) / half_x;
+    val[1] = -(val[1] - half_y) / half_y;
+    val[3] = -(val[3] - half_y) / half_y;
+  };
+
+  if (left_count != 0)
+    normalize(left);
+  if (right_count != 0)
+    normalize(right);
+  if (bottom_count != 0)
+    normalize(bottom);
+
+  return {preview_frame, {left, right, bottom}};
 }
 
 }// namespace auv::vision

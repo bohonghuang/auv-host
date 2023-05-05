@@ -123,20 +123,13 @@ function print_mat(mat)
     print(str)
 end
 
-function print_table(mat, rows, cols)
-    local str = ""
-    for i = 1, rows do
-        local row = mat[i]
-        for j = 1, cols do
-            local value = row[j]
-            str = str .. value .. ","
-        end
-        str = str .. "\n"
+function print_table(tbl)
+    for k, v in pairs(tbl) do
+        print(k, v)
     end
-    print(str)
 end
 
-function print_bool_table(mat, rows, cols)
+function print_bool_mat(mat, rows, cols)
     local str = ""
     for i = 1, rows do
         local row = mat[i]

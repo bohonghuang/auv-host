@@ -6,9 +6,9 @@ require("application.lua.door_block")
 require("application.lua.door_grid_block")
 require("application.lua.detect_block")
 
-server = json.rpc.proxy("http://localhost:8888")
+-- server = json.rpc.proxy("http://localhost:8888")
 -- local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
---local server = make_fake_server()
+local server = make_fake_server()
 local writer = ImshowBlock.new()
 
 local function update()
@@ -24,7 +24,7 @@ local function update()
     local door_any = input["find_door"]
     if door_any then
         local find_line = FindDoorResults.from_any(door_any)
-        -- DoorBlock.update(find_line.result)
+        DoorBlock.update(find_line.result)
         writer:process(find_line.frame)
     end
 
@@ -56,21 +56,28 @@ function main(input)
         update()
 
         -- DoorGridBlock.process()
-        local door_block_fun = DoorBlock.process()
-        -- door_block_fun(server)
+        local door_state, door_motion_fun = DoorBlock.process()
+        if door_state == DoorState.None or door_state == DoorState.Rush then
+            -- local bar_motion_fun = BarBlock.process()
+            -- if bar_motion_fun then
+            --     bar_motion_fun(server)
+            --     DoorBlock.reset()
+            --     goto while_begin
+            -- end
+            door_motion_fun(server)
+        elseif door_state == DoorState.FindDoor then
+            door_motion_fun(server)
+        end
+
         --detect_motion_fun = detect_block:process()
         --if detect_motion_fun then
         --    detect_motion_fun(server)
         --    goto while_begin
         --end
-
-        --bar_motion_fun = BarBlock.process()
-        --if bar_motion_fun then
-        --    bar_motion_fun(server)
-        --end
-
-        sleep(0.1)
     end
+
+
+    sleep(0.1)
 end
 
 local co = coroutine.create(main)

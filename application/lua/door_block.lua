@@ -1,82 +1,90 @@
 require("application.lua.utils")
 require("math")
 
-DoorBlock = {
-    bars = {
-        left = {}, -- {cent_x, cent_y, points}
-        right = {},
-        bottom = {}
-    },
-    motions = function(deg, dev)
-        return function(server)
-            server.move { x = dev, y = 0.3, z = 0.0, rot = -deg / 90.0 }
-        end
-    end
+DoorState = {
+    None = 0,
+    FindDoor = 1,
+    Rush = 2
 }
 
+DoorBlock = {
+    left = {},
+    right = {},
+    bottom = {},
+
+    state = DoorState.None
+}
+
+function DoorBlock.reset()
+    DoorBlock.state = DoorState.None
+end
+
+local function is_point_val(tbl)
+    if table_size(tbl.p1) ~= 0 then
+        return true
+    end
+    return false
+end
+
 function DoorBlock.process()
-    local bars = DoorBlock.bars
+    local rot = 0.0
+    local x, y = 0.0, 0.0
 
-    local deg = 0.0
-    local dev = 0.0
-
-    if next(bars.bottom) then
-        local points = bars.bottom[3]
-        local dist_p12 = point_dist(points[1], points[2])
-        local dist_p23 = point_dist(points[2], points[3])
-        if dist_p12 > dist_p23 then
-            p1, p2 = points[1], points[2]
-        else
-            p1, p2 = points[2], points[3]
+    if DoorBlock.state == DoorState.None or DoorBlock.state == DoorState.FindDoor then
+        local left, right, bottom = DoorBlock.left, DoorBlock.right, DoorBlock.bottom
+        if is_point_val(bottom) then
+            local k = (bottom.p1.y - bottom.p2.y) / (bottom.p1.x - bottom.p2.x)
+            rot = -k * 1.4
+            DoorBlock.state = DoorState.FindDoor
         end
-        deg = point_deg(p1, p2) - 90.0
-        print("Door Deg : ", deg)
+        if is_point_val(left) and is_point_val(right) then
+            local left_x = (left.p1.x + left.p2.x) / 2
+            local right_x = (right.p1.x + right.p2.x) / 2
+            x = left_x + right_x
+        else
+            if is_point_val(left) then
+                x = 1.0
+            end
+            if is_point_val(right) then
+                x = -1.0
+            end
+        end
     end
 
-    if next(bars.right) and next(bars.left) then
-        dev = bars.right[1] + bars.left[1]
+    if DoorBlock.state == DoorState.Rush then
+        y = 1.0
     end
 
-    return DoorBlock.motions(deg, dev)
+    local result_func = function(server)
+        server.move { x = x, y = y, z = 0, rot = rot }
+    end
+    return DoorBlock.state, result_func
+end
+
+local function raw22point(raw_point_val)
+    local point1, point2 = {}, {}
+    if raw_point_val[1] ~= 0 and raw_point_val[2] ~= 0 then
+        point1.x = raw_point_val[1]
+        point1.y = raw_point_val[2]
+    end
+
+    if raw_point_val[3] ~= 0 and raw_point_val[4] ~= 0 then
+        point2.x = raw_point_val[3]
+        point2.y = raw_point_val[4]
+    end
+    return { p1 = point1, p2 = point2 }
 end
 
 function DoorBlock.update(raw_vision_line_results)
-    DoorBlock.bars.left = {}
-    DoorBlock.bars.right = {}
-    DoorBlock.bars.bottom = {}
-    for index = 1, #raw_vision_line_results do
-        local points = raw_vision_line_results[index]
-        local dist_p12 = point_dist(points[1], points[2])
-        local dist_p23 = point_dist(points[2], points[3])
-        local length, width = math.max(dist_p12, dist_p23) / 2.0, math.min(dist_p12, dist_p23) / 2.0
-        local area = width * length
-        if area < 0.02 then
-            goto continue
-        end
-
-        local cent_x = 0.0
-        local cent_y = 0.0
-        for i = 1, #points do
-            cent_x = cent_x + points[i].x
-            cent_y = cent_y + points[i].y
-        end
-        cent_x = cent_x / 4.0
-        cent_y = cent_y / 4.0
-
-        -- print(points[1], points[2], points[3], points[4])
-        if cent_y < -0.35 then
-            -- 水平的bar
-            DoorBlock.bars.bottom = { cent_x, cent_y, points }
-        else
-            -- 垂直的bar
-            if cent_x > 0 then --右边垂直
-                DoorBlock.bars.left = { cent_x, cent_y, points }
-            else               --左边垂直
-                DoorBlock.bars.right = { cent_x, cent_y, points }
-            end
-            goto continue
-        end
-
-        :: continue ::
-    end
+    DoorBlock.left = raw22point(raw_vision_line_results.left)
+    DoorBlock.right = raw22point(raw_vision_line_results.right)
+    DoorBlock.bottom = raw22point(raw_vision_line_results.bottom)
+    -- if is_point_val(DoorBlock.bottom) then
+    --     print("left.point1", DoorBlock.bottom.p1.x, DoorBlock.bottom.p1.y)
+    --     print("left.point2", DoorBlock.bottom.p2.x, DoorBlock.bottom.p2.y)
+    -- end
+    -- print("left.point1", left.p1.x, left.p1.y)
+    -- print("left.point2", left.p2.x, left.p2.y)
+    -- print("right.point1", right.p1.x, right.p1.y)
+    -- print("right.point2", right.p2.x, right.p2.y)
 end

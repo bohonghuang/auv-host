@@ -8,11 +8,15 @@
 
 namespace auv::vision {
 
-struct FindDoorResults {
-  cv::Mat frame;
+struct FindDoorResult {
   std::array<float, 4> left;
   std::array<float, 4> right;
   std::array<float, 4> bottom;
+};
+
+struct FindDoorResults {
+  cv::Mat frame;
+  FindDoorResult result;
 };
 
 class FindLineBlock : public auv::Block<cv::Mat, FindDoorResults> {

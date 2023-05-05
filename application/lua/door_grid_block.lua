@@ -38,7 +38,7 @@ function DoorGridBlock.process()
         table.insert(bool_mat, bool_vector)
     end
 
-    print_bool_table(bool_mat, 6, 8)
+    print_bool_mat(bool_mat, 6, 8)
 
     local index_height = {}
     for i = 1, col_count do

@@ -34,8 +34,8 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(state, auv::vision::CameraBlock,
                    sol::constructors<auv::vision::CameraBlock(cv::VideoCapture &)>());
 
-//  AUV_NEW_SOL_TYPE(state, auv::vision::CameraCalibrateBlock,
-//                   sol::constructors<auv::vision::CameraCalibrateBlock(const auv::vision::CameraParams &)>());
+  //  AUV_NEW_SOL_TYPE(state, auv::vision::CameraCalibrateBlock,
+  //                   sol::constructors<auv::vision::CameraCalibrateBlock(const auv::vision::CameraParams &)>());
 
   AUV_NEW_SOL_TYPE(state, auv::vision::CameraCalibrateBlock,
                    sol::constructors<auv::vision::CameraCalibrateBlock(const sol::table &)>());
@@ -81,15 +81,18 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(state, auv::vision::FindBallBlock,
                    sol::constructors<auv::vision::FindBarBlock(bool)>());
 
+  AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorResult, sol::no_constructor,
+                   "left", &auv::vision::FindDoorResult::left,
+                   "right", &auv::vision::FindDoorResult::right,
+                   "bottom", &auv::vision::FindDoorResult::bottom);
+
   AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorResults, sol::no_constructor,
                    "frame", &auv::vision::FindDoorResults::frame,
-                   "left", &auv::vision::FindDoorResults::left,
-                   "right", &auv::vision::FindDoorResults::right,
-                   "bottom", &auv::vision::FindDoorResults::bottom);
+                   "result", &auv::vision::FindDoorResults::result);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorGridResults, sol::no_constructor,
-                  "frame", &auv::vision::FindDoorGridResults::frame,
-                  "mat", &auv::vision::FindDoorGridResults::mat);
+                   "frame", &auv::vision::FindDoorGridResults::frame,
+                   "mat", &auv::vision::FindDoorGridResults::mat);
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindDoorGrid,
                    sol::constructors<auv::vision::FindDoorGrid(int, int)>());
@@ -113,7 +116,7 @@ void auv::vision::lua::setup_env(sol::state &state) {
   AUV_NEW_SOL_TYPE(state, auv::vision::ObjectDetectResults, sol::no_constructor,
                    "frame", &auv::vision::ObjectDetectResults::frame,
                    "result", &auv::vision::ObjectDetectResults::result);
-  
+
   AUV_NEW_SOL_TYPE(state, auv::vision::ObjectDetectBlock,
                    sol::default_constructor);
 
