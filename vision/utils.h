@@ -1,7 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "block.h"
 #include <opencv2/opencv.hpp>
 #include <cmath>
 

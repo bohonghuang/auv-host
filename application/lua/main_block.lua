@@ -7,7 +7,7 @@ require("application.lua.door_grid_block")
 require("application.lua.detect_block")
 
 -- server = json.rpc.proxy("http://localhost:8888")
--- local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 480)
+-- local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 360)
 local server = make_fake_server()
 local writer = ImshowBlock.new()
 

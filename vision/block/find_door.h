@@ -21,7 +21,7 @@ struct FindDoorResults {
 
 class FindLineBlock : public auv::Block<cv::Mat, FindDoorResults> {
 public:
-  FindLineBlock(double rho, double theta, int threshold);
+  FindLineBlock(double rho, double theta, int threshold, bool center_div = true);
   Out process(In frame) override;
   AUV_BLOCK;
 
@@ -29,6 +29,8 @@ private:
   double m_rho;
   double m_theta;
   int m_threshold;
+
+  bool m_center_div;
 };
 
 }// namespace auv::vision

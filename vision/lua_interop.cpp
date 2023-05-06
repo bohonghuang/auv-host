@@ -98,7 +98,7 @@ void auv::vision::lua::setup_env(sol::state &state) {
                    sol::constructors<auv::vision::FindDoorGrid(int, int)>());
 
   AUV_NEW_SOL_TYPE(state, auv::vision::FindLineBlock,
-                   sol::constructors<auv::vision::FindLineBlock(double, double, int)>());
+                   sol::constructors<auv::vision::FindLineBlock(double, double, int, bool)>());
 
   AUV_NEW_SOL_TYPE(state, auv::vision::network::YoloFastV2Result, sol::no_constructor,
                    "name", &auv::vision::network::YoloFastV2Result::name,

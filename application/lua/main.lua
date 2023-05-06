@@ -35,7 +35,7 @@ local find_bar_inrange = InRangeBlock.new(find_bar_inrange_params)
 local find_bar = FindBarBlock.new(true)
 local find_bar_block = LuaMuxBlock.new("application/lua/main_block.lua")
 
-local find_door = FindLineBlock.new(1, math.pi / 180, 200)
+local find_door = FindLineBlock.new(1, math.pi / 180, 200, true)
 local find_door_grid = FindDoorGrid.new(6, 8)
 
 local show = ImshowBlock.new()

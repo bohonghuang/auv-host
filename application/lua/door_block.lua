@@ -20,7 +20,7 @@ function DoorBlock.reset()
 end
 
 local function is_point_val(tbl)
-    if table_size(tbl.p1) ~= 0 then
+    if table_size(tbl.p1) ~= 0 and table_size(tbl.p2) ~= 0 then
         return true
     end
     return false
@@ -32,10 +32,12 @@ function DoorBlock.process()
 
     if DoorBlock.state == DoorState.None or DoorBlock.state == DoorState.FindDoor then
         local left, right, bottom = DoorBlock.left, DoorBlock.right, DoorBlock.bottom
+        if is_point_val(bottom) and is_point_val(left) and is_point_val(right) then
+            DoorBlock.state = DoorState.FindDoor
+        end
         if is_point_val(bottom) then
             local k = (bottom.p1.y - bottom.p2.y) / (bottom.p1.x - bottom.p2.x)
             rot = -k * 1.4
-            DoorBlock.state = DoorState.FindDoor
         end
         if is_point_val(left) and is_point_val(right) then
             local left_x = (left.p1.x + left.p2.x) / 2
@@ -48,6 +50,10 @@ function DoorBlock.process()
             if is_point_val(right) then
                 x = -1.0
             end
+        end
+
+        if DoorBlock.state == DoorState.FindDoor and math.abs(x) < 0.01 and math.abs(rot) < 0.01 then
+            DoorBlock.state = DoorState.Rush
         end
     end
 

@@ -1,12 +1,16 @@
 #include "find_door.h"
 #include <algorithm>
+#include <complex>
+#include <opencv2/core/base.hpp>
 #include <opencv2/core/matx.hpp>
+#include <opencv2/core/types.hpp>
 #include <opencv2/imgproc.hpp>
+#include <tuple>
 
 namespace auv::vision {
 
-FindLineBlock::FindLineBlock(double rho, double theta, int threshold)
-    : m_rho(rho), m_theta(theta), m_threshold(threshold) {
+FindLineBlock::FindLineBlock(double rho, double theta, int threshold, bool center_div)
+    : m_rho(rho), m_theta(theta), m_threshold(threshold), m_center_div(center_div) {
 }
 
 FindDoorResults FindLineBlock::process(cv::Mat frame) {
@@ -38,6 +42,8 @@ FindDoorResults FindLineBlock::process(cv::Mat frame) {
   std::array<float, 4> bottom = {0, 0, 0, 0};
   size_t bottom_count = 0;
 
+  std::pair<int, int> left_or_right_x_range = {0, 0};
+  bool has_init = false;
   for (auto &i: lines) {
     auto [tmp] = i;
     auto [p1_x, p1_y, p2_x, p2_y] = tmp;
@@ -50,47 +56,50 @@ FindDoorResults FindLineBlock::process(cv::Mat frame) {
       count++;
     };
 
-    if (p1_x == p2_x) {
+    auto theta = cv::fastAtan2(p1_y - p2_y, p1_x - p2_x);
+    if (std::fabs(theta - 180.0f) < 45.0f) {// 水平
+      if (p1_x > p2_x) {
+        std::swap(i[1], i[3]);
+        std::swap(i[0], i[2]);
+      }
+      update(bottom, bottom_count, i);
+    } else {// 垂直
       auto x_center = (p1_x + p2_x) / 2;
       if (p1_y > p2_y) {
         std::swap(i[1], i[3]);
         std::swap(i[0], i[2]);
       }
-      if (x_center > width / 2) {
-        update(right, right_count, i);
-      } else {
-        update(left, left_count, i);
-      }
-    } else {
-      auto k = (float) (p1_y - p2_y) / (p1_x - p2_x);
-      if (std::fabs(k) < 1) {
-        if (p1_x > p2_x) {
-          std::swap(i[1], i[3]);
-          std::swap(i[0], i[2]);
-        }
-        update(bottom, bottom_count, i);
-      } else {
-        auto x_center = (p1_x + p2_x) / 2;
-        if (p1_y > p2_y) {
-          std::swap(i[1], i[3]);
-          std::swap(i[0], i[2]);
-        }
+
+      if (m_center_div) {
         if (x_center > width / 2) {
           update(right, right_count, i);
         } else {
           update(left, left_count, i);
         }
+      } else {
+        auto [range_left_x, range_right_x] = left_or_right_x_range;
+        if (!has_init) {
+          has_init = true;
+          range_left_x = x_center - 30;
+          range_right_x = x_center + 30;
+          left_or_right_x_range = {range_left_x, range_right_x};
+        }
+        if (range_left_x < x_center && x_center < range_right_x) {
+          update(left, left_count, i);
+        } else {
+          update(right, right_count, i);
+        }
       }
     }
   }
 
-  if (left_count + right_count + bottom_count != lines.size())
-    std::cout << "asadasd1!!! "
-              << left_count << "  "
-              << bottom_count << "  "
-              << right_count << "  "
-              << lines.size() << "  "
-              << std::endl;
+  // if (left_count + right_count + bottom_count != lines.size())
+  //   std::cout << "asadasd1!!! "
+  //             << left_count << "  "
+  //             << bottom_count << "  "
+  //             << right_count << "  "
+  //             << lines.size() << "  "
+  //             << std::endl;
 
   if (left_count != 0)
     std::for_each(left.begin(), left.end(), [left_count](float &val) { val /= left_count; });
@@ -98,6 +107,11 @@ FindDoorResults FindLineBlock::process(cv::Mat frame) {
     std::for_each(right.begin(), right.end(), [right_count](float &val) { val /= right_count; });
   if (bottom_count != 0)
     std::for_each(bottom.begin(), bottom.end(), [bottom_count](float &val) { val /= bottom_count; });
+
+  if (left_count != 0 && right_count != 0 && !m_center_div && left[0] > right[0]) {
+    std::swap(left, right);
+  }
+
 
   cv::line(preview_frame, cv::Point(left[0], left[1]),
            cv::Point(left[2], left[3]), cv::Scalar(0, 0, 255), 3, cv::LINE_AA);
