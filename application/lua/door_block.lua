@@ -20,7 +20,7 @@ function DoorBlock.reset()
 end
 
 local function is_point_val(tbl)
-    if table_size(tbl.p1) ~= 0 and table_size(tbl.p2) ~= 0 then
+    if tbl.p1 and table_size(tbl.p1) ~= 0 and table_size(tbl.p2) ~= 0 then
         return true
     end
     return false
@@ -30,9 +30,9 @@ function DoorBlock.process()
     local rot = 0.0
     local x, y = 0.0, 0.0
 
+    local left, right, bottom = DoorBlock.left, DoorBlock.right, DoorBlock.bottom
     if DoorBlock.state == DoorState.None or DoorBlock.state == DoorState.FindDoor then
-        local left, right, bottom = DoorBlock.left, DoorBlock.right, DoorBlock.bottom
-        if is_point_val(bottom) and is_point_val(left) and is_point_val(right) then
+    	if is_point_val(bottom) and is_point_val(left) and is_point_val(right) then
             DoorBlock.state = DoorState.FindDoor
         end
         if is_point_val(bottom) then
@@ -52,13 +52,15 @@ function DoorBlock.process()
             end
         end
 
-        if DoorBlock.state == DoorState.FindDoor and math.abs(x) < 0.01 and math.abs(rot) < 0.01 then
+        if DoorBlock.state == DoorState.FindDoor and math.abs(x) < 0.05 and math.abs(rot) < 0.05 then
             DoorBlock.state = DoorState.Rush
         end
-    end
-
-    if DoorBlock.state == DoorState.Rush then
-        y = 1.0
+    elseif DoorBlock.state == DoorState.Rush then
+        --if is_point_val(bottom) and is_point_val(left) and is_point_val(right) then
+        --    DoorBlock.state = DoorState.FindDoor
+        --else
+            y = 1.0
+        --end
     end
 
     local result_func = function(server)
@@ -94,3 +96,4 @@ function DoorBlock.update(raw_vision_line_results)
     -- print("right.point1", right.p1.x, right.p1.y)
     -- print("right.point2", right.p2.x, right.p2.y)
 end
+

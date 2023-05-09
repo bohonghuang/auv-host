@@ -14,12 +14,12 @@ local writer = ImshowBlock.new()
 local function update()
     local input = coroutine.yield()
 
-    -- local bar_any = input["find_bar"]
-    -- if bar_any then
-    --     local find_bar = FindBarResults.from_any(bar_any)
-    --     BarBlock.update(find_bar.result)
-    --     writer:process(find_bar.frame)
-    -- end
+    local bar_any = input["find_bar"]
+    if bar_any then
+        local find_bar = FindBarResults.from_any(bar_any)
+        BarBlock.update(find_bar.result)
+        -- writer:process(find_bar.frame)
+    end
 
     local door_any = input["find_door"]
     if door_any then
@@ -68,7 +68,7 @@ function main(input)
         elseif door_state == DoorState.FindDoor then
             door_motion_fun(server)
         end
-
+        print(DoorBlock.state)
         --detect_motion_fun = detect_block:process()
         --if detect_motion_fun then
         --    detect_motion_fun(server)
