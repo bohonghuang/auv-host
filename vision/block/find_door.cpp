@@ -63,7 +63,7 @@ FindDoorResults FindLineBlock::process(cv::Mat frame) {
 
     auto theta = cv::fastAtan2(p1_y - p2_y, p1_x - p2_x);
     if (std::fabs(theta - 180.0f) < 45.0f) {// 水平
-      if (p1_y >= height / 2 && p2_y >= height / 2) {
+      if (p1_y >= 2 * height / 3 && p2_y >= 2 * height / 3) {
         if (p1_x > p2_x) {
           std::swap(i[1], i[3]);
           std::swap(i[0], i[2]);

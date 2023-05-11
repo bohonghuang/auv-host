@@ -30,6 +30,8 @@ public:
 
 private:
   CameraParams m_camera_params{};
+  std::array<cv::Mat, 2> m_distort_map;
+  bool m_has_init = false;
 };
 
 

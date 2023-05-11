@@ -1,12 +1,20 @@
 import cv2
 import numpy as np
 
-h_lower = 53
-s_lower = 132
-v_lower = 103
-h_upper = 151
-s_upper = 189
-v_upper = 146
+# HLS
+h_lower = 107
+s_lower = 0
+v_lower = 81
+h_upper = 163
+s_upper = 255
+v_upper = 217
+
+# h_lower = 89    HSV
+# s_lower = 84
+# v_lower = 90
+# h_upper = 129
+# s_upper = 217
+# v_upper = 193
 
 # h_lower = 33
 # s_lower = 146
@@ -33,7 +41,8 @@ def main():
     init_window()
     # cap = cv2.VideoCapture('/home/qff233/.local/share/rovhost/Videos/2023-03-24T17-07-23.199254+08.mkv')
     # cap = cv2.VideoCapture('v4l2src device=/dev/video0 ! video/x-raw, format=(string)YUY2, width=(int)640, height=(int)360 ! videoconvert ! appsink ')
-    cap = cv2.VideoCapture('/home/qff233/.local/share/rovhost/Videos/1.mkv')
+    cap = cv2.VideoCapture('/home/qff233/.local/share/rovhost/Videos/2.mkv')
+    # cap = cv2.VideoCapture('./door.mkv')
     global current_img
     n = 1
     while cap.isOpened():
@@ -58,7 +67,7 @@ def process(frame):
     h, w, _ = frame.shape
     wh_prop = w / h
     frame = cv2.resize(frame, (int(480 * wh_prop), 480))
-    img_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
+    img_hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
     h, w, _ = frame.shape
     mask = cv2.inRange(img_hsv, (h_lower, s_lower, v_lower), (h_upper, s_upper, v_upper))
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (h // 96, h // 96)))

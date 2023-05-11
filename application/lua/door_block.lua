@@ -4,7 +4,8 @@ require("math")
 DoorState = {
     None = 0,
     FindDoor = 1,
-    Rush = 2
+    Rush = 2,
+    Lost = 3,
 }
 
 DoorBlock = {
@@ -31,44 +32,56 @@ function DoorBlock.process()
     local x, y = 0.0, 0.0
 
     local left, right, bottom = DoorBlock.left, DoorBlock.right, DoorBlock.bottom
-    if DoorBlock.state == DoorState.None or DoorBlock.state == DoorState.FindDoor then
-        if is_point_val(bottom) and is_point_val(left) and is_point_val(right) then
+    if DoorBlock.state == DoorState.None or DoorBlock.state == DoorState.FindDoor or DoorBlock.state == DoorState.Lost then
+        if is_point_val(left) and is_point_val(right) then
             DoorBlock.state = DoorState.FindDoor
         end
+
         if is_point_val(bottom) then
             local k = (bottom.p1.y - bottom.p2.y) / (bottom.p1.x - bottom.p2.x)
-            rot = -k * 1.4
+            rot = -k * 1.0
         end
+
         if is_point_val(left) and is_point_val(right) then
             local left_x = (left.p1.x + left.p2.x) / 2
             local right_x = (right.p1.x + right.p2.x) / 2
             x = left_x + right_x
         else
-            if is_point_val(left) then
-                x = 1.0
-            end
-            if is_point_val(right) then
-                x = -1.0
-            end
+            DoorBlock.state = DoorState.Lost
+            -- if is_point_val(left) then
+            --     x = 1.0
+            -- end
+            -- if is_point_val(right) then
+            --     x = -1.0
+            -- end
         end
 
-        if DoorBlock.state == DoorState.FindDoor and math.abs(x) < 0.05 and math.abs(rot) < 0.05 then
+        if DoorBlock.state == DoorState.FindDoor and math.abs(x) < 0.06 and math.abs(rot) < 0.20 then
+            y = 0.5
             DoorBlock.state = DoorState.Rush
         end
+    elseif DoorBlock.state == DoorState.Lost then
+
     elseif DoorBlock.state == DoorState.Rush then
-        if is_point_val(bottom) and is_point_val(left) and is_point_val(right) then
-            DoorBlock.state = DoorState.FindDoor
+        if not is_point_val(left) or not is_point_val(right) then
+            DoorBlock.state = DoorState.Lost
         else
             if is_point_val(bottom) then
                 local k = (bottom.p1.y - bottom.p2.y) / (bottom.p1.x - bottom.p2.x)
-                rot = -k
+                rot = -k * 0.8
             end
-            y = 1.0
+            if is_point_val(left) and is_point_val(right) then
+                local left_x = (left.p1.x + left.p2.x) / 2
+                local right_x = (right.p1.x + right.p2.x) / 2
+                x = (left_x + right_x) * 0.8
+            end
+            y = 0.2
         end
     end
 
     local result_func = function(server)
-        server.move { x = x, y = y, z = 0, rot = rot }
+        server.move { x = x * 0.3, y = y, z = 0, rot = rot * 0.5 }
+        print("x,y,rot:", x, y, rot)
         sleep(0.1)
     end
     return DoorBlock.state, result_func

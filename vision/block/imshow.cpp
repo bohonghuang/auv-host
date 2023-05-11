@@ -27,11 +27,11 @@ UploadBlock::process(cv::Mat frame) noexcept {
   }();
 
   if (writer.isOpened() && width == frame.size().width && height == frame.size().height)
-    writer.write(frame);
+    writer.write(frame.clone());
   else
     std::cout << "VideoWriter don't open, or the frame size is error!"
               << "frame width : " << frame.size().width << "   height : " << frame.size().height
-              << "   needed frame width : " << width << "   height" << height;
+              << "   needed frame width : " << width << "   height" << height << std::endl;
   return frame;
 }
 

@@ -6,10 +6,12 @@ require("application.lua.door_block")
 require("application.lua.door_grid_block")
 require("application.lua.detect_block")
 
--- server = json.rpc.proxy("http://localhost:8888")
--- local writer = UploadBlock.new("appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 360)
-local server = make_fake_server()
-local writer = ImshowBlock.new()
+-- local server = make_fake_server()
+local server = json.rpc.proxy("http://localhost:8888")
+
+local writer = UploadBlock.new(
+    "appsrc ! videoconvert ! nvvidconv ! nvv4l2h264enc ! rtph264pay ! udpsink host=192.168.31.100 port=5600", 640, 360)
+-- local writer = ImshowBlock.new()
 
 local function update()
     local input = coroutine.yield()
@@ -50,36 +52,58 @@ function sleep(duration)
     update()
 end
 
+local rush_time = 0.0
 function main(input)
     while true do
         ::while_begin::
         update()
 
-        -- DoorGridBlock.process()
         local door_state, door_motion_fun = DoorBlock.process()
         if door_state == DoorState.None or door_state == DoorState.Rush then
+            print("None   Rush")
+            -- local bar_motion_fun = BarBlock.process()
+            -- if bar_motion_fun then
+            --     bar_motion_fun(server)
+            --     DoorBlock.reset()
+            --     rush_time = 0.0
+            --     goto while_begin
+            -- end
+            if door_state == DoorState.Rush then
+                print("Rush")
+                if rush_time > 3 then
+                    print("超时  重置!--------------")
+                    DoorBlock.reset()
+                    rush_time = 0.0
+                    goto while_begin
+                else
+                    rush_time = rush_time + 0.1
+                end
+            end
+            door_motion_fun(server)
+        elseif door_state == DoorState.Lost then
+            print("Lost")
+            DoorBlock.reset()
             -- local bar_motion_fun = BarBlock.process()
             -- if bar_motion_fun then
             --     bar_motion_fun(server)
             --     DoorBlock.reset()
             --     goto while_begin
+            -- else
+            -- 
             -- end
-            door_motion_fun(server)
         elseif door_state == DoorState.FindDoor then
+            print("FindDoor")
+            rush_time = 0.0
             door_motion_fun(server)
         end
-        print(DoorBlock.state)
 
-        
         --detect_motion_fun = detect_block:process()
         --if detect_motion_fun then
         --    detect_motion_fun(server)
         --    goto while_begin
         --end
+        sleep(0.1)
     end
-
-
-    sleep(0.1)
 end
 
 local co = coroutine.create(main)

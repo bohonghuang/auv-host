@@ -50,6 +50,7 @@ void auv::vision::lua::setup_env(sol::state &state) {
   ns_cv["COLOR_BGR2HSV"] = cv::COLOR_BGR2HSV;
   ns_cv["COLOR_BGR2YCrCb"] = cv::COLOR_BGR2YCrCb;
   ns_cv["COLOR_GRAY2BGR"] = cv::COLOR_GRAY2BGR;
+  ns_cv["COLOR_RGB2HLS"] = cv::COLOR_RGB2HLS;
   ns_cv["COLOR_RGB2HSV"] = cv::COLOR_RGB2HSV;
   AUV_NEW_SOL_TYPE(ns_cv, cv::Mat, sol::default_constructor);
   AUV_NEW_SOL_TYPE(ns_cv, cv::Point, sol::default_constructor, "x", &cv::Point::x, "y", &cv::Point::y);

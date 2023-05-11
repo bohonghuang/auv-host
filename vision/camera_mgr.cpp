@@ -40,6 +40,7 @@ cv::VideoCapture &CameraManager::get_capture(const std::string &index, int width
   std::unique_lock<std::mutex> lock(m_mutex);
   auto it = m_video_captures.find(index);
   if (it == m_video_captures.end()) {
+    std::cout << "capture index : " << index << "  " << width << " " << height << std::endl;
     this->add_capture({{index, {width, height}}});
     return m_video_captures[index];
   }
