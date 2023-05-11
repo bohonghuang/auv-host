@@ -32,7 +32,7 @@ function DoorBlock.process()
 
     local left, right, bottom = DoorBlock.left, DoorBlock.right, DoorBlock.bottom
     if DoorBlock.state == DoorState.None or DoorBlock.state == DoorState.FindDoor then
-    	if is_point_val(bottom) and is_point_val(left) and is_point_val(right) then
+        if is_point_val(bottom) and is_point_val(left) and is_point_val(right) then
             DoorBlock.state = DoorState.FindDoor
         end
         if is_point_val(bottom) then
@@ -56,15 +56,20 @@ function DoorBlock.process()
             DoorBlock.state = DoorState.Rush
         end
     elseif DoorBlock.state == DoorState.Rush then
-        --if is_point_val(bottom) and is_point_val(left) and is_point_val(right) then
-        --    DoorBlock.state = DoorState.FindDoor
-        --else
+        if is_point_val(bottom) and is_point_val(left) and is_point_val(right) then
+            DoorBlock.state = DoorState.FindDoor
+        else
+            if is_point_val(bottom) then
+                local k = (bottom.p1.y - bottom.p2.y) / (bottom.p1.x - bottom.p2.x)
+                rot = -k
+            end
             y = 1.0
-        --end
+        end
     end
 
     local result_func = function(server)
         server.move { x = x, y = y, z = 0, rot = rot }
+        sleep(0.1)
     end
     return DoorBlock.state, result_func
 end
@@ -96,4 +101,3 @@ function DoorBlock.update(raw_vision_line_results)
     -- print("right.point1", right.p1.x, right.p1.y)
     -- print("right.point2", right.p2.x, right.p2.y)
 end
-

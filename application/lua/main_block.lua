@@ -69,6 +69,8 @@ function main(input)
             door_motion_fun(server)
         end
         print(DoorBlock.state)
+
+        
         --detect_motion_fun = detect_block:process()
         --if detect_motion_fun then
         --    detect_motion_fun(server)

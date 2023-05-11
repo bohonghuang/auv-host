@@ -10,33 +10,32 @@ local function bottom_x(cx, cy, deg)
 end
 
 BarBlock = {
-    bars = {}, --{{cx, cy, deg, fill_rate, area}, ... }
-
+    bars = {},           --{{cx, cy, deg, fill_rate, area}, ... }
     motions = {
         function(server) --FindMid 1
             print("往前走")
-            server.move { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
-            sleep(3.0)
+            server.move { x = 0.0, y = 0.1, z = 0.0, rot = 0.0 }
+            sleep(0.1)
         end,
         function(server) --FindLeft 2
             print("向左寻找")
             server.move { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
-            sleep(1.5 * find_count)
+            sleep(0.1)
         end,
         function(server) --FindLeftBack 3
             print("归位")
             server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.5 }
-            sleep(1.5 * find_count)
+            sleep(0.1)
         end,
         function(server) --FindRight 4
             print("向右寻找")
             server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.5 }
-            sleep(1.5 * find_count)
+            sleep(0.1)
         end,
         function(server) --FindRightBack 5
             print("归位")
             server.move { x = 0.0, y = 0.0, z = 0.0, rot = -0.5 }
-            sleep(1.5 * find_count)
+            sleep(0.1)
         end,
         function(bars) --Found 6
             if #bars >= 2 then
@@ -97,23 +96,30 @@ BarBlock = {
 }
 
 --- 调用这个函数前先调用 update
---- @return function, number
-local index = 0
+--- @return function
+local index = 1
+local duration = 0.5
+local time = 0.0
+local motion = BarBlock.motions[1]
 function BarBlock.process()
     if #BarBlock.bars > 0 then
         index = 0
         find_count = 1
-        return BarBlock.motions[6](BarBlock.bars), 0.1
+        return BarBlock.motions[6](BarBlock.bars)
     end
 
     if index >= 5 then
-        find_count = 1
+        find_count = find_count + 1
         index = 0
     end
 
-    local motion
-    index, motion = next(BarBlock.motions, index)
-    return motion, 1.0
+    if time >= duration then
+        time = 0.0
+        duration = 0.5 * find_count
+        index, motion = next(BarBlock.motions, index)
+    end
+    time = time + 0.1
+    return motion
 end
 
 function BarBlock.has_result()

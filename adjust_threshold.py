@@ -1,12 +1,12 @@
 import cv2
 import numpy as np
 
-h_lower = 35
-s_lower = 155
-v_lower = 100
-h_upper = 180
-s_upper = 220
-v_upper = 160
+h_lower = 53
+s_lower = 132
+v_lower = 103
+h_upper = 151
+s_upper = 189
+v_upper = 146
 
 # h_lower = 33
 # s_lower = 146
@@ -32,7 +32,8 @@ v_upper = 160
 def main():
     init_window()
     # cap = cv2.VideoCapture('/home/qff233/.local/share/rovhost/Videos/2023-03-24T17-07-23.199254+08.mkv')
-    cap = cv2.VideoCapture('v4l2src device=/dev/video0 ! video/x-raw, format=(string)YUY2, width=(int)640, height=(int)360 ! videoconvert ! appsink ')
+    # cap = cv2.VideoCapture('v4l2src device=/dev/video0 ! video/x-raw, format=(string)YUY2, width=(int)640, height=(int)360 ! videoconvert ! appsink ')
+    cap = cv2.VideoCapture('/home/qff233/.local/share/rovhost/Videos/1.mkv')
     global current_img
     n = 1
     while cap.isOpened():
@@ -40,7 +41,7 @@ def main():
             _, current_img = cap.read()
         update_show()
         key = cv2.waitKey(0)
-        if key == 112:  # p
+        if key == 112:  # p3
             print_params()
             n = 0
         elif key == 113:
