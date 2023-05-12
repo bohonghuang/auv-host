@@ -18,7 +18,7 @@ FindLineBlock::FindLineBlock(double rho, double theta, int threshold, bool cente
 }
 
 FindDoorResults FindLineBlock::process(cv::Mat frame) {
-  auto begin = std::chrono::steady_clock::now();
+  // auto begin = std::chrono::steady_clock::now();
   static const int height = frame.size().height;
   static const int width = frame.size().width;
   static const cv::Mat kernel1 =
@@ -63,7 +63,7 @@ FindDoorResults FindLineBlock::process(cv::Mat frame) {
 
     auto theta = cv::fastAtan2(p1_y - p2_y, p1_x - p2_x);
     if (std::fabs(theta - 180.0f) < 45.0f) {// 水平
-      if (p1_y >= 2 * height / 3 && p2_y >= 2 * height / 3) {
+      if (p1_y >= height / 2 && p2_y >= height / 2) {
         if (p1_x > p2_x) {
           std::swap(i[1], i[3]);
           std::swap(i[0], i[2]);
@@ -142,8 +142,8 @@ FindDoorResults FindLineBlock::process(cv::Mat frame) {
     normalize(right);
   if (bottom_count != 0)
     normalize(bottom);
-  auto end = std::chrono::steady_clock::now();
-  std::cout << "fps: " << 1.0 / std::chrono::duration_cast<std::chrono::duration<double>>(end - begin).count() << std::endl;
+  // auto end = std::chrono::steady_clock::now();
+  // std::cout << "fps: " << 1.0 / std::chrono::duration_cast<std::chrono::duration<double>>(end - begin).count() << std::endl;
   return {preview_frame, {left, right, bottom}};
 }
 

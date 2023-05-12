@@ -61,9 +61,10 @@ BarBlock = {
                 -- +-----------+
                 local deg = point_deg(p1, p2) - 90.0
                 local bx = p1.x
-                print(2, bx, deg)
+                print("找到两个引导线 x  rot =", bx, deg)
                 return function(server)
                     server.move { x = bx, y = 0.2, z = 0.0, rot = (deg / 90.0) / 2.0 }
+                    sleep(0.1)
                 end
             end
 
@@ -87,9 +88,10 @@ BarBlock = {
                 deg = deg / (math.abs(cx) * 4.0)
                 by = by / (math.abs(cx) * 4.0)
             end
-            print(1, bx, deg)
+            print("找到一个引导线  x  rot =", bx, deg)
             return function(server)
                 server.move { x = bx, y = by, z = 0.0, rot = (deg / 90.0) / 2.0 }
+                sleep(0.1)
             end
         end,
     }

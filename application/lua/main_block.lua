@@ -52,51 +52,75 @@ function sleep(duration)
     update()
 end
 
+local function is_lose_edges(edges)
+    local left, bottom, right = edges.left, edges.bottom, edges.right
+    if not left and not bottom and not right then
+        return true
+    end
+    return false
+end
+
+local State = {
+    None = 0,
+    Aim = 1,
+    PreRush = 2,
+    Rush = 3,
+}
+
+local state = State.None
+local pre_rush_time = 0.0
 local rush_time = 0.0
 function main(input)
     while true do
         ::while_begin::
         update()
+        ::while_begin_after::
 
-        local door_state, door_motion_fun = DoorBlock.process()
-        if door_state == DoorState.None or door_state == DoorState.Rush then
-            print("None   Rush")
-            -- local bar_motion_fun = BarBlock.process()
-            -- if bar_motion_fun then
-            --     bar_motion_fun(server)
-            --     DoorBlock.reset()
-            --     rush_time = 0.0
-            --     goto while_begin
-            -- end
-            if door_state == DoorState.Rush then
-                print("Rush")
-                if rush_time > 3 then
-                    print("超时  重置!--------------")
-                    DoorBlock.reset()
-                    rush_time = 0.0
-                    goto while_begin
-                else
-                    rush_time = rush_time + 0.1
-                end
+        local edges, motion = DoorBlock.process()
+        local left, bottom, right = edges.left, edges.bottom, edges.right
+
+        if state == State.None then
+            print("None")
+            if left and right and bottom then
+                state = State.Aim
+            else
+                local bar_motion_fun = BarBlock.process()
+                bar_motion_fun(server)
+                goto while_begin_after
             end
-            door_motion_fun(server)
-        elseif door_state == DoorState.Lost then
-            print("Lost")
-            DoorBlock.reset()
-            -- local bar_motion_fun = BarBlock.process()
-            -- if bar_motion_fun then
-            --     bar_motion_fun(server)
-            --     DoorBlock.reset()
-            --     goto while_begin
-            -- else
-            -- 
-            -- end
-        elseif door_state == DoorState.FindDoor then
-            print("FindDoor")
-            rush_time = 0.0
-            door_motion_fun(server)
+        elseif state == State.Aim then
+            print("Aim")
+            if is_lose_edges(edges) then
+                state = State.None
+            end
+            if motion.x < 0.1 and motion.rot < 0.4 then
+                state = State.PreRush
+            end
+        elseif state == State.PreRush then
+            print("PreRush")
+            if is_lose_edges(edges) then
+                state = State.None
+            end
+            if pre_rush_time < 2.0 then
+                pre_rush_time = pre_rush_time + 0.1
+            else
+                state = State.Rush
+                pre_rush_time = 0.0
+            end
+        elseif state == State.Rush then
+            print("Rush")
+            if rush_time < 3.0 then
+                motion.y = 0.6
+                rush_time = rush_time + 0.1
+            else
+                state = State.None
+                rush_time = 0.0
+            end
         end
 
+        print_table(motion)
+        server.move(motion)
+        sleep(0.1)
         --detect_motion_fun = detect_block:process()
         --if detect_motion_fun then
         --    detect_motion_fun(server)
