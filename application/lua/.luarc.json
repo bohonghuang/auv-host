@@ -1,0 +1,47 @@
+{
+  "diagnostics.globals": [
+    "resume_all",
+    "pause_all",
+    "stop_all",
+    "start_all",
+    "SchedulerList",
+    "ImshowBlock",
+    "FindDoorGrid",
+    "FindLineBlock",
+    "InRangeBlock",
+    "LuaMuxBlock",
+    "CameraCalibrateBlock",
+    "ConvertColorBlock",
+    "cv",
+    "CameraBlock",
+    "GetCapture",
+    "connect",
+    "Scheduler",
+    "FindBarBlock",
+    "point_dist",
+    "point_center",
+    "point_deg",
+    "limit_value",
+    "is_in_range",
+    "table_size",
+    "make_fake_server",
+    "print_mat",
+    "print_table",
+    "print_bool_mat",
+    "register_component",
+    "register_block",
+    "connect_block",
+    "create_task_group"
+  ],
+  "runtime": {
+    "version": "LuaJIT",
+    "path": [
+      "/usr/share/lua/5.1/?.lua",
+      "/usr/share/lua/5.1/?/init.lua",
+      "/usr/lib/lua/5.1/?.lua",
+      "/usr/lib/lua/5.1/?/init.lua",
+      "/home/qff233/.luarocks/share/lua/5.1/?.lua",
+      "/home/qff233/.luarocks/share/lua/5.1/?/init.lua"
+    ]
+  }
+}

@@ -1,125 +1,132 @@
-local json = require('json')
+local json = require("json")
 require("json.rpc")
 require("application.lua.utils")
 local server = json.rpc.proxy("http://localhost:8888")
 
--- local cam_front = CameraBlock.new(GetCapture("door6.tmp"))
-local cam_front = CameraBlock.new(GetCapture("0", 640, 360))
-local cam_bottom = CameraBlock.new(GetCapture("2", 640, 480))
-
 local camera_calibr_params = {
-    fx = 354.9862468599325,
-    cx = 324.5669837164503,
-    fy = 354.8966706449905,
-    cy = 192.7918851368834,
-    k1 = -0.4797210886746362,
-    k2 = 0.2124696026438813,
-    k3 = 0.001906119577026161,
-    k4 = 0.001051512267817575,
-    k5 = -0.03890132615729874,
+	fx = 354.9862468599325,
+	cx = 324.5669837164503,
+	fy = 354.8966706449905,
+	cy = 192.7918851368834,
+	k1 = -0.4797210886746362,
+	k2 = 0.2124696026438813,
+	k3 = 0.001906119577026161,
+	k4 = 0.001051512267817575,
+	k5 = -0.03890132615729874,
 }
 
-local cam_front_calibr = CameraCalibrateBlock.new(camera_calibr_params)
-local cvtcolor_ycrcb = ConvertColorBlock.new(cv.COLOR_BGR2YCrCb)
-
 local find_bar_inrange_params = {
-    low_1 = 53,
-    low_2 = 132,
-    low_3 = 103,
-    high_1 =151,
-    high_2 =189,
-    high_3 =146,
+	low_1 = 53,
+	low_2 = 132,
+	low_3 = 103,
+	high_1 = 151,
+	high_2 = 189,
+	high_3 = 146,
 }
 
 local find_door_inrange_params = {
-    low_1 = 38,
-    low_2 = 132,
-    low_3 = 95,
-    high_1 =136,
-    high_2 =193,
-    high_3 =134,
+	low_1 = 38,
+	low_2 = 132,
+	low_3 = 95,
+	high_1 = 136,
+	high_2 = 193,
+	high_3 = 134,
 }
 
-local find_bar_inrange = InRangeBlock.new(find_bar_inrange_params)
-local find_bar = FindBarBlock.new(true)
-local find_bar_block = LuaMuxBlock.new("application/lua/main_block.lua")
+local register_bar_and_door_block_list = {
+	-- { "cam_front", block = {
+	-- 	"CameraBlock",
+	-- 	args = function()
+	-- 		return GetCapture("door6.tmp")
+	-- 	end,
+	-- } },
+	{
+		"cam_front",
+		block = {
+			"CameraBlock",
+			args = function()
+				return GetCapture("0", 640, 360)
+			end,
+		},
+	},
+	{
+		"cam_bottom",
+		block = {
+			"CameraBlock",
+			args = function()
+				-- return GetCapture("0", 640, 480)
+				return GetCapture("0", 640, 360)
+			end,
+		},
+	},
+	{ "cam_front_calibr", block = { "CameraCalibrateBlock", args = { camera_calibr_params } } },
+	{ "cvtcolor_ycrcb", block = { "ConvertColorBlock", args = { cv.COLOR_BGR2YCrCb } } },
+	--- 引导线相关视觉算法
+	{ "find_bar_inrange", block = { "InRangeBlock", args = { find_bar_inrange_params } } },
+	{ "find_bar", block = { "FindBarBlock", args = { true } } },
+	--- 门相关视觉算法
+	{ "find_door_inrange", block = { "InRangeBlock", args = { find_door_inrange_params } } },
+	{ "find_door", block = { "FindLineBlock", args = { 4, math.pi / 60, 200, true } } },
+	--- 逻辑代码循环
+	{ "main_block", block = { "LuaMuxBlock", args = { "application/lua/main_block.lua" } } },
+}
+local bar_and_door_block_list = register_block(register_bar_and_door_block_list)
 
-local find_door_inrange = InRangeBlock.new(find_door_inrange_params)
-local find_door = FindLineBlock.new(4, math.pi / 60, 200, true)
-local find_door_grid = FindDoorGrid.new(6, 8)
+local find_bar_sequence = {
+	"cam_bottom",
+	"cam_front_calibr",
+	"cvtcolor_ycrcb",
+	"find_bar_inrange",
+	"find_bar",
+	{ "main_block", input = "find_bar" },
+}
+local find_door_sequence = {
+	"cam_front",
+	"cam_front_calibr",
+	"cvtcolor_ycrcb",
+	"find_door_inrange",
+	"find_door",
+	{ "main_block", input = "find_door" },
+}
+local find_bar = connect_block(bar_and_door_block_list, find_bar_sequence)
+local find_door = connect_block(bar_and_door_block_list, find_door_sequence)
 
-local show = ImshowBlock.new()
--- local bio = ObjectDetectBlock.new()
+local main_task_group = create_task_group({
+	{ bar_and_door_block_list.main_block, fps = 15.0 },
+	{ find_bar, fps = 15.0 },
+	{ find_door, fps = 15.0 },
+})
 
-local input_find_bar = connect(cam_bottom, cam_front_calibr, cvtcolor_ycrcb, find_bar_inrange, find_bar,
-    find_bar_block:input_block("find_bar"))
-local input_find_door = connect(cam_front, cam_front_calibr, cvtcolor_ycrcb, find_door_inrange, find_door,
-    find_bar_block:input_block("find_door"))
--- local input_find_door_grid = connect(cam_front, cam_front_calibr, cvtcolor_ycrcb, find_bar_inrange, find_door_grid,
---    find_bar_block:input_block("find_door_grid"))
--- local input_detect = connect(cam_front, bio, find_bar_block:input_block("detect"))
+local tasks = main_task_group
 
-local find_bar_task = SchedulerList.new(
-    Scheduler.new(find_bar_block:as_untyped(), 1.0 / 15.0),
-    Scheduler.new(input_find_bar:as_untyped(), 1.0 / 15.0),
-    Scheduler.new(input_find_door:as_untyped(), 1.0 / 15.0)
-    -- Scheduler.new(input_find_door_grid:as_untyped(), 1.0 / 15.0)
-)
--- find_bar_task:add(Scheduler.new(input_detect:as_untyped(), 1.0 / 15.0))
-
--- local find_ball_inrange_params = {
---     low_1 = 33,
---     high_1 = 177,
---     low_2 = 146,
---     high_2 = 255,
---     low_3 = 65,
---     high_3 = 130
--- }
-
--- local cvtcolor_hsv = ConvertColorBlock.new(cv.COLOR_BGR2HSV)
--- local find_ball_inrange = InRangeBlock.new(find_ball_inrange_params)
--- local find_ball = FindBallBlock.new(true)
--- local find_ball_block = LuaMuxBlock.new("application/lua/ball_block.lua")
-
--- local input_find_ball_front = connect(cam_bottom, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("front"))
--- local input_find_ball_bottom = connect(cam_front, cvtcolor_hsv, find_ball_inrange, find_ball, find_ball_block:input_block("bottom"))
-
--- local find_ball_task = SchedulerList.new(
---         Scheduler.new(find_ball_block:as_untyped(), 1.0 / 15.0),
---         Scheduler.new(input_find_ball_front:as_untyped(), 1.0 / 15.0),
---         Scheduler.new(input_find_ball_bottom:as_untyped(), 1.0 / 15.0)
--- )
-
-local tasks = find_bar_task
-
-server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
-server.set_depth_locked { false }
-server.set_direction_locked { false }
+server.move({ x = 0.0, y = 0.0, z = 0.0, rot = 0.0 })
+server.set_depth_locked({ false })
+server.set_direction_locked({ false })
 
 function start_all()
-    server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
-    -- server.set_depth_locked { true } ------------------------------------------------------------------------------------------------------
-    -- server.set_direction_locked { true }
-    tasks:start()
+	server.move({ x = 0.0, y = 0.0, z = 0.0, rot = 0.0 })
+	-- server.set_depth_locked { true } ------------------------------------------------------------------------------------------------------
+	-- server.set_direction_locked { true }
+	tasks:start()
 end
 
 function stop_all()
-    server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
-    server.set_depth_locked { false }
-    server.set_direction_locked { false }
-    tasks:stop()
+	server.move({ x = 0.0, y = 0.0, z = 0.0, rot = 0.0 })
+	server.set_depth_locked({ false })
+	server.set_direction_locked({ false })
+	tasks:stop()
 end
 
 function pause_all()
-    server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
-    server.set_depth_locked { false }
-    server.set_direction_locked { false }
-    tasks:pause()
+	server.move({ x = 0.0, y = 0.0, z = 0.0, rot = 0.0 })
+	server.set_depth_locked({ false })
+	server.set_direction_locked({ false })
+	tasks:pause()
 end
 
 function resume_all()
-    server.move { x = 0.0, y = 0.0, z = 0.0, rot = 0.0 }
-    server.set_depth_locked { true }
-    server.set_direction_locked { true }
-    tasks:resume()
+	server.move({ x = 0.0, y = 0.0, z = 0.0, rot = 0.0 })
+	server.set_depth_locked({ true })
+	server.set_direction_locked({ true })
+	tasks:resume()
 end
